@@ -233,9 +233,8 @@ const Map<String, dynamic> appLocaleId = {
       'Menampilkan tab RetroAchievements di bilah navigasi',
   AppLocale.showRommTab: 'Tampilkan tab RomM',
   AppLocale.showRommTabSubtitle: 'Menampilkan tab RomM di bilah navigasi',
-  AppLocale.showSearchTab: 'Tampilkan tab Cari',
-  AppLocale.showSearchTabSubtitle:
-      'Menampilkan tab pencarian di bilah navigasi',
+  AppLocale.searchCard: 'Kartu Cari',
+  AppLocale.searchCardSubtitle: 'Tampilkan kartu pencarian di grid sistem',
 
   AppLocale.configureDirectories: 'Konfigurasi Direktori',
   AppLocale.configureRomsFolder: 'Konfigurasi Folder ROM',
@@ -1134,17 +1133,12 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.filterGenre: 'Genre',
   AppLocale.filterRating: 'Peringkat',
   AppLocale.filterYear: 'Tahun',
-  AppLocale.filterAchievements: 'Prestasi',
-  AppLocale.raCoverageMatched: 'Ya',
-  AppLocale.raCoverageNoSet: 'Tidak',
   AppLocale.raCoverageUnknown: 'Tidak diketahui',
   AppLocale.filterAny: 'Semua',
   AppLocale.filterSource: 'Sumber',
   AppLocale.sourceLocal: 'Di perangkat ini',
   AppLocale.searchRatingLocalOnly:
       'Filter peringkat hanya berlaku untuk gim lokal',
-  AppLocale.searchAchievementsLocalOnly:
-      'Filter prestasi hanya berlaku untuk gim lokal',
   AppLocale.searchNoRommEquivalent:
       'RomM tidak punya apa pun dengan nama “{value}”',
   AppLocale.resetPlayTimeConfirm: 'Atur Ulang Waktu Bermain',

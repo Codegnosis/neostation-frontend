@@ -239,9 +239,8 @@ const Map<String, dynamic> appLocaleRu = {
       'Отображает вкладку RetroAchievements на панели навигации',
   AppLocale.showRommTab: 'Показывать вкладку RomM',
   AppLocale.showRommTabSubtitle: 'Отображает вкладку RomM на панели навигации',
-  AppLocale.showSearchTab: 'Показывать вкладку поиска',
-  AppLocale.showSearchTabSubtitle:
-      'Отображает вкладку поиска на панели навигации',
+  AppLocale.searchCard: 'Карточка поиска',
+  AppLocale.searchCardSubtitle: 'Показать карточку поиска в сетке систем',
 
   AppLocale.configureDirectories: 'Директории',
   AppLocale.configureRomsFolder: 'Настроить папку ROM',
@@ -1133,17 +1132,12 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.filterGenre: 'Жанр',
   AppLocale.filterRating: 'Рейтинг',
   AppLocale.filterYear: 'Год',
-  AppLocale.filterAchievements: 'Достижения',
-  AppLocale.raCoverageMatched: 'Есть',
-  AppLocale.raCoverageNoSet: 'Нет',
   AppLocale.raCoverageUnknown: 'Неизвестно',
   AppLocale.filterAny: 'Любой',
   AppLocale.filterSource: 'Источник',
   AppLocale.sourceLocal: 'На этом устройстве',
   AppLocale.searchRatingLocalOnly:
       'Фильтр рейтинга применяется только к локальным играм',
-  AppLocale.searchAchievementsLocalOnly:
-      'Фильтр достижений применяется только к локальным играм',
   AppLocale.searchNoRommEquivalent: 'В RomM ничего не отнесено к «{value}»',
   AppLocale.resetPlayTimeConfirm: 'Сбросить время игры',
   AppLocale.resetPlayTimeConfirmBody:

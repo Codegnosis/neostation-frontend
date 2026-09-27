@@ -247,9 +247,8 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.showRommTab: 'Afficher l’onglet RomM',
   AppLocale.showRommTabSubtitle:
       'Affiche l’onglet RomM dans la barre de navigation',
-  AppLocale.showSearchTab: 'Afficher l’onglet Rechercher',
-  AppLocale.showSearchTabSubtitle:
-      'Affiche l’onglet de recherche dans la barre de navigation',
+  AppLocale.searchCard: 'Carte Rechercher',
+  AppLocale.searchCardSubtitle: 'Afficher la carte de recherche dans la grille',
 
   AppLocale.configureDirectories: 'Configurer les Répertoires',
   AppLocale.configureRomsFolder: 'Configurer le Dossier des ROMs',
@@ -1170,17 +1169,12 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.filterGenre: 'Genre',
   AppLocale.filterRating: 'Note',
   AppLocale.filterYear: 'Année',
-  AppLocale.filterAchievements: 'Succès',
-  AppLocale.raCoverageMatched: 'Oui',
-  AppLocale.raCoverageNoSet: 'Non',
   AppLocale.raCoverageUnknown: 'Inconnu',
   AppLocale.filterAny: 'Tous',
   AppLocale.filterSource: 'Source',
   AppLocale.sourceLocal: 'Sur cet appareil',
   AppLocale.searchRatingLocalOnly:
       'Le filtre de note ne s’applique qu’aux jeux locaux',
-  AppLocale.searchAchievementsLocalOnly:
-      'Le filtre de succès ne s’applique qu’aux jeux locaux',
   AppLocale.searchNoRommEquivalent: 'RomM n’a rien classé sous « {value} »',
   AppLocale.resetPlayTimeConfirm: 'Réinitialiser le temps de jeu',
   AppLocale.resetPlayTimeConfirmBody:

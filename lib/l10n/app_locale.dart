@@ -114,6 +114,8 @@ mixin AppLocale {
   static const String hideRecentCardSubtitle = 'hide_recent_card_subtitle';
   static const String recentCardSize = 'recent_card_size';
   static const String recentCardSizeSubtitle = 'recent_card_size_subtitle';
+  static const String searchCard = 'search_card';
+  static const String searchCardSubtitle = 'search_card_subtitle';
   static const String recentCardSizeDefault = 'recent_card_size_default';
   static const String recentCardSize2x1 = 'recent_card_size_2x1';
 
@@ -239,8 +241,6 @@ mixin AppLocale {
       'show_achievements_tab_subtitle';
   static const String showRommTab = 'show_romm_tab';
   static const String showRommTabSubtitle = 'show_romm_tab_subtitle';
-  static const String showSearchTab = 'show_search_tab';
-  static const String showSearchTabSubtitle = 'show_search_tab_subtitle';
 
   // ---------------------------------------------------------------------------
   // Directories
@@ -1229,12 +1229,7 @@ mixin AppLocale {
   static const String filterGenre = 'filter_genre';
   static const String filterRating = 'filter_rating';
   static const String filterYear = 'filter_year';
-  static const String filterAchievements = 'filter_achievements';
-  static const String raCoverageMatched = 'ra_coverage_matched';
-  static const String raCoverageNoSet = 'ra_coverage_no_set';
   static const String raCoverageUnknown = 'ra_coverage_unknown';
-  static const String searchAchievementsLocalOnly =
-      'search_achievements_local_only';
   static const String filterAny = 'filter_any';
   static const String filterSource = 'filter_source';
   static const String sourceLocal = 'source_local';
