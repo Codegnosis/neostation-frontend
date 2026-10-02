@@ -615,6 +615,9 @@ class SqliteMigrations {
       case 160:
         await _migrateToVersion160(db);
         break;
+      case 161:
+        await _migrateToVersion161(db);
+        break;
       default:
         _log.w('No migration defined for version $version');
     }
@@ -7070,6 +7073,23 @@ class SqliteMigrations {
       _log.e('Error in migration v160: $e');
       _log.e('   StackTrace: $stackTrace');
       rethrow;
+    }
+  }
+
+  /// Migration v161: adds the independent List view size preference.
+  ///
+  /// v160 is already occupied by the Search-card preference on main. This
+  /// remains idempotent for databases that reached a branch with the former
+  /// v160 list-size migration before the branches were merged.
+  static Future<void> _migrateToVersion161(Database db) async {
+    final columns = db
+        .select('PRAGMA table_info(user_config)')
+        .map((row) => row['name'] as String)
+        .toSet();
+    if (!columns.contains('game_list_size')) {
+      db.execute(
+        "ALTER TABLE user_config ADD COLUMN game_list_size TEXT DEFAULT 'S'",
+      );
     }
   }
 }

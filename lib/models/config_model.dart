@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:neostation/constants/recent_card_sizes.dart';
 import 'emulator_model.dart';
 
+String _normalizeGameListSize(String value) =>
+    const {'S', 'M', 'L', 'XL'}.contains(value) ? value : 'S';
+
 /// Represents the global application configuration and user preferences.
 class ConfigModel {
   /// Maximum number of storable slots in the secondary "Now Playing" app dock.
@@ -182,6 +185,9 @@ class ConfigModel {
   /// Preferred grid column density for the games grid ('S', 'M', 'L', 'XL').
   final String gameGridColumns;
 
+  /// Preferred text and row size for the game list ('S', 'M', 'L', 'XL').
+  final String gameListSize;
+
   /// Preferred card style for the game carousel ('fanart' or 'box').
   final String gameCarouselCardStyle;
 
@@ -282,6 +288,7 @@ class ConfigModel {
     this.autoUpdateSystems = true,
     this.systemGridColumns = 'M',
     this.gameGridColumns = 'M',
+    this.gameListSize = 'S',
     this.gameCarouselCardStyle = 'fanart',
     this.nowPlayingDimDelay = 3,
     this.nowPlayingDimLevel = 100,
@@ -456,6 +463,9 @@ class ConfigModel {
       gameGridColumns:
           (json['gameGridColumns'] ?? json['game_grid_columns'] ?? 'M')
               .toString(),
+      gameListSize: _normalizeGameListSize(
+        (json['gameListSize'] ?? json['game_list_size'] ?? 'S').toString(),
+      ),
       gameCarouselCardStyle:
           (json['gameCarouselCardStyle'] ??
                   json['game_carousel_card_style'] ??
@@ -619,6 +629,7 @@ class ConfigModel {
       'autoUpdateSystems': autoUpdateSystems,
       'systemGridColumns': systemGridColumns,
       'gameGridColumns': gameGridColumns,
+      'gameListSize': gameListSize,
       'gameCarouselCardStyle': gameCarouselCardStyle,
       'nowPlayingDimDelay': nowPlayingDimDelay,
       'nowPlayingDimLevel': nowPlayingDimLevel,
@@ -675,6 +686,7 @@ class ConfigModel {
     bool? autoUpdateSystems,
     String? systemGridColumns,
     String? gameGridColumns,
+    String? gameListSize,
     String? gameCarouselCardStyle,
     int? nowPlayingDimDelay,
     int? nowPlayingDimLevel,
@@ -728,6 +740,7 @@ class ConfigModel {
       autoUpdateSystems: autoUpdateSystems ?? this.autoUpdateSystems,
       systemGridColumns: systemGridColumns ?? this.systemGridColumns,
       gameGridColumns: gameGridColumns ?? this.gameGridColumns,
+      gameListSize: gameListSize ?? this.gameListSize,
       gameCarouselCardStyle:
           gameCarouselCardStyle ?? this.gameCarouselCardStyle,
       nowPlayingDimDelay: nowPlayingDimDelay ?? this.nowPlayingDimDelay,
