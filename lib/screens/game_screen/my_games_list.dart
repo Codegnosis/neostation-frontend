@@ -39,6 +39,7 @@ import '../../models/database_game_model.dart';
 import '../../utils/rom_tree.dart';
 import '../../utils/game_list_size.dart';
 import 'game_details_card/game_details_card_list.dart';
+import 'game_details_card/detail_tab.dart';
 import 'game_details_card/random_game_dialog.dart';
 import 'game_settings_dialog/game_settings_dialog.dart';
 import 'my_games_grid.dart';
@@ -81,11 +82,15 @@ class SystemGamesList extends StatefulWidget {
   /// specific game in the normal browsing view.
   final String? initialRomPath;
 
+  /// Optional details-card tab for feature deep links.
+  final DetailTab? initialDetailTab;
+
   const SystemGamesList({
     super.key,
     required this.system,
     required this.fileProvider,
     this.initialRomPath,
+    this.initialDetailTab,
   });
 
   @override
@@ -1873,6 +1878,7 @@ class _SystemGamesListState extends State<SystemGamesList> {
           videoController: _videoController,
           isVideoLoading: _isVideoLoading,
           isAllMode: SystemFolderNames.isAggregate(widget.system.folderName),
+          initialDetailTab: widget.initialDetailTab,
           retroAchievementsProvider: _retroAchievementsProvider,
           syncProvider: syncManager.active!,
           localizedDescription: _localizedDescription,
