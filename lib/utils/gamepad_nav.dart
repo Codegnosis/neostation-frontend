@@ -695,8 +695,9 @@ class GamepadNavigation {
       }
 
       if (_debugLogging) {
+        // `input`, not `key`: the log redactor treats `key=` as a credential.
         _log.i(
-          '[GamepadRaw] gamepad="${event.gamepadId}" key="${event.key}" '
+          '[GamepadRaw] gamepad="${event.gamepadId}" input="${event.key}" '
           'type=${event.type.name} value=${event.value.toStringAsFixed(4)}',
         );
       }
@@ -1116,8 +1117,9 @@ class GamepadNavigation {
     }
 
     if (_debugLogging) {
+      // `input`, not `key`: the log redactor treats `key=` as a credential.
       _log.i(
-        '[KeyboardRaw] key="${event.logicalKey.keyLabel}" '
+        '[KeyboardRaw] input="${event.logicalKey.keyLabel}" '
         'physical="${event.physicalKey.usbHidUsage.toRadixString(16)}" '
         '${isKeyDown ? "DOWN" : "UP"}',
       );
