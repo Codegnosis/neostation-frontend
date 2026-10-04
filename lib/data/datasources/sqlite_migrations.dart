@@ -38,13 +38,15 @@ class SqliteMigrations {
     );
   ''';
 
-  /// CREATE for the local-game → RomM rom_id save-sync map (v111).
+  /// CREATE for the local-game → RomM rom_id save-sync map (v111;
+  /// `link_source` added in v161).
   static const String createAppRommRomMapTableSql = '''
     CREATE TABLE IF NOT EXISTS app_romm_rom_map (
       romname TEXT NOT NULL,
       system_folder TEXT NOT NULL,
       romm_rom_id INTEGER NOT NULL,
       romm_fs_name TEXT,
+      link_source TEXT,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (romname, system_folder)
     );
@@ -620,6 +622,9 @@ class SqliteMigrations {
         break;
       case 162:
         await _migrateToVersion162(db);
+        break;
+      case 163:
+        await _migrateToVersion163(db);
         break;
       default:
         _log.w('No migration defined for version $version');
@@ -7111,6 +7116,45 @@ class SqliteMigrations {
         'ALTER TABLE user_config ADD COLUMN android_apps_as_tab '
         'INTEGER DEFAULT 0',
       );
+    }
+  }
+
+  /// Migration v163: Adds `app_romm_rom_map.link_source`, recording which
+  /// writer produced a RomM link row (`download`, `auto`, or `manual`).
+  ///
+  /// Existing rows are left null and read as automatic: both the download
+  /// path and the automatic link paths populate `romm_fs_name`, so no backfill
+  /// could tell them apart, and only `manual` changes behaviour. Nullable and
+  /// guarded by `PRAGMA table_info`, so a re-run is a no-op. A database that
+  /// skipped v119 (no map table at all) gets the table from its CREATE, which
+  /// already carries the column.
+  ///
+  /// Numbered 163 rather than the 158 and then 161 slots this branch first
+  /// reserved: `main` moved past each while the branch was open (161 and 162
+  /// are the list-size and Android-apps-tab columns), and an install already
+  /// past a number never runs that `case`, so it would be left without a
+  /// column every `app_romm_rom_map` query now names. A device that ran this
+  /// branch at 161 still gets main's 161 via v162's idempotent backfill.
+  static Future<void> _migrateToVersion163(Database db) async {
+    _log.i('Migration v163: Adding link_source to app_romm_rom_map');
+    try {
+      final tableInfo = db.select('PRAGMA table_info(app_romm_rom_map)');
+      final columns = tableInfo.map((c) => c['name'].toString()).toList();
+      if (columns.isEmpty) {
+        db.execute(createAppRommRomMapTableSql);
+        db.execute(createAppRommRomMapIndexSql);
+        _log.i('Table app_romm_rom_map created with link_source via v163');
+      } else if (!columns.contains('link_source')) {
+        db.execute('ALTER TABLE app_romm_rom_map ADD COLUMN link_source TEXT');
+        _log.i('Column link_source added via v163');
+      } else {
+        _log.i('Column link_source already exists');
+      }
+      _log.i('Migration v163 completed');
+    } catch (e, stackTrace) {
+      _log.e('Error in migration v163: $e');
+      _log.e('   StackTrace: $stackTrace');
+      rethrow;
     }
   }
 }
