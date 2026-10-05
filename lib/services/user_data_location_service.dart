@@ -3,6 +3,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neostation/services/config_service.dart';
+import 'package:neostation/services/credential_store.dart';
 import 'package:neostation/services/logger_service.dart';
 import 'package:neostation/services/neo_assets_service.dart';
 import 'package:neostation/services/retro_achievements_cache.dart';
@@ -47,6 +48,7 @@ class UserDataLocationService {
     NeoAssetsService.resetCacheDir();
     RetroAchievementsCache.resetCacheDir();
     ScreenscraperMediaResolver.resetMediaDirectory();
+    CredentialStore.resetFileStore();
   }
 
   /// Counts top-level entries in [dirPath].
@@ -214,7 +216,12 @@ class UserDataLocationService {
         name == 'temp' ||
         name == 'config.json' ||
         name.startsWith('data.sqlite') || // data.sqlite + -wal/-shm/-journal
-        name.startsWith('app.log'); // app.log + rotated variants
+        name.startsWith('app.log') || // app.log + rotated variants
+        // The desktop credential fallback (CredentialFileStore). Left behind,
+        // every sign-in is lost after a move and the old folder keeps a copy
+        // its own key file decrypts.
+        name == 'credentials.enc' ||
+        name == 'credentials.key';
   }
 
   /// Migrates NeoStation's own user data from [sourceUserDataPath] to
