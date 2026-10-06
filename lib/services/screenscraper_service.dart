@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import 'package:neostation/services/logger_service.dart';
 import '../models/rom_fingerprint.dart';
 import '../models/screenscraper_game_candidate.dart';
+import '../repositories/game_repository.dart';
 import '../repositories/scraper_repository.dart';
 import 'retroachievements_hash_service.dart';
 import 'rom_fingerprint_service.dart';
@@ -1048,6 +1049,11 @@ class ScreenScraperService {
       _log.e('Error saving the identified game for $romPath: $e');
       return {'success': false, 'message': AppLocale.scrapeUnexpectedError};
     }
+    await _clearScrapedMedia(
+      appSystemId: appSystemId,
+      romName: romName,
+      systemFolder: systemFolder,
+    );
     return scrapeSingleGame(
       appSystemId: appSystemId,
       romName: romName,
@@ -1057,6 +1063,39 @@ class ScreenScraperService {
       onProgress: onProgress,
       forceOverwrite: true,
     );
+  }
+
+  /// Deletes the media NeoStation scraped for [romName] before the game it was
+  /// identified as is scraped.
+  ///
+  /// The downloader only writes the media types the new game has, and a type
+  /// it gets in another format leaves the old file beside it (png is looked up
+  /// before jpg), so the wrong game's art kept showing. It is the wrong game's,
+  /// so it goes even if the new scrape then fails.
+  static Future<void> _clearScrapedMedia({
+    required String appSystemId,
+    required String romName,
+    required String systemFolder,
+  }) async {
+    try {
+      final deleted = await GameRepository.deleteNeoStationScrapedMedia(
+        systemFolderName: systemFolder,
+        filename: romName,
+        romBaseName: await ScreenscraperRomHasher.getCleanRomName(
+          romName,
+          appSystemId,
+        ),
+        mediaDirectoryPath:
+            await ScreenscraperMediaResolver.getMediaDirectory(),
+      );
+      if (deleted > 0) {
+        _log.i(
+          'Removed $deleted media file(s) of the previous match for "$romName"',
+        );
+      }
+    } catch (e) {
+      _log.w('Could not remove the previous match\'s media for "$romName": $e');
+    }
   }
 
   /// Forgets the game the user identified [romPath] as; the next scrape

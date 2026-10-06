@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -37,7 +39,7 @@ void main() {
   final game = GameModel(
     name: 'Bubble Bobble (USA) [!]',
     realname: 'Bubble Bobble',
-    romname: 'Bubble Bobble (USA) [!].nes',
+    romname: 'Bubble Bobble (USA) [!]',
     systemFolderName: 'nes',
     systemId: 'nes',
     year: '',
@@ -70,13 +72,19 @@ void main() {
   late List<String> searches;
   late ScreenScraperSearchResult nextResult;
 
+  /// When set, searches wait for it, so a search can be caught mid-flight.
+  Completer<void>? searchGate;
+
   Future<ScreenScraperSearchResult> fakeSearch(String query) async {
     searches.add(query);
-    return nextResult;
+    final result = nextResult;
+    await searchGate?.future;
+    return result;
   }
 
   setUp(() {
     searches = [];
+    searchGate = null;
     nextResult = const ScreenScraperSearchResult.success([
       bubbleBobble,
       partTwo,
@@ -133,7 +141,7 @@ void main() {
     final misidentified = GameModel(
       name: 'Bubble Bobble Part 2',
       realname: 'Bubble Bobble Part 2',
-      romname: 'Bubble Bobble (Europe).nes',
+      romname: 'Bubble Bobble (Europe)',
       systemFolderName: 'nes',
       systemId: 'nes',
       year: '',
@@ -154,7 +162,8 @@ void main() {
     final app = GameModel(
       name: 'Super Game',
       realname: 'Super Game',
-      romname: 'com.example.supergame',
+      // A package name loses its last segment the way a file extension would.
+      romname: 'com.example',
       systemFolderName: 'android',
       systemId: 'android',
       year: '',
@@ -166,6 +175,72 @@ void main() {
       romPath: 'com.example.supergame',
     );
     expect(ScreenScraperMatchPickerDialog.initialQuery(app), 'Super Game');
+  });
+
+  // The games list fills romname with the whole filename, the database model
+  // with the name minus its extension; both must give the same query.
+  GameModel named(String romname, String romPath) => GameModel(
+    name: 'Shown title',
+    realname: 'Shown title',
+    romname: romname,
+    systemFolderName: 'nes',
+    systemId: 'nes',
+    year: '',
+    developer: '',
+    publisher: '',
+    genre: '',
+    players: '',
+    rating: 0.0,
+    romPath: romPath,
+  );
+
+  test('a full filename loses its extension', () {
+    expect(
+      ScreenScraperMatchPickerDialog.initialQuery(
+        named(
+          'Bubble Bobble (Europe).nes',
+          '/roms/nes/Bubble Bobble (Europe).nes',
+        ),
+      ),
+      'Bubble Bobble',
+    );
+    expect(
+      ScreenScraperMatchPickerDialog.initialQuery(
+        named('Dr.Mario.nes', '/roms/nes/Dr.Mario.nes'),
+      ),
+      'Dr.Mario',
+    );
+  });
+
+  test('a full filename from an Android folder loses its extension', () {
+    expect(
+      ScreenScraperMatchPickerDialog.initialQuery(
+        named(
+          'Bubble Bobble (Europe).nes',
+          'content://com.android.externalstorage.documents/tree/primary%3Aemu'
+              '/document/primary%3Aemu%2Fnes%2FBubble%20Bobble%20%28Europe%29.nes',
+        ),
+      ),
+      'Bubble Bobble',
+    );
+  });
+
+  test('a dot in the name is not taken for an extension', () {
+    final drMario = GameModel(
+      name: 'Dr. Mario',
+      realname: 'Dr. Mario',
+      romname: 'Dr.Mario',
+      systemFolderName: 'nes',
+      systemId: 'nes',
+      year: '',
+      developer: '',
+      publisher: '',
+      genre: '',
+      players: '',
+      rating: 0.0,
+      romPath: '/roms/nes/Dr.Mario.nes',
+    );
+    expect(ScreenScraperMatchPickerDialog.initialQuery(drMario), 'Dr.Mario');
   });
 
   testWidgets('searches once for the cleaned name when it opens', (
@@ -284,6 +359,103 @@ void main() {
 
     final choice = await popped;
     expect(choice?.isAutomatic, isTrue);
+  });
+
+  // Waits out GamepadNavigation's real-time activation grace and key throttle.
+  Future<void> realPause(WidgetTester tester) async {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  // On Android a controller's A is ignored while the field has focus, so after
+  // editing the user leaves the field with B and presses A on it again.
+  testWidgets('A on the query row searches for edited text', (tester) async {
+    await openPicker(tester);
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'Bubble Bobble Part');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await realPause(tester);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await realPause(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await realPause(tester);
+
+    expect(searches, ['Bubble Bobble', 'Bubble Bobble Part']);
+  });
+
+  testWidgets('A on the query row edits it when the text is unchanged', (
+    tester,
+  ) async {
+    await openPicker(tester);
+    await realPause(tester);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await realPause(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await realPause(tester);
+
+    expect(searches, ['Bubble Bobble']);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus,
+      isTrue,
+    );
+  });
+
+  testWidgets('a search submitted during another runs after it', (
+    tester,
+  ) async {
+    searchGate = Completer<void>();
+    // Opened without settling: the spinner keeps animating while it waits.
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(1920, 1080);
+    addTearDown(tester.view.reset);
+    late BuildContext ctx;
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(1920, 1080),
+        builder: (context, _) => MaterialApp(
+          localizationsDelegates:
+              FlutterLocalization.instance.localizationsDelegates,
+          supportedLocales: FlutterLocalization.instance.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                ctx = context;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    showDialog<ScreenScraperMatchChoice>(
+      context: ctx,
+      builder: (_) => ScreenScraperMatchPickerDialog(
+        game: game,
+        appSystemId: 'nes',
+        search: fakeSearch,
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(searches, ['Bubble Bobble']);
+
+    await tester.enterText(find.byType(TextField), 'Bubble Bobble Part');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+
+    nextResult = const ScreenScraperSearchResult.success([partTwo]);
+    searchGate!.complete();
+    searchGate = null;
+    await tester.pumpAndSettle();
+
+    expect(searches, ['Bubble Bobble', 'Bubble Bobble Part']);
+    expect(listed('Bubble Bobble Part 2'), findsOneWidget);
+    expect(listed('Bubble Bobble'), findsNothing);
   });
 
   testWidgets('choosing with the arrow keys and Enter closes only the picker', (

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:neostation/data/datasources/sqlite_service.dart';
+import 'package:neostation/services/screenscraper/media_resolver.dart';
 import 'package:neostation/services/screenscraper_service.dart';
 
 import 'database_test_helper.dart';
@@ -243,6 +245,63 @@ void main() {
       expect(sent.containsKey('gameid'), isFalse);
       expect(sent['crc'], 'ABCD1234');
       expect(sent['romtaille'], '40960');
+    });
+  });
+
+  group('identifyGame', () {
+    late Directory media;
+
+    setUp(() async {
+      media = await Directory.systemTemp.createTemp('neostation_media_');
+      ScreenscraperMediaResolver.setMediaDirectoryForTesting(media.path);
+      body = jsonEncode({
+        'header': {'success': 'true'},
+        'response': {
+          'jeu': {'id': '1234'},
+          'ssuser': <String, dynamic>{},
+        },
+      });
+    });
+
+    tearDown(() async {
+      ScreenscraperMediaResolver.setMediaDirectoryForTesting(null);
+      if (await media.exists()) await media.delete(recursive: true);
+    });
+
+    File mediaFile(String folder, String name) =>
+        File('${media.path}/nes/$folder/$name');
+
+    // The wrong game's art is not overwritten when the right game lacks that
+    // type, or has it in another format: Identify must clear it first.
+    test('removes the media the wrong match left behind', () async {
+      final db = await SqliteService.getDatabase();
+      await db.execute(
+        'INSERT INTO user_roms (app_system_id, filename, rom_path) '
+        "VALUES ('nes', 'Bubble Bobble (USA).nes', "
+        "'/roms/nes/Bubble Bobble (USA).nes')",
+      );
+      final stale = [
+        mediaFile('box2d', 'Bubble Bobble (USA).png'),
+        mediaFile('fanarts', 'Bubble Bobble (USA).jpg'),
+        mediaFile('videos', 'Bubble Bobble (USA).mp4'),
+      ];
+      final otherGame = mediaFile('box2d', 'Bubble Bobble Part 2 (USA).png');
+      for (final f in [...stale, otherGame]) {
+        await f.create(recursive: true);
+      }
+
+      await ScreenScraperService.identifyGame(
+        appSystemId: 'nes',
+        romName: 'Bubble Bobble (USA).nes',
+        systemFolder: 'nes',
+        romPath: '/roms/nes/Bubble Bobble (USA).nes',
+        gameId: 1234,
+      );
+
+      for (final f in stale) {
+        expect(f.existsSync(), isFalse, reason: f.path);
+      }
+      expect(otherGame.existsSync(), isTrue);
     });
   });
 }

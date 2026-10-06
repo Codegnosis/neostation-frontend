@@ -84,13 +84,32 @@ class ScreenScraperMatchPickerDialog extends StatefulWidget {
   /// own name is the better guess.
   @visibleForTesting
   static String initialQuery(GameModel game) {
-    final isApp = game.romPath == game.romname;
-    final raw = (isApp || game.romname.isEmpty) ? game.name : game.romname;
+    final isApp = game.systemFolderName == 'android';
+    final raw = (isApp || game.romname.isEmpty)
+        ? game.name
+        : _withoutExtension(game.romname, game.romPath);
     return raw
-        .replaceAll(RegExp(r'\.[A-Za-z0-9]{1,5}$'), '')
         .replaceAll(RegExp(r'\s*\([^)]*\)'), '')
         .replaceAll(RegExp(r'\s*\[[^\]]*\]'), '')
         .trim();
+  }
+
+  /// [romname] without its file extension.
+  ///
+  /// The games list passes the whole filename and the database model the name
+  /// already without it, so an extension is only dropped when [romname] is
+  /// the end of the ROM's path: stripping "one more" would cut a name such as
+  /// Dr.Mario. Android paths are percent-encoded, so they are decoded first.
+  static String _withoutExtension(String romname, String? romPath) {
+    var path = romPath ?? '';
+    try {
+      path = Uri.decodeComponent(path);
+    } catch (_) {
+      // Not percent-encoded after all; compare it as it is.
+    }
+    final dot = romname.lastIndexOf('.');
+    if (dot <= 0 || !path.endsWith(romname)) return romname;
+    return romname.substring(0, dot);
   }
 
   @override
@@ -124,6 +143,13 @@ class _ScreenScraperMatchPickerDialogState
   /// keyboard's submit action can both fire for one press; a repeat of a query
   /// already answered is skipped so it doesn't spend a second request.
   String? _shownQuery;
+
+  /// The query most recently sent, answered or not. A on the query row searches
+  /// when the text differs from it, and edits the text otherwise.
+  String? _requestedQuery;
+
+  /// A query submitted while another search was running; it runs next.
+  String? _pendingQuery;
 
   /// Index of the "use automatic matching" row, or null when it is not shown.
   int? get _resetIndex =>
@@ -176,8 +202,14 @@ class _ScreenScraperMatchPickerDialogState
 
   Future<void> _search(String query) async {
     final trimmed = query.trim();
-    if (_isSearching || trimmed.isEmpty || trimmed == _shownQuery) return;
+    if (trimmed.isEmpty) return;
+    if (_isSearching) {
+      if (trimmed != _requestedQuery) _pendingQuery = trimmed;
+      return;
+    }
+    if (trimmed == _shownQuery) return;
 
+    _requestedQuery = trimmed;
     setState(() {
       _isSearching = true;
       _failure = null;
@@ -190,6 +222,16 @@ class _ScreenScraperMatchPickerDialogState
             query: trimmed,
           );
     if (!mounted) return;
+
+    // A newer query was submitted meanwhile: its results are the ones to show.
+    final pending = _pendingQuery;
+    _pendingQuery = null;
+    if (pending != null && pending != trimmed) {
+      setState(() => _isSearching = false);
+      _search(pending);
+      return;
+    }
+
     setState(() {
       _isSearching = false;
       _hasSearched = true;
@@ -227,7 +269,15 @@ class _ScreenScraperMatchPickerDialogState
     }
 
     if (_selectedIndex == 0) {
-      _queryFocus.requestFocus();
+      // Edited text is searched; otherwise A opens the field for editing. On
+      // Android a controller can't search from inside the field (only LB, RB
+      // and B get through while typing), so this is its way to run the search.
+      final text = _queryController.text.trim();
+      if (text.isNotEmpty && text != _requestedQuery) {
+        _search(text);
+      } else {
+        _queryFocus.requestFocus();
+      }
       return;
     }
 
