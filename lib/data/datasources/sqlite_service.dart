@@ -460,7 +460,7 @@ class SqliteService {
   SqliteService._internal();
 
   // Database configuration
-  static const int _databaseVersion = 163;
+  static const int _databaseVersion = 165;
   static const String _databaseName = 'data.sqlite';
 
   DatabaseAdapter? _database;
@@ -2013,6 +2013,9 @@ class SqliteService {
         rom_crc32 TEXT,
         rom_size INTEGER,
         rom_fingerprint_skipped TEXT,
+        -- ScreenScraper game the user picked by hand (Identify…); NULL means
+        -- match automatically. See migration v165.
+        ss_manual_game_id INTEGER,
         id_ra INTEGER,
         ra_match_source TEXT,
         ra_hash_skipped TEXT,
