@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:neostation/services/credential_file_store.dart';
 import 'package:neostation/services/user_data_location_service.dart';
 import 'package:path/path.dart' as p;
 
@@ -103,6 +104,30 @@ void main() {
       // ...and removed from the source.
       expect(db.existsSync(), isFalse, reason: 'owned db moved out of source');
       expect(neoArt.existsSync(), isFalse, reason: 'owned art moved out');
+    });
+
+    // The desktop fallback for credentials the OS keyring can't hold (always the
+    // case on SteamOS) lives in the user-data folder too. Left behind, every
+    // sign-in is lost after the move while the old folder keeps a decryptable
+    // copy.
+    test('moves the fallback credential files, which still decrypt', () async {
+      await CredentialFileStore(esde.path).write('auth_token', 'secret-token');
+      final enc = File(p.join(esde.path, 'credentials.enc'));
+      final key = File(p.join(esde.path, 'credentials.key'));
+      expect(enc.existsSync() && key.existsSync(), isTrue);
+
+      await UserDataLocationService.migrateData(
+        sourceUserDataPath: esde.path,
+        sourceMediaPath: p.join(esde.path, 'media'),
+        destPath: dest.path,
+      );
+
+      expect(
+        await CredentialFileStore(dest.path).read('auth_token'),
+        'secret-token',
+      );
+      expect(enc.existsSync(), isFalse, reason: 'no copy left behind');
+      expect(key.existsSync(), isFalse, reason: 'no key left behind');
     });
 
     test(
