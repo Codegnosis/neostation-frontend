@@ -213,6 +213,117 @@ void main() {
       },
     );
 
+    // Custom themes are the user's own; the RA cache is just rebuilt, but
+    // neither should be left behind.
+    test('moves custom themes and the RetroAchievements cache', () async {
+      final theme = File(p.join(esde.path, 'custom_themes', 'mine.json'))
+        ..createSync(recursive: true);
+      theme.writeAsStringSync('{"name":"mine"}');
+      final cached = File(p.join(esde.path, 'ra_cache', 'profile.json'))
+        ..createSync(recursive: true);
+
+      await UserDataLocationService.migrateData(
+        sourceUserDataPath: esde.path,
+        sourceMediaPath: p.join(esde.path, 'media'),
+        destPath: dest.path,
+      );
+
+      expect(
+        File(
+          p.join(dest.path, 'custom_themes', 'mine.json'),
+        ).readAsStringSync(),
+        '{"name":"mine"}',
+      );
+      expect(
+        File(p.join(dest.path, 'ra_cache', 'profile.json')).existsSync(),
+        isTrue,
+      );
+      expect(theme.existsSync(), isFalse);
+      expect(cached.existsSync(), isFalse);
+    });
+
+    // `themes/` is both NeoStation's art-pack cache and ES-DE's own themes
+    // folder: only NeoStation's packs and manifest may move.
+    test('moves art packs but leaves ES-DE themes in themes/', () async {
+      final manifest = File(p.join(esde.path, 'themes', 'manifest.json'))
+        ..createSync(recursive: true);
+      manifest.writeAsStringSync('{"source":"neoassets","themes":[]}');
+      final pack = File(p.join(esde.path, 'themes', 'Pack', 'pack.json'))
+        ..createSync(recursive: true);
+      final background = File(
+        p.join(esde.path, 'themes', 'Pack', 'backgrounds', 'nes.webp'),
+      )..createSync(recursive: true);
+      final esdeTheme = File(
+        p.join(esde.path, 'themes', 'epic-noir', 'theme.xml'),
+      )..createSync(recursive: true);
+
+      await UserDataLocationService.migrateData(
+        sourceUserDataPath: esde.path,
+        sourceMediaPath: p.join(esde.path, 'media'),
+        destPath: dest.path,
+      );
+
+      for (final rel in [
+        'manifest.json',
+        p.join('Pack', 'pack.json'),
+        p.join('Pack', 'backgrounds', 'nes.webp'),
+      ]) {
+        expect(
+          File(p.join(dest.path, 'themes', rel)).existsSync(),
+          isTrue,
+          reason: rel,
+        );
+      }
+      expect(manifest.existsSync(), isFalse);
+      expect(pack.existsSync(), isFalse);
+      expect(background.existsSync(), isFalse);
+      expect(esdeTheme.existsSync(), isTrue, reason: 'ES-DE theme stays');
+      expect(
+        Directory(p.join(esde.path, 'themes', 'Pack')).existsSync(),
+        isFalse,
+        reason: 'the moved pack folder is pruned',
+      );
+      expect(
+        Directory(p.join(dest.path, 'themes', 'epic-noir')).existsSync(),
+        isFalse,
+      );
+    });
+
+    test('leaves a themes/ folder that is not an art pack', () async {
+      final other = File(p.join(esde.path, 'themes', 'Legacy', 'theme.json'))
+        ..createSync(recursive: true);
+
+      await UserDataLocationService.migrateData(
+        sourceUserDataPath: esde.path,
+        sourceMediaPath: p.join(esde.path, 'media'),
+        destPath: dest.path,
+      );
+
+      expect(other.existsSync(), isTrue);
+      expect(
+        Directory(p.join(dest.path, 'themes', 'Legacy')).existsSync(),
+        isFalse,
+      );
+    });
+
+    test('leaves a themes/manifest.json that is not NeoStation\'s', () async {
+      final foreign = File(p.join(esde.path, 'themes', 'manifest.json'))
+        ..createSync(recursive: true);
+      foreign.writeAsStringSync('{"source":"someone-else"}');
+
+      await UserDataLocationService.migrateData(
+        sourceUserDataPath: esde.path,
+        sourceMediaPath: p.join(esde.path, 'media'),
+        destPath: dest.path,
+      );
+
+      expect(foreign.readAsStringSync(), '{"source":"someone-else"}');
+      expect(
+        File(p.join(dest.path, 'themes', 'manifest.json')).existsSync(),
+        isFalse,
+      );
+    });
+
     test('no-ops when source and dest are the same folder', () async {
       // Same physical folder, different path strings (trailing slash) — the
       // caller's string-equality guard would miss this.
