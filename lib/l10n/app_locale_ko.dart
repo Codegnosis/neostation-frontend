@@ -1,6 +1,22 @@
 part of 'app_locale.dart';
 
 const Map<String, dynamic> appLocaleKo = {
+  AppLocale.customSounds: "사용자 지정 효과음",
+  AppLocale.customSoundsSubtitle: "이동, 확인, 뒤로 가기 효과음 선택",
+  AppLocale.customSoundsHint: "WAV, MP3, OGG 또는 FLAC · 최대 5초 및 5 MiB",
+  AppLocale.customSoundsMovement: "이동",
+  AppLocale.customSoundsConfirm: "확인",
+  AppLocale.customSoundsBack: "뒤로",
+  AppLocale.customSoundsDefault: "기본값",
+  AppLocale.customSoundsImport: "가져오기 / 교체",
+  AppLocale.customSoundsPreview: "미리 듣기",
+  AppLocale.customSoundsReset: "기본값 복원",
+  AppLocale.customSoundsClose: "닫기",
+  AppLocale.customSoundsSizeError: "5 MiB 이하의 파일을 선택하세요.",
+  AppLocale.customSoundsDurationError: "5초 이하의 효과음을 선택하세요.",
+  AppLocale.customSoundsInvalidError: "파일이 비어 있거나 지원되지 않거나 재생할 수 없습니다.",
+  AppLocale.customSoundsSaveError: "효과음을 가져오거나 저장하지 못했습니다. 이전 효과음이 유지됩니다.",
+
   AppLocale.rommSavesAutoDownload: '연결된 게임을 실행하면 최신 클라우드 저장 데이터를 다운로드합니다.',
   AppLocale.rommSaveFile: '세이브 파일',
   AppLocale.rommSaveState: '세이브 상태',

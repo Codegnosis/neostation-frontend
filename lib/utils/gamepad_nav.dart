@@ -62,6 +62,9 @@ class GamepadNavigation {
   final VoidCallback? onPreviousTab;
   final VoidCallback? onNextTab;
   final VoidCallback? onSelectItem;
+
+  /// Disable when selection itself previews an audio clip.
+  final bool playSelectSound;
   final VoidCallback? onBack;
   final VoidCallback? onFavorite;
   final VoidCallback? onSettings;
@@ -355,6 +358,7 @@ class GamepadNavigation {
     this.onPreviousTab,
     this.onNextTab,
     this.onSelectItem,
+    this.playSelectSound = true,
     this.onBack,
     this.onFavorite,
     this.onSettings,
@@ -1052,7 +1056,7 @@ class GamepadNavigation {
         break;
 
       case GamepadInputType.buttonA:
-        SfxService().playEnterSound();
+        if (playSelectSound) SfxService().playEnterSound();
         onSelectItem?.call();
         break;
 
@@ -1245,7 +1249,7 @@ class GamepadNavigation {
       handled = true;
     } else if (key == LogicalKeyboardKey.enter) {
       if (isKeyDown) {
-        SfxService().playEnterSound();
+        if (playSelectSound) SfxService().playEnterSound();
         onSelectItem?.call();
       }
       handled = true;

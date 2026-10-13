@@ -5,6 +5,7 @@ import 'package:neostation/services/saf_directory_service.dart';
 import 'package:path/path.dart' as path;
 import 'package:neostation/services/logger_service.dart';
 import '../../models/config_model.dart';
+import '../../models/custom_sfx.dart';
 import '../../models/system_model.dart';
 import '../../models/emulator_model.dart';
 import 'sqlite_service.dart';
@@ -253,6 +254,7 @@ class SqliteConfigService {
                 ) ??
                 0) ==
             1,
+        customSfx: CustomSfx.decode(userConfig?['custom_sfx']),
         sfxEnabled:
             (int.tryParse(userConfig?['sfx_enabled']?.toString() ?? '1') ??
                 1) ==
@@ -447,6 +449,8 @@ class SqliteConfigService {
   /// was silently reverted on the next start. The field has since been removed
   /// from the model rather than merely skipped here, so there is no longer a
   /// theme on the model for a caller to believe this method persists.
+  // Custom SFX assignments are written separately by ConfigRepository so an
+  // older whole-config save cannot revert a concurrent import.
   static Future<void> saveConfig(ConfigModel config) async {
     try {
       await SqliteService.saveUserConfig(
