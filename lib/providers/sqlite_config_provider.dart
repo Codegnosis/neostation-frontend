@@ -65,6 +65,12 @@ class SqliteConfigProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Flag to prevent concurrent ROM scanning operations.
   bool _isScanningRoms = false;
   bool _isSilentScanning = false;
+
+  /// Scans in progress (full scans and single-system rescans), and a future
+  /// that completes when the last of them ends. Removing a ROM folder waits on
+  /// it, so a running scan can't write the removed folder's games back.
+  int _activeScans = 0;
+  Completer<void>? _scansIdle;
   bool _pendingStartupScan = false;
   SystemModel? _silentScannedSystem;
   ScanSummary? _lastScanSummary;
@@ -457,11 +463,29 @@ class SqliteConfigProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _setScanning(bool scanning) {
+    // Count the transition only: a scan's early exits and its `finally` can
+    // both clear the flag.
+    if (scanning && !_isScanning) _scanStarted();
+    if (!scanning && _isScanning) _scanEnded();
     _isScanning = scanning;
     if (scanning) {
       _scanCompleted = false;
     }
     notifyListeners();
+  }
+
+  void _scanStarted() {
+    _activeScans++;
+    _scansIdle ??= Completer<void>();
+  }
+
+  void _scanEnded() {
+    if (_activeScans == 0) return;
+    _activeScans--;
+    if (_activeScans == 0) {
+      _scansIdle?.complete();
+      _scansIdle = null;
+    }
   }
 
   void clearError() {
