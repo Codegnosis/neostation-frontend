@@ -1302,9 +1302,10 @@ mixin AppLocale {
   static const String sourceLocal = 'source_local';
   static const String searchRatingLocalOnly = 'search_rating_local_only';
   static const String searchNoRommEquivalent = 'search_no_romm_equivalent';
-  // Destructive-action confirmation prompts
+  // Destructive-action confirmation prompts and their results
   static const String resetPlayTimeConfirm = 'reset_play_time_confirm';
   static const String resetPlayTimeConfirmBody = 'reset_play_time_confirm_body';
+  static const String playTimeResetDone = 'play_time_reset_done';
   static const String removeRomFolderConfirmBody =
       'remove_rom_folder_confirm_body';
   static const String disconnectRaConfirm = 'disconnect_ra_confirm';

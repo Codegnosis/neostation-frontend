@@ -1103,6 +1103,7 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.searchNoRommEquivalent: 'RomM 中没有归类为“{value}”的内容',
   AppLocale.resetPlayTimeConfirm: '重置游戏时间',
   AppLocale.resetPlayTimeConfirmBody: '这将永久将此游戏记录的游戏时间重置为零。此操作无法撤销。',
+  AppLocale.playTimeResetDone: '游玩时间已重置',
   AppLocale.removeRomFolderConfirmBody: '这将从您的库来源中移除此 ROM 文件夹。磁盘上的文件不会被删除。',
   AppLocale.disconnectRaConfirm: '断开 RetroAchievements 连接',
   AppLocale.disconnectRaConfirmBody:

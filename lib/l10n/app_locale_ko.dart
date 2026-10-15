@@ -1126,6 +1126,7 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.resetPlayTimeConfirm: '플레이 시간 재설정',
   AppLocale.resetPlayTimeConfirmBody:
       '이 게임의 플레이 시간 기록을 0으로 초기화합니다. 이 작업은 되돌릴 수 없습니다.',
+  AppLocale.playTimeResetDone: '플레이 시간을 재설정했습니다',
   AppLocale.removeRomFolderConfirmBody:
       '이 ROM 폴더를 라이브러리 소스에서 제거합니다. 디스크의 파일은 삭제되지 않습니다.',
   AppLocale.disconnectRaConfirm: 'RetroAchievements 연결 해제',
