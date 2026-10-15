@@ -255,7 +255,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       if (waitForAndroidStorage &&
           await _hasStoredRoms() &&
           !await _waitForAndroidRomFolders()) {
-        _scanStatus = 'ROM storage is not ready; existing games were kept.';
+        _scanStatus = AppLocale.romStorageNotReady.getStringForCurrentLocale();
         SqliteConfigProvider._log.w(
           'Startup scan skipped because Android ROM storage never became ready',
         );
@@ -370,7 +370,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
     _totalSystemsToScan = 0;
     _scannedSystemsCount = 0;
     _scanProgress = 0.0;
-    _scanStatus = 'Please Wait...';
+    _scanStatus = AppLocale.scanningSystemsRoms.getStringForCurrentLocale();
 
     try {
       // Reload from synchronized database during initialization
@@ -547,7 +547,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
         );
       } else {
         _totalSystemsToScan = _detectedSystems.length;
-        _scanStatus = 'Scanning ROMs...';
+        _scanStatus = AppLocale.scanningRoms.getStringForCurrentLocale();
         await _scanRomsInBackground();
       }
 
@@ -611,7 +611,10 @@ extension SqliteConfigScanning on SqliteConfigProvider {
         return anyOnline;
       }
 
-      _scanStatus = 'Waiting for ROM storage ($attempt/$maxAttempts)...';
+      _scanStatus = AppLocale.waitingForRomStorage
+          .getStringForCurrentLocale()
+          .replaceFirst('{attempt}', '$attempt')
+          .replaceFirst('{max}', '$maxAttempts');
       _notify();
       await Future<void>.delayed(retryDelay);
     }
@@ -688,7 +691,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       }
 
       // Phase 2: Update the systems list (0.95 - 1.0)
-      _scanStatus = 'Updating systems list...';
+      _scanStatus = AppLocale.updatingSystemsList.getStringForCurrentLocale();
       _scanProgress = scanPhaseWeight; // 95%
       _notify();
 
@@ -808,12 +811,12 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       await _refreshDetectedSystemsFromDatabase();
 
       // Completar al 100%
-      _scanStatus = 'ROMs Scanned';
+      _scanStatus = AppLocale.romsScanned.getStringForCurrentLocale();
       _scanProgress = 1.0;
       _notify();
     } catch (e) {
       SqliteConfigProvider._log.e('Error scanning ROMs: $e');
-      _scanStatus = 'Error scanning ROMs';
+      _scanStatus = AppLocale.errorScanningRoms.getStringForCurrentLocale();
       _notify();
     } finally {
       _isScanningRoms = false; // Liberar el lock

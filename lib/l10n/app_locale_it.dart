@@ -1118,6 +1118,13 @@ const Map<String, dynamic> appLocaleIt = {
   AppLocale.systemsUpdateDownloading: 'Download configurazioni sistemi...',
   AppLocale.systemsUpdateCancelling: 'Annullamento...',
   AppLocale.systemsUpdateSyncing: 'Sincronizzazione database sistemi...',
+  AppLocale.waitingForRomStorage:
+      'In attesa dell’archiviazione ROM ({attempt}/{max})...',
+  AppLocale.updatingSystemsList: 'Aggiornamento elenco sistemi...',
+  AppLocale.romsScanned: 'ROM scansionate',
+  AppLocale.errorScanningRoms: 'Errore durante la scansione delle ROM',
+  AppLocale.romStorageNotReady:
+      'L’archiviazione ROM non è pronta; i giochi esistenti sono stati mantenuti.',
   AppLocale.systemsUpdateComplete: 'Sistemi aggiornati con successo!',
   AppLocale.systemsUpdateError:
       'Aggiornamento sistemi fallito. Riprova più tardi.',

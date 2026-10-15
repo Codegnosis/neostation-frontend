@@ -1091,6 +1091,12 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.systemsUpdateDownloading: 'Загрузка конфигураций систем...',
   AppLocale.systemsUpdateCancelling: 'Отмена...',
   AppLocale.systemsUpdateSyncing: 'Синхронизация базы данных систем...',
+  AppLocale.waitingForRomStorage: 'Ожидание хранилища ROM ({attempt}/{max})...',
+  AppLocale.updatingSystemsList: 'Обновление списка систем...',
+  AppLocale.romsScanned: 'ROM просканированы',
+  AppLocale.errorScanningRoms: 'Ошибка при сканировании ROM',
+  AppLocale.romStorageNotReady:
+      'Хранилище ROM не готово; существующие игры сохранены.',
   AppLocale.systemsUpdateComplete: 'Системы успешно обновлены!',
   AppLocale.systemsUpdateError: 'Ошибка обновления систем. Попробуйте позже.',
 

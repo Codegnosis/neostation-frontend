@@ -998,6 +998,11 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.systemsUpdateDownloading: '시스템 구성 다운로드 중...',
   AppLocale.systemsUpdateCancelling: '취소하는 중...',
   AppLocale.systemsUpdateSyncing: '시스템 데이터베이스 동기화 중...',
+  AppLocale.waitingForRomStorage: 'ROM 저장소를 기다리는 중 ({attempt}/{max})...',
+  AppLocale.updatingSystemsList: '시스템 목록 업데이트 중...',
+  AppLocale.romsScanned: 'ROM 스캔을 마쳤습니다',
+  AppLocale.errorScanningRoms: 'ROM 스캔 중 오류가 발생했습니다',
+  AppLocale.romStorageNotReady: 'ROM 저장소가 준비되지 않았습니다. 기존 게임은 유지되었습니다.',
   AppLocale.systemsUpdateComplete: '시스템이 성공적으로 업데이트되었습니다!',
   AppLocale.systemsUpdateError: '시스템을 업데이트하지 못했습니다. 나중에 다시 시도해 주세요.',
 
