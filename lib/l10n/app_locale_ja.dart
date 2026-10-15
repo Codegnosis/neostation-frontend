@@ -1264,27 +1264,24 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.customSaveFoldersMigrate: 'クラウドセーブをNeoSync v2に移行',
 
   // ES-DE import
-  AppLocale.esdeImport: 'ES-DE Import',
-  AppLocale.esdeImportSubtitle: 'Import metadata and artwork from ES-DE',
-  AppLocale.esdeSelectFolder: 'Select ES-DE Folder',
+  AppLocale.esdeImport: 'ES-DE インポート',
+  AppLocale.esdeImportSubtitle: 'ES-DE からメタデータとアートワークをインポート',
+  AppLocale.esdeSelectFolder: 'ES-DE フォルダーを選択',
   AppLocale.esdeSelectFolderSubtitle:
-      'Choose the ES-DE folder containing gamelists and downloaded_media',
-  AppLocale.esdeRunImport: 'Import from ES-DE',
-  AppLocale.esdeRunImportSubtitle:
-      'Fill in missing metadata and use ES-DE artwork as fallback',
-  AppLocale.esdeImporting: 'Importing from ES-DE',
-  AppLocale.esdeImportComplete: 'ES-DE import complete',
-  AppLocale.esdeImportNoFolder: 'Select your ES-DE folder first',
-  AppLocale.esdeReset: 'Reset ES-DE Import',
-  AppLocale.esdeResetSubtitle:
-      'Remove imported metadata and media links so the import can be re-run',
-  AppLocale.esdeResetComplete: 'ES-DE import reset',
+      'gamelists と downloaded_media が含まれる ES-DE フォルダーを選択します',
+  AppLocale.esdeRunImport: 'ES-DE からインポート',
+  AppLocale.esdeRunImportSubtitle: '不足しているメタデータを補い、ES-DE のアートワークを代替として使用します',
+  AppLocale.esdeImporting: 'ES-DE からインポート中',
+  AppLocale.esdeImportComplete: 'ES-DE のインポート完了',
+  AppLocale.esdeImportNoFolder: '先に ES-DE フォルダーを選択してください',
+  AppLocale.esdeReset: 'ES-DE インポートをリセット',
+  AppLocale.esdeResetSubtitle: 'インポートしたメタデータとメディアのリンクを削除し、再度インポートできるようにします',
+  AppLocale.esdeResetComplete: 'ES-DE のインポートをリセットしました',
   AppLocale.esdeResetConfirmBody:
-      'This removes all imported ES-DE metadata and media links and clears the selected folder. Your games and ROM files are not affected.',
+      'ES-DE からインポートしたメタデータとメディアのリンクをすべて削除し、選択したフォルダーの設定を解除します。ゲームと ROM ファイルには影響しません。',
   AppLocale.esdeImportNotEsdeFolder:
-      'This folder is not an ES-DE installation (no gamelists found)',
-  AppLocale.esdeImportNothingFound:
-      'No matching systems or games were found to import',
+      'このフォルダーは ES-DE のインストール先ではありません（gamelists が見つかりません）',
+  AppLocale.esdeImportNothingFound: 'インポート対象となるシステムやゲームが見つかりませんでした',
   AppLocale.esdeSummarySystemsMatched: '一致したシステム',
   AppLocale.esdeSummaryUnmatched: '一致なし',
   AppLocale.esdeSummarySkipped: 'スキップ（読み取り不可）',

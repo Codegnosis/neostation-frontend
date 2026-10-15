@@ -1404,27 +1404,27 @@ const Map<String, dynamic> appLocaleId = {
       'Migrasikan penyimpanan cloud ke NeoSync v2',
 
   // ES-DE import
-  AppLocale.esdeImport: 'ES-DE Import',
-  AppLocale.esdeImportSubtitle: 'Import metadata and artwork from ES-DE',
-  AppLocale.esdeSelectFolder: 'Select ES-DE Folder',
+  AppLocale.esdeImport: 'Impor ES-DE',
+  AppLocale.esdeImportSubtitle: 'Impor metadata dan gambar dari ES-DE',
+  AppLocale.esdeSelectFolder: 'Pilih Folder ES-DE',
   AppLocale.esdeSelectFolderSubtitle:
-      'Choose the ES-DE folder containing gamelists and downloaded_media',
-  AppLocale.esdeRunImport: 'Import from ES-DE',
+      'Pilih folder ES-DE yang berisi gamelists dan downloaded_media',
+  AppLocale.esdeRunImport: 'Impor dari ES-DE',
   AppLocale.esdeRunImportSubtitle:
-      'Fill in missing metadata and use ES-DE artwork as fallback',
-  AppLocale.esdeImporting: 'Importing from ES-DE',
-  AppLocale.esdeImportComplete: 'ES-DE import complete',
-  AppLocale.esdeImportNoFolder: 'Select your ES-DE folder first',
-  AppLocale.esdeReset: 'Reset ES-DE Import',
+      'Lengkapi metadata yang kurang dan gunakan gambar ES-DE sebagai cadangan',
+  AppLocale.esdeImporting: 'Mengimpor dari ES-DE',
+  AppLocale.esdeImportComplete: 'Impor ES-DE selesai',
+  AppLocale.esdeImportNoFolder: 'Pilih folder ES-DE Anda terlebih dahulu',
+  AppLocale.esdeReset: 'Atur Ulang Impor ES-DE',
   AppLocale.esdeResetSubtitle:
-      'Remove imported metadata and media links so the import can be re-run',
-  AppLocale.esdeResetComplete: 'ES-DE import reset',
+      'Hapus metadata dan tautan media yang diimpor agar impor dapat dijalankan ulang',
+  AppLocale.esdeResetComplete: 'Impor ES-DE diatur ulang',
   AppLocale.esdeResetConfirmBody:
-      'This removes all imported ES-DE metadata and media links and clears the selected folder. Your games and ROM files are not affected.',
+      'Ini menghapus semua metadata dan tautan media yang diimpor dari ES-DE serta mengosongkan pilihan folder. Game dan file ROM Anda tidak terpengaruh.',
   AppLocale.esdeImportNotEsdeFolder:
-      'This folder is not an ES-DE installation (no gamelists found)',
+      'Folder ini bukan instalasi ES-DE (gamelists tidak ditemukan)',
   AppLocale.esdeImportNothingFound:
-      'No matching systems or games were found to import',
+      'Tidak ditemukan sistem atau game yang cocok untuk diimpor',
   AppLocale.esdeSummarySystemsMatched: 'Sistem cocok',
   AppLocale.esdeSummaryUnmatched: 'tidak cocok',
   AppLocale.esdeSummarySkipped: 'dilewati (tidak terbaca)',

@@ -1230,27 +1230,23 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.customSaveFoldersMigrate: '将云存档迁移到 NeoSync v2',
 
   // ES-DE import
-  AppLocale.esdeImport: 'ES-DE Import',
-  AppLocale.esdeImportSubtitle: 'Import metadata and artwork from ES-DE',
-  AppLocale.esdeSelectFolder: 'Select ES-DE Folder',
+  AppLocale.esdeImport: 'ES-DE 导入',
+  AppLocale.esdeImportSubtitle: '从 ES-DE 导入元数据和图片',
+  AppLocale.esdeSelectFolder: '选择 ES-DE 文件夹',
   AppLocale.esdeSelectFolderSubtitle:
-      'Choose the ES-DE folder containing gamelists and downloaded_media',
-  AppLocale.esdeRunImport: 'Import from ES-DE',
-  AppLocale.esdeRunImportSubtitle:
-      'Fill in missing metadata and use ES-DE artwork as fallback',
-  AppLocale.esdeImporting: 'Importing from ES-DE',
-  AppLocale.esdeImportComplete: 'ES-DE import complete',
-  AppLocale.esdeImportNoFolder: 'Select your ES-DE folder first',
-  AppLocale.esdeReset: 'Reset ES-DE Import',
-  AppLocale.esdeResetSubtitle:
-      'Remove imported metadata and media links so the import can be re-run',
-  AppLocale.esdeResetComplete: 'ES-DE import reset',
+      '选择包含 gamelists 和 downloaded_media 的 ES-DE 文件夹',
+  AppLocale.esdeRunImport: '从 ES-DE 导入',
+  AppLocale.esdeRunImportSubtitle: '补全缺失的元数据，并以 ES-DE 图片作为备用',
+  AppLocale.esdeImporting: '正在从 ES-DE 导入',
+  AppLocale.esdeImportComplete: 'ES-DE 导入完成',
+  AppLocale.esdeImportNoFolder: '请先选择 ES-DE 文件夹',
+  AppLocale.esdeReset: '重置 ES-DE 导入',
+  AppLocale.esdeResetSubtitle: '移除已导入的元数据和媒体链接，以便重新导入',
+  AppLocale.esdeResetComplete: 'ES-DE 导入已重置',
   AppLocale.esdeResetConfirmBody:
-      'This removes all imported ES-DE metadata and media links and clears the selected folder. Your games and ROM files are not affected.',
-  AppLocale.esdeImportNotEsdeFolder:
-      'This folder is not an ES-DE installation (no gamelists found)',
-  AppLocale.esdeImportNothingFound:
-      'No matching systems or games were found to import',
+      '这将移除所有从 ES-DE 导入的元数据和媒体链接，并清除所选文件夹设置。你的游戏和 ROM 文件不受影响。',
+  AppLocale.esdeImportNotEsdeFolder: '此文件夹不是 ES-DE 安装目录（未找到 gamelists）',
+  AppLocale.esdeImportNothingFound: '未找到可导入的匹配系统或游戏',
   AppLocale.esdeSummarySystemsMatched: '已匹配系统',
   AppLocale.esdeSummaryUnmatched: '未匹配',
   AppLocale.esdeSummarySkipped: '已跳过（无法读取）',

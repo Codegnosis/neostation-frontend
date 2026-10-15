@@ -1232,27 +1232,23 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.customSaveFoldersMigrate: '將雲端存檔遷移至 NeoSync v2',
 
   // ES-DE import
-  AppLocale.esdeImport: 'ES-DE Import',
-  AppLocale.esdeImportSubtitle: 'Import metadata and artwork from ES-DE',
-  AppLocale.esdeSelectFolder: 'Select ES-DE Folder',
+  AppLocale.esdeImport: 'ES-DE 匯入',
+  AppLocale.esdeImportSubtitle: '從 ES-DE 匯入中繼資料和圖片',
+  AppLocale.esdeSelectFolder: '選擇 ES-DE 資料夾',
   AppLocale.esdeSelectFolderSubtitle:
-      'Choose the ES-DE folder containing gamelists and downloaded_media',
-  AppLocale.esdeRunImport: 'Import from ES-DE',
-  AppLocale.esdeRunImportSubtitle:
-      'Fill in missing metadata and use ES-DE artwork as fallback',
-  AppLocale.esdeImporting: 'Importing from ES-DE',
-  AppLocale.esdeImportComplete: 'ES-DE import complete',
-  AppLocale.esdeImportNoFolder: 'Select your ES-DE folder first',
-  AppLocale.esdeReset: 'Reset ES-DE Import',
-  AppLocale.esdeResetSubtitle:
-      'Remove imported metadata and media links so the import can be re-run',
-  AppLocale.esdeResetComplete: 'ES-DE import reset',
+      '選擇包含 gamelists 和 downloaded_media 的 ES-DE 資料夾',
+  AppLocale.esdeRunImport: '從 ES-DE 匯入',
+  AppLocale.esdeRunImportSubtitle: '補齊缺少的中繼資料，並以 ES-DE 圖片作為備用',
+  AppLocale.esdeImporting: '正在從 ES-DE 匯入',
+  AppLocale.esdeImportComplete: 'ES-DE 匯入完成',
+  AppLocale.esdeImportNoFolder: '請先選擇 ES-DE 資料夾',
+  AppLocale.esdeReset: '重設 ES-DE 匯入',
+  AppLocale.esdeResetSubtitle: '移除已匯入的中繼資料和媒體連結，以便重新匯入',
+  AppLocale.esdeResetComplete: 'ES-DE 匯入已重設',
   AppLocale.esdeResetConfirmBody:
-      'This removes all imported ES-DE metadata and media links and clears the selected folder. Your games and ROM files are not affected.',
-  AppLocale.esdeImportNotEsdeFolder:
-      'This folder is not an ES-DE installation (no gamelists found)',
-  AppLocale.esdeImportNothingFound:
-      'No matching systems or games were found to import',
+      '這將移除所有從 ES-DE 匯入的中繼資料和媒體連結，並清除所選資料夾設定。你的遊戲和 ROM 檔案不受影響。',
+  AppLocale.esdeImportNotEsdeFolder: '此資料夾不是 ES-DE 安裝目錄（找不到 gamelists）',
+  AppLocale.esdeImportNothingFound: '找不到可匯入的相符系統或遊戲',
   AppLocale.esdeSummarySystemsMatched: '已比對系統',
   AppLocale.esdeSummaryUnmatched: '未比對',
   AppLocale.esdeSummarySkipped: '已略過（無法讀取）',
