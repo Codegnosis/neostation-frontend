@@ -1447,27 +1447,27 @@ const Map<String, dynamic> appLocaleDe = {
       'Cloud-Spielstände zu NeoSync v2 migrieren',
 
   // ES-DE import
-  AppLocale.esdeImport: 'ES-DE Import',
-  AppLocale.esdeImportSubtitle: 'Import metadata and artwork from ES-DE',
-  AppLocale.esdeSelectFolder: 'Select ES-DE Folder',
+  AppLocale.esdeImport: 'ES-DE-Import',
+  AppLocale.esdeImportSubtitle: 'Metadaten und Artworks aus ES-DE importieren',
+  AppLocale.esdeSelectFolder: 'ES-DE-Ordner auswählen',
   AppLocale.esdeSelectFolderSubtitle:
-      'Choose the ES-DE folder containing gamelists and downloaded_media',
-  AppLocale.esdeRunImport: 'Import from ES-DE',
+      'Wähle den ES-DE-Ordner, der gamelists und downloaded_media enthält',
+  AppLocale.esdeRunImport: 'Aus ES-DE importieren',
   AppLocale.esdeRunImportSubtitle:
-      'Fill in missing metadata and use ES-DE artwork as fallback',
-  AppLocale.esdeImporting: 'Importing from ES-DE',
-  AppLocale.esdeImportComplete: 'ES-DE import complete',
-  AppLocale.esdeImportNoFolder: 'Select your ES-DE folder first',
-  AppLocale.esdeReset: 'Reset ES-DE Import',
+      'Fehlende Metadaten ergänzen und ES-DE-Artworks als Ersatz verwenden',
+  AppLocale.esdeImporting: 'Import aus ES-DE läuft',
+  AppLocale.esdeImportComplete: 'ES-DE-Import abgeschlossen',
+  AppLocale.esdeImportNoFolder: 'Wähle zuerst deinen ES-DE-Ordner aus',
+  AppLocale.esdeReset: 'ES-DE-Import zurücksetzen',
   AppLocale.esdeResetSubtitle:
-      'Remove imported metadata and media links so the import can be re-run',
-  AppLocale.esdeResetComplete: 'ES-DE import reset',
+      'Importierte Metadaten und Medienverknüpfungen entfernen, damit der Import erneut ausgeführt werden kann',
+  AppLocale.esdeResetComplete: 'ES-DE-Import zurückgesetzt',
   AppLocale.esdeResetConfirmBody:
-      'This removes all imported ES-DE metadata and media links and clears the selected folder. Your games and ROM files are not affected.',
+      'Dadurch werden alle aus ES-DE importierten Metadaten und Medienverknüpfungen entfernt und die Ordnerauswahl wird aufgehoben. Deine Spiele und ROM-Dateien sind nicht betroffen.',
   AppLocale.esdeImportNotEsdeFolder:
-      'This folder is not an ES-DE installation (no gamelists found)',
+      'Dieser Ordner ist keine ES-DE-Installation (kein gamelists-Ordner gefunden)',
   AppLocale.esdeImportNothingFound:
-      'No matching systems or games were found to import',
+      'Es wurden keine passenden Systeme oder Spiele zum Importieren gefunden',
   AppLocale.esdeSummarySystemsMatched: 'Zugeordnete Systeme',
   AppLocale.esdeSummaryUnmatched: 'nicht zugeordnet',
   AppLocale.esdeSummarySkipped: 'übersprungen (nicht lesbar)',

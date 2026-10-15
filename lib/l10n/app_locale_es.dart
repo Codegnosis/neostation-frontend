@@ -1436,27 +1436,27 @@ const Map<String, dynamic> appLocaleEs = {
       'Migrar guardados de la nube a NeoSync v2',
 
   // ES-DE import
-  AppLocale.esdeImport: 'ES-DE Import',
-  AppLocale.esdeImportSubtitle: 'Import metadata and artwork from ES-DE',
-  AppLocale.esdeSelectFolder: 'Select ES-DE Folder',
+  AppLocale.esdeImport: 'Importación de ES-DE',
+  AppLocale.esdeImportSubtitle: 'Importar metadatos e imágenes desde ES-DE',
+  AppLocale.esdeSelectFolder: 'Seleccionar carpeta de ES-DE',
   AppLocale.esdeSelectFolderSubtitle:
-      'Choose the ES-DE folder containing gamelists and downloaded_media',
-  AppLocale.esdeRunImport: 'Import from ES-DE',
+      'Elige la carpeta de ES-DE que contiene gamelists y downloaded_media',
+  AppLocale.esdeRunImport: 'Importar desde ES-DE',
   AppLocale.esdeRunImportSubtitle:
-      'Fill in missing metadata and use ES-DE artwork as fallback',
-  AppLocale.esdeImporting: 'Importing from ES-DE',
-  AppLocale.esdeImportComplete: 'ES-DE import complete',
-  AppLocale.esdeImportNoFolder: 'Select your ES-DE folder first',
-  AppLocale.esdeReset: 'Reset ES-DE Import',
+      'Completar los metadatos que faltan y usar las imágenes de ES-DE como respaldo',
+  AppLocale.esdeImporting: 'Importando desde ES-DE',
+  AppLocale.esdeImportComplete: 'Importación de ES-DE completada',
+  AppLocale.esdeImportNoFolder: 'Primero selecciona tu carpeta de ES-DE',
+  AppLocale.esdeReset: 'Restablecer importación de ES-DE',
   AppLocale.esdeResetSubtitle:
-      'Remove imported metadata and media links so the import can be re-run',
-  AppLocale.esdeResetComplete: 'ES-DE import reset',
+      'Eliminar los metadatos importados y los enlaces multimedia para poder repetir la importación',
+  AppLocale.esdeResetComplete: 'Importación de ES-DE restablecida',
   AppLocale.esdeResetConfirmBody:
-      'This removes all imported ES-DE metadata and media links and clears the selected folder. Your games and ROM files are not affected.',
+      'Esto elimina todos los metadatos y enlaces multimedia importados de ES-DE y anula la selección de la carpeta. Tus juegos y archivos ROM no se ven afectados.',
   AppLocale.esdeImportNotEsdeFolder:
-      'This folder is not an ES-DE installation (no gamelists found)',
+      'Esta carpeta no es una instalación de ES-DE (no se encontró la carpeta gamelists)',
   AppLocale.esdeImportNothingFound:
-      'No matching systems or games were found to import',
+      'No se encontraron sistemas ni juegos coincidentes para importar',
   AppLocale.esdeSummarySystemsMatched: 'Sistemas coincidentes',
   AppLocale.esdeSummaryUnmatched: 'sin coincidencia',
   AppLocale.esdeSummarySkipped: 'omitidos (ilegibles)',
