@@ -217,9 +217,9 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.nowPlayingDimOff: 'オフ',
   AppLocale.secondarySectionNowPlaying: 'Now Playingパネル',
   AppLocale.secondarySectionDock: 'アプリドック',
-  AppLocale.screenshotAccess: 'Screen return & screenshots',
+  AppLocale.screenshotAccess: '画面復帰とスクリーンショット',
   AppLocale.screenshotAccessSubtitle:
-      'Restores the Now Playing screen when you close an app opened from the dock, and lets the screenshot button capture the screen (opens Android accessibility settings)',
+      'ドックから開いたアプリを閉じたときにNow Playing画面に戻し、スクリーンショットボタンで画面を撮影できるようにします（Androidのユーザー補助設定が開きます）',
   AppLocale.scanOnStartupSubtitle: 'アプリ起動時にROMフォルダを自動的にスキャン',
   AppLocale.ignoreHiddenFiles: '隠しアイテムを無視',
   AppLocale.ignoreHiddenFilesSubtitle: 'ROMスキャン中に隠しファイルとフォルダを非表示にする',
@@ -795,10 +795,16 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.storagePermission: 'ストレージの許可',
   AppLocale.storagePermissionDesc:
       'NeoStationがRetroArchの設定を管理し、セーブデータを正しく同期するには「すべてのファイルへのアクセス」が必要です。\n\n次の画面でこの許可を与えてください。',
-  AppLocale.screenReturnAccess: 'Screen Return Access',
+  AppLocale.screenReturnAccess: '画面復帰のアクセス許可',
   AppLocale.screenReturnAccessDesc:
-      'Brings the Now Playing screen back when you close an app opened from the dock, and enables system screenshots. Only the foreground app name is read \u2014 no screen content is collected.',
-  AppLocale.screenReturnAccessHint: 'Turn on NeoStation, then tap Allow',
+      'ドックから開いたアプリを閉じるとNow Playing画面に戻り、システムのスクリーンショットが使えるようになります。読み取るのは前面に表示中のアプリ名だけで、画面の内容は収集しません。',
+  AppLocale.screenReturnAccessHint: 'NeoStationをオンにして、「許可」をタップしてください',
+  AppLocale.screenReturnDialogTitle: '画面復帰を有効にする',
+  AppLocale.screenReturnDialogBody:
+      'ドックからアプリを起動するには、画面復帰のユーザー補助サービスが必要です。開いたアプリを閉じたあと、この画面に戻れるようにします。これがないと、戻る手段がなくなることがあります。',
+  AppLocale.screenReturnDialogSteps:
+      '次の画面で、サービスの一覧から NeoStation を探してオンにしてください。',
+  AppLocale.openSettings: '設定を開く',
   AppLocale.selectRomFolder: 'ROMフォルダを選択',
   AppLocale.romFolderSelected: 'ROMフォルダが選択されました！',
   AppLocale.chooseRomFolderDesc:

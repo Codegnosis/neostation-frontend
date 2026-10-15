@@ -247,9 +247,9 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.nowPlayingDimOff: 'Mati',
   AppLocale.secondarySectionNowPlaying: 'Panel Now Playing',
   AppLocale.secondarySectionDock: 'Dock aplikasi',
-  AppLocale.screenshotAccess: 'Screen return & screenshots',
+  AppLocale.screenshotAccess: 'Kembali ke layar & tangkapan layar',
   AppLocale.screenshotAccessSubtitle:
-      'Restores the Now Playing screen when you close an app opened from the dock, and lets the screenshot button capture the screen (opens Android accessibility settings)',
+      'Memulihkan layar Now Playing saat Anda menutup aplikasi yang dibuka dari dock, dan memungkinkan tombol tangkapan layar menangkap layar (membuka setelan Aksesibilitas Android)',
   AppLocale.scanOnStartupSubtitle:
       'Pindai folder ROM secara otomatis saat membuka aplikasi',
   AppLocale.ignoreHiddenFiles: 'Abaikan item tersembunyi',
@@ -879,10 +879,16 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.storagePermission: 'Izin Penyimpanan',
   AppLocale.storagePermissionDesc:
       'NeoStation memerlukan "Akses Semua File" untuk mengelola konfigurasi RetroArch dan menyinkronkan simpanan Anda dengan benar.\n\nHarap berikan izin ini di layar berikutnya.',
-  AppLocale.screenReturnAccess: 'Screen Return Access',
+  AppLocale.screenReturnAccess: 'Akses Kembali ke Layar',
   AppLocale.screenReturnAccessDesc:
-      'Brings the Now Playing screen back when you close an app opened from the dock, and enables system screenshots. Only the foreground app name is read \u2014 no screen content is collected.',
-  AppLocale.screenReturnAccessHint: 'Turn on NeoStation, then tap Allow',
+      'Mengembalikan layar Now Playing saat Anda menutup aplikasi yang dibuka dari dock, dan mengaktifkan tangkapan layar sistem. Hanya nama aplikasi di latar depan yang dibaca — tidak ada konten layar yang dikumpulkan.',
+  AppLocale.screenReturnAccessHint: 'Aktifkan NeoStation, lalu ketuk Izinkan',
+  AppLocale.screenReturnDialogTitle: 'Aktifkan fitur Kembali ke Layar',
+  AppLocale.screenReturnDialogBody:
+      'Untuk membuka aplikasi dari dock, NeoStation memerlukan layanan aksesibilitas Kembali ke Layar. Layanan ini membawa Anda kembali ke sini setelah Anda menutup aplikasi yang dibuka. Tanpanya, Anda mungkin tidak bisa kembali.',
+  AppLocale.screenReturnDialogSteps:
+      'Di layar berikutnya, cari NeoStation di daftar layanan lalu aktifkan.',
+  AppLocale.openSettings: 'Buka setelan',
   AppLocale.selectRomFolder: 'Pilih Folder ROM',
   AppLocale.romFolderSelected: 'Folder ROM dipilih!',
   AppLocale.chooseRomFolderDesc:

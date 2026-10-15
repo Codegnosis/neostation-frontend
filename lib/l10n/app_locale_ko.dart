@@ -804,8 +804,13 @@ const Map<String, dynamic> appLocaleKo = {
       'NeoStation은 RetroArch 구성을 관리하고 게임 저장을 올바르게 동기화하려면 "모든 파일 액세스"가 필요합니다.\n\n다음 화면에서 이 권한을 부여해 주세요.',
   AppLocale.screenReturnAccess: '화면 복귀 권한',
   AppLocale.screenReturnAccessDesc:
-      '독에서 실행한 앱을 닫으면 플레이 중 화면으로 돌아오고 시스템 스크린샷을 사용할 수 있습니다. 현재 실행 중인 앱 이름만 읽으며 화면 내용은 수집하지 않습니다.',
+      'Dock에서 실행한 앱을 닫으면 플레이 중 화면으로 돌아오고 시스템 스크린샷을 사용할 수 있습니다. 현재 실행 중인 앱 이름만 읽으며 화면 내용은 수집하지 않습니다.',
   AppLocale.screenReturnAccessHint: 'NeoStation을 켠 뒤 허용을 누르세요',
+  AppLocale.screenReturnDialogTitle: '화면 복귀 사용',
+  AppLocale.screenReturnDialogBody:
+      'Dock에서 앱을 실행하려면 NeoStation에 화면 복귀 접근성 서비스가 필요합니다. 실행한 앱을 닫은 뒤 이 화면으로 돌아올 수 있게 해 줍니다. 이 서비스가 없으면 돌아올 방법이 없을 수 있습니다.',
+  AppLocale.screenReturnDialogSteps: '다음 화면의 서비스 목록에서 NeoStation을 찾아 켜세요.',
+  AppLocale.openSettings: '설정 열기',
   AppLocale.selectRomFolder: 'ROM 폴더 선택',
   AppLocale.romFolderSelected: 'ROM 폴더가 선택되었습니다!',
   AppLocale.chooseRomFolderDesc:

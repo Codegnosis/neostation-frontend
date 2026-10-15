@@ -260,9 +260,9 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.nowPlayingDimOff: 'Désactivé',
   AppLocale.secondarySectionNowPlaying: 'Panneau Now Playing',
   AppLocale.secondarySectionDock: 'Dock d\'applications',
-  AppLocale.screenshotAccess: 'Screen return & screenshots',
+  AppLocale.screenshotAccess: 'Retour à l’écran et captures',
   AppLocale.screenshotAccessSubtitle:
-      'Restores the Now Playing screen when you close an app opened from the dock, and lets the screenshot button capture the screen (opens Android accessibility settings)',
+      'Rétablit l’écran Now Playing quand vous fermez une application ouverte depuis le dock, et permet au bouton de capture de faire des captures d’écran (ouvre les paramètres d’accessibilité d’Android)',
   AppLocale.scanOnStartupSubtitle:
       'Analyse automatiquement les dossiers de ROMs à l’ouverture de l’application',
   AppLocale.ignoreHiddenFiles: 'Ignorer les éléments cachés',
@@ -911,10 +911,17 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.storagePermission: 'Autorisation de Stockage',
   AppLocale.storagePermissionDesc:
       'NeoStation a besoin de "l’Accès à Tous les Fichiers" pour gérer vos configurations RetroArch et synchroniser vos sauvegardes correctement.\n\nVeuillez accorder cette autorisation sur l’écran suivant.',
-  AppLocale.screenReturnAccess: 'Screen Return Access',
+  AppLocale.screenReturnAccess: 'Accès au retour à l’écran',
   AppLocale.screenReturnAccessDesc:
-      'Brings the Now Playing screen back when you close an app opened from the dock, and enables system screenshots. Only the foreground app name is read \u2014 no screen content is collected.',
-  AppLocale.screenReturnAccessHint: 'Turn on NeoStation, then tap Allow',
+      'Réaffiche l’écran Now Playing quand vous fermez une application ouverte depuis le dock, et active les captures d’écran système. Seul le nom de l’application au premier plan est lu — aucun contenu de l’écran n’est collecté.',
+  AppLocale.screenReturnAccessHint:
+      'Activez NeoStation, puis appuyez sur Autoriser',
+  AppLocale.screenReturnDialogTitle: 'Activer le retour à l’écran',
+  AppLocale.screenReturnDialogBody:
+      'Pour lancer des applications depuis le dock, NeoStation a besoin du service d’accessibilité de retour à l’écran. Il vous ramène ici après la fermeture de l’application ouverte. Sans lui, vous risquez de ne plus pouvoir revenir.',
+  AppLocale.screenReturnDialogSteps:
+      'Sur l’écran suivant, trouvez NeoStation dans la liste des services et activez-le.',
+  AppLocale.openSettings: 'Ouvrir les paramètres',
   AppLocale.selectRomFolder: 'Sélectionner le Dossier des ROMs',
   AppLocale.romFolderSelected: 'Dossier des ROMs sélectionné !',
   AppLocale.chooseRomFolderDesc:
