@@ -1086,6 +1086,13 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.systemsUpdateDownloading: 'Mengunduh konfigurasi sistem...',
   AppLocale.systemsUpdateCancelling: 'Membatalkan...',
   AppLocale.systemsUpdateSyncing: 'Menyinkronkan database sistem...',
+  AppLocale.waitingForRomStorage:
+      'Menunggu penyimpanan ROM ({attempt}/{max})...',
+  AppLocale.updatingSystemsList: 'Memperbarui daftar sistem...',
+  AppLocale.romsScanned: 'ROM selesai dipindai',
+  AppLocale.errorScanningRoms: 'Kesalahan saat memindai ROM',
+  AppLocale.romStorageNotReady:
+      'Penyimpanan ROM belum siap; game yang ada tetap disimpan.',
   AppLocale.systemsUpdateComplete: 'Sistem berhasil diperbarui!',
   AppLocale.systemsUpdateError: 'Gagal memperbarui sistem. Coba lagi nanti.',
 

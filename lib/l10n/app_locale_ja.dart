@@ -984,6 +984,11 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.systemsUpdateDownloading: 'システム設定をダウンロード中...',
   AppLocale.systemsUpdateCancelling: 'キャンセル中...',
   AppLocale.systemsUpdateSyncing: 'システムデータベースを同期中...',
+  AppLocale.waitingForRomStorage: 'ROMストレージを待機中 ({attempt}/{max})...',
+  AppLocale.updatingSystemsList: 'システムリストを更新中...',
+  AppLocale.romsScanned: 'ROMをスキャンしました',
+  AppLocale.errorScanningRoms: 'ROMのスキャン中にエラーが発生しました',
+  AppLocale.romStorageNotReady: 'ROMストレージの準備ができていません。既存のゲームは保持されました。',
   AppLocale.systemsUpdateComplete: 'システムが正常に更新されました！',
   AppLocale.systemsUpdateError: 'システムの更新に失敗しました。後でもう一度試してください。',
 

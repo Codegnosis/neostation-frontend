@@ -959,6 +959,11 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.systemsUpdateDownloading: '正在下载系统配置...',
   AppLocale.systemsUpdateCancelling: '正在取消...',
   AppLocale.systemsUpdateSyncing: '正在同步系统数据库...',
+  AppLocale.waitingForRomStorage: '正在等待 ROM 存储 ({attempt}/{max})...',
+  AppLocale.updatingSystemsList: '正在更新系统列表...',
+  AppLocale.romsScanned: 'ROM 已扫描',
+  AppLocale.errorScanningRoms: '扫描 ROM 时出错',
+  AppLocale.romStorageNotReady: 'ROM 存储尚未就绪，已保留现有游戏。',
   AppLocale.systemsUpdateComplete: '系统更新成功！',
   AppLocale.systemsUpdateError: '系统更新失败，请稍后再试。',
 

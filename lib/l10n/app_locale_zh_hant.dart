@@ -960,6 +960,11 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.systemsUpdateDownloading: '正在下載系統設定...',
   AppLocale.systemsUpdateCancelling: '正在取消...',
   AppLocale.systemsUpdateSyncing: '正在同步系統資料庫...',
+  AppLocale.waitingForRomStorage: '正在等待 ROM 儲存空間 ({attempt}/{max})...',
+  AppLocale.updatingSystemsList: '正在更新系統列表...',
+  AppLocale.romsScanned: 'ROM 已掃描',
+  AppLocale.errorScanningRoms: '掃描 ROM 時發生錯誤',
+  AppLocale.romStorageNotReady: 'ROM 儲存空間尚未就緒，已保留現有遊戲。',
   AppLocale.systemsUpdateComplete: '系統更新成功！',
   AppLocale.systemsUpdateError: '系統更新失敗，請稍後再試。',
 

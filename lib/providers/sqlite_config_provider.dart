@@ -25,6 +25,7 @@ import '../models/secondary_display_state.dart';
 import 'package:flutter/services.dart';
 import '../widgets/tv_directory_picker.dart';
 import '../constants/system_folder_names.dart';
+import '../l10n/app_locale.dart';
 import '../utils/rom_folder_path.dart';
 import '../services/global_notification_service.dart';
 import '../services/game_session_persistence.dart';
@@ -233,7 +234,7 @@ class SqliteConfigProvider extends ChangeNotifier with WidgetsBindingObserver {
       // CRITICAL: Always reload and sync system JSONs with the database at startup
       // to ensure that new cores or systems modified in assets are reflected,
       // regardless of whether ROM scanning is enabled.
-      _scanStatus = 'Syncing system databases...';
+      _scanStatus = AppLocale.systemsUpdateSyncing.getStringForCurrentLocale();
       notifyListeners();
       await SqliteService.loadAndSyncSystems();
 
