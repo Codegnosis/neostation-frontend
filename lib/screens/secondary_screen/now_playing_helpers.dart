@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:neostation/providers/theme_provider.dart';
 import '../../models/secondary_display_state.dart';
+import '../../l10n/app_locale.dart';
 
 /// Pure presentation helpers for the secondary display's Now Playing / panel
 /// chrome — theme + colour-scheme resolution and the leaf builders/formatters.
@@ -101,12 +102,18 @@ Widget buildNowPlayingStat({
         '$label  ',
         style: TextStyle(color: muted, fontSize: 14.r, letterSpacing: 1.r),
       ),
-      Text(
-        text,
-        style: TextStyle(
-          color: scheme.onSurface,
-          fontSize: 16.r,
-          fontWeight: FontWeight.w600,
+      // Translated labels and values ("ZULETZT GESPIELT  Vor 365 Tagen") can
+      // nearly fill the column; clip the value rather than overflow.
+      Flexible(
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: scheme.onSurface,
+            fontSize: 16.r,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     ],
@@ -122,15 +129,22 @@ String formatPlayTime(int? seconds) {
   return '<1m';
 }
 
-String formatLastPlayed(int? millis) {
-  if (millis == null) return 'Never';
+/// How long ago [millis] was, in the app language: [text] looks up an
+/// [AppLocale] key (the panel passes `(key) => key.getString(context)`).
+String formatLastPlayed(int? millis, String Function(String key) text) {
+  if (millis == null) return text(AppLocale.timeNever);
   final then = DateTime.fromMillisecondsSinceEpoch(millis);
   final diff = DateTime.now().difference(then);
+  String count(String key, int n) => text(key).replaceFirst('{count}', '$n');
   if (diff.inDays >= 1) {
     final d = diff.inDays;
-    return d == 1 ? 'Yesterday' : '$d days ago';
+    return d == 1
+        ? text(AppLocale.timeYesterday)
+        : count(AppLocale.timeDaysAgo, d);
   }
-  if (diff.inHours >= 1) return '${diff.inHours}h ago';
-  if (diff.inMinutes >= 1) return '${diff.inMinutes}m ago';
-  return 'Just now';
+  if (diff.inHours >= 1) return count(AppLocale.timeHoursAgo, diff.inHours);
+  if (diff.inMinutes >= 1) {
+    return count(AppLocale.timeMinutesAgo, diff.inMinutes);
+  }
+  return text(AppLocale.timeJustNow);
 }
