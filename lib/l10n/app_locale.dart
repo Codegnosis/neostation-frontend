@@ -808,6 +808,10 @@ mixin AppLocale {
   static const String screenReturnAccess = 'screen_return_access';
   static const String screenReturnAccessDesc = 'screen_return_access_desc';
   static const String screenReturnAccessHint = 'screen_return_access_hint';
+  static const String screenReturnDialogTitle = 'screen_return_dialog_title';
+  static const String screenReturnDialogBody = 'screen_return_dialog_body';
+  static const String screenReturnDialogSteps = 'screen_return_dialog_steps';
+  static const String openSettings = 'open_settings';
   static const String selectRomFolder = 'select_rom_folder';
   static const String romFolderSelected = 'rom_folder_selected';
   static const String chooseRomFolderDesc = 'choose_rom_folder_desc';

@@ -212,9 +212,9 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.nowPlayingDimOff: '關閉',
   AppLocale.secondarySectionNowPlaying: 'Now Playing 面板',
   AppLocale.secondarySectionDock: '應用程式塢',
-  AppLocale.screenshotAccess: 'Screen return & screenshots',
+  AppLocale.screenshotAccess: '畫面返回與截圖',
   AppLocale.screenshotAccessSubtitle:
-      'Restores the Now Playing screen when you close an app opened from the dock, and lets the screenshot button capture the screen (opens Android accessibility settings)',
+      '關閉從應用程式塢開啟的應用程式後恢復 Now Playing 畫面，並讓截圖按鈕可擷取螢幕畫面（將開啟 Android 無障礙設定）',
   AppLocale.scanOnStartupSubtitle: '應用程式啟動時自動掃描 ROM 資料夾',
   AppLocale.ignoreHiddenFiles: '忽略隱藏項目',
   AppLocale.ignoreHiddenFilesSubtitle: 'ROM 掃描期間隱藏隱藏檔案和資料夾',
@@ -775,10 +775,15 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.storagePermission: '儲存權限',
   AppLocale.storagePermissionDesc:
       'NeoStation 需要「所有檔案存取權限」來管理 RetroArch 設定並同步遊戲存檔。',
-  AppLocale.screenReturnAccess: 'Screen Return Access',
+  AppLocale.screenReturnAccess: '畫面返回權限',
   AppLocale.screenReturnAccessDesc:
-      'Brings the Now Playing screen back when you close an app opened from the dock, and enables system screenshots. Only the foreground app name is read \u2014 no screen content is collected.',
-  AppLocale.screenReturnAccessHint: 'Turn on NeoStation, then tap Allow',
+      '關閉從應用程式塢開啟的應用程式後返回 Now Playing 畫面，並啟用系統截圖。僅讀取前景應用程式的名稱，不會收集任何螢幕內容。',
+  AppLocale.screenReturnAccessHint: '開啟 NeoStation，然後點按「允許」',
+  AppLocale.screenReturnDialogTitle: '啟用畫面返回',
+  AppLocale.screenReturnDialogBody:
+      '要從應用程式塢啟動應用程式，NeoStation 需要「畫面返回」無障礙服務。它會在你關閉所開啟的應用程式後帶你回到這裡。沒有它，你可能無法返回。',
+  AppLocale.screenReturnDialogSteps: '在下一個畫面中，從服務清單裡找到 NeoStation 並將其開啟。',
+  AppLocale.openSettings: '開啟設定',
   AppLocale.selectRomFolder: '選擇 ROM 資料夾',
   AppLocale.romFolderSelected: 'ROM 資料夾已選擇！',
   AppLocale.chooseRomFolderDesc: '選擇儲存 ROM 檔案的資料夾。NeoStation 將掃描其中的遊戲。',

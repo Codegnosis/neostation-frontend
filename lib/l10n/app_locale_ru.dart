@@ -248,9 +248,9 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.nowPlayingDimOff: 'Выкл',
   AppLocale.secondarySectionNowPlaying: 'Панель Now Playing',
   AppLocale.secondarySectionDock: 'Док приложений',
-  AppLocale.screenshotAccess: 'Screen return & screenshots',
+  AppLocale.screenshotAccess: 'Возврат к экрану и скриншоты',
   AppLocale.screenshotAccessSubtitle:
-      'Restores the Now Playing screen when you close an app opened from the dock, and lets the screenshot button capture the screen (opens Android accessibility settings)',
+      'Возвращает экран Now Playing, когда вы закрываете приложение, открытое из дока, и позволяет кнопке скриншота делать скриншоты (открывает настройки специальных возможностей Android)',
   AppLocale.scanOnStartupSubtitle:
       'Автоматически сканировать папки ROM при запуске приложения',
   AppLocale.ignoreHiddenFiles: 'Игнорировать скрытые элементы',
@@ -887,10 +887,17 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.storagePermission: 'Разрешение на доступ к памяти',
   AppLocale.storagePermissionDesc:
       'NeoStation нужен «Доступ ко всем файлам» для управления конфигурациями RetroArch.',
-  AppLocale.screenReturnAccess: 'Screen Return Access',
+  AppLocale.screenReturnAccess: 'Доступ для возврата к экрану',
   AppLocale.screenReturnAccessDesc:
-      'Brings the Now Playing screen back when you close an app opened from the dock, and enables system screenshots. Only the foreground app name is read \u2014 no screen content is collected.',
-  AppLocale.screenReturnAccessHint: 'Turn on NeoStation, then tap Allow',
+      'Возвращает экран Now Playing, когда вы закрываете приложение, открытое из дока, и включает системные скриншоты. Считывается только название приложения на переднем плане — содержимое экрана не собирается.',
+  AppLocale.screenReturnAccessHint:
+      'Включите NeoStation, затем нажмите «Разрешить»',
+  AppLocale.screenReturnDialogTitle: 'Включить возврат к экрану',
+  AppLocale.screenReturnDialogBody:
+      'Чтобы запускать приложения из дока, NeoStation нужна служба специальных возможностей для возврата к экрану. Она возвращает вас сюда после закрытия открытого приложения. Без неё вернуться сюда может быть невозможно.',
+  AppLocale.screenReturnDialogSteps:
+      'На следующем экране найдите NeoStation в списке служб и включите эту службу.',
+  AppLocale.openSettings: 'Открыть настройки',
   AppLocale.selectRomFolder: 'Выбрать папку ROM',
   AppLocale.romFolderSelected: 'Папка ROM выбрана!',
   AppLocale.chooseRomFolderDesc: 'Выберите папку, где хранятся ваши ROM.',
