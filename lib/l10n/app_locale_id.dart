@@ -1252,6 +1252,7 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.resetPlayTimeConfirm: 'Atur Ulang Waktu Bermain',
   AppLocale.resetPlayTimeConfirmBody:
       'Ini akan mengatur ulang waktu bermain yang tercatat untuk game ini menjadi nol secara permanen. Tindakan ini tidak dapat dibatalkan.',
+  AppLocale.playTimeResetDone: 'Waktu bermain diatur ulang',
   AppLocale.removeRomFolderConfirmBody:
       'Ini akan menghapus folder ROM ini dari sumber pustaka Anda. File Anda di disk tidak akan dihapus.',
   AppLocale.disconnectRaConfirm: 'Putuskan RetroAchievements',

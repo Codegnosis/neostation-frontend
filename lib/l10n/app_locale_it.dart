@@ -1281,6 +1281,7 @@ const Map<String, dynamic> appLocaleIt = {
   AppLocale.resetPlayTimeConfirm: 'Reimposta tempo di gioco',
   AppLocale.resetPlayTimeConfirmBody:
       'Questa operazione azzererà in modo permanente il tempo di gioco registrato per questo gioco. Non può essere annullata.',
+  AppLocale.playTimeResetDone: 'Tempo di gioco reimpostato',
   AppLocale.removeRomFolderConfirmBody:
       'Questa operazione rimuoverà questa cartella ROM dalle fonti della tua libreria. I file sul disco non vengono eliminati.',
   AppLocale.disconnectRaConfirm: 'Disconnetti RetroAchievements',

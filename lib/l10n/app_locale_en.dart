@@ -1240,6 +1240,7 @@ const Map<String, dynamic> appLocaleEn = {
   AppLocale.resetPlayTimeConfirm: 'Reset Play Time',
   AppLocale.resetPlayTimeConfirmBody:
       'This will permanently reset the recorded play time for this game to zero. This cannot be undone.',
+  AppLocale.playTimeResetDone: 'Play time reset',
   AppLocale.removeRomFolderConfirmBody:
       'This will remove this ROM folder from your library sources. Your files on disk are not deleted.',
   AppLocale.disconnectRaConfirm: 'Disconnect RetroAchievements',

@@ -1249,6 +1249,7 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.resetPlayTimeConfirm: 'Сбросить время игры',
   AppLocale.resetPlayTimeConfirmBody:
       'Записанное время игры для этой игры будет безвозвратно сброшено до нуля. Это действие нельзя отменить.',
+  AppLocale.playTimeResetDone: 'Время игры сброшено',
   AppLocale.removeRomFolderConfirmBody:
       'Эта папка ROM будет удалена из источников вашей библиотеки. Ваши файлы на диске не будут удалены.',
   AppLocale.disconnectRaConfirm: 'Отключить RetroAchievements',

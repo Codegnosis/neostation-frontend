@@ -1133,6 +1133,7 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.resetPlayTimeConfirm: 'プレイ時間をリセット',
   AppLocale.resetPlayTimeConfirmBody:
       'このゲームの記録されたプレイ時間を完全にゼロにリセットします。この操作は元に戻せません。',
+  AppLocale.playTimeResetDone: 'プレイ時間をリセットしました',
   AppLocale.removeRomFolderConfirmBody:
       'このROMフォルダをライブラリのソースから削除します。ディスク上のファイルは削除されません。',
   AppLocale.disconnectRaConfirm: 'RetroAchievements の接続を解除',
