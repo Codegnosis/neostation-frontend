@@ -443,8 +443,12 @@ class RommProvider extends ChangeNotifier {
   // ── Lifecycle / connection ──────────────────────────────────────────────────
 
   /// Loads any persisted credentials/tokens and configures the service.
-  /// Does not hit the network; status becomes [connected] when a config exists.
+  ///
+  /// A saved account reports [RommConnectionStatus.connected] straight away,
+  /// so the cached library stays usable offline, and is then verified in the
+  /// background (see [_verifyRestoredConnection]).
   Future<void> initialize() async {
+    final epoch = ++_connectionEpoch;
     try {
       final config = await RommRepository.getConfig();
       if (config == null) {
@@ -471,10 +475,42 @@ class RommProvider extends ChangeNotifier {
       _status = RommConnectionStatus.connected;
       notifyListeners();
       _flushQueuedPlaytime();
+      unawaited(_verifyRestoredConnection(epoch));
     } catch (e) {
       _log.e('RomM initialize failed: $e');
       _status = RommConnectionStatus.disconnected;
       notifyListeners();
+    }
+  }
+
+  /// Bumped by every [initialize], [connect] and [disconnect], so a
+  /// background check that finishes late cannot overwrite a newer state.
+  int _connectionEpoch = 0;
+
+  /// Confirms a restored account still authenticates.
+  ///
+  /// Only a definite rejection (401/403) reports [RommConnectionStatus.error].
+  /// An unreachable server is normal offline, or before Wi-Fi associates at
+  /// boot, so the account stays connected and the next real call reports
+  /// the problem. A token refreshed along the way is persisted, because the
+  /// server may already have rotated the refresh token the DB holds.
+  Future<void> _verifyRestoredConnection(int epoch) async {
+    try {
+      await _service.verifyStoredConnection();
+      if (epoch != _connectionEpoch) return;
+      await _persistRefreshedTokens();
+    } on RommException catch (e) {
+      if (epoch != _connectionEpoch) return;
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        _log.w('RomM: saved account was rejected: ${e.message}');
+        _status = RommConnectionStatus.error;
+        _lastError = e.message;
+        notifyListeners();
+      } else {
+        _log.w('RomM: could not verify the saved account: ${e.message}');
+      }
+    } catch (e) {
+      _log.w('RomM: could not verify the saved account: $e');
     }
   }
 
@@ -517,6 +553,7 @@ class RommProvider extends ChangeNotifier {
     String password = '',
     String apiKey = '',
   }) async {
+    _connectionEpoch++;
     _status = RommConnectionStatus.connecting;
     _lastError = null;
     notifyListeners();
@@ -528,7 +565,7 @@ class RommProvider extends ChangeNotifier {
       apiKey: apiKey,
     );
     try {
-      await _service.authenticate();
+      await _service.verifyConnection();
     } on RommException catch (e) {
       _status = RommConnectionStatus.error;
       _lastError = e.message;
@@ -589,6 +626,7 @@ class RommProvider extends ChangeNotifier {
     // Stop a bulk sync before the credentials go: its remaining transfers would
     // otherwise keep running (and failing) against a server we just forgot.
     bulkSync.cancel();
+    _connectionEpoch++;
     await RommRepository.clearConfig();
     _status = RommConnectionStatus.disconnected;
     _lastError = null;

@@ -462,6 +462,12 @@ class RommService {
     await _authedGet('/api/users/me');
   }
 
+  /// Validates a restored session, allowing cached tokens to refresh normally.
+  Future<void> verifyStoredConnection() async {
+    if (usesApiKey) return _verifyApiKey();
+    await _authedGet('/api/users/me');
+  }
+
   // ── Read endpoints ───────────────────────────────────────────────────────
 
   /// Sends an authenticated request via [send] and retries it once on an auth
