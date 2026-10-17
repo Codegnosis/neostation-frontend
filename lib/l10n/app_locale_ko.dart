@@ -310,8 +310,18 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.cleanOrphanedMetadataNothingFound: '고아 메타데이터를 찾을 수 없습니다.',
   AppLocale.cleanOrphanedMetadataDone:
       '{entries}개의 메타데이터 항목과 {files}개의 미디어 파일을 정리했습니다.',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '고아 메타데이터 항목 {count}개가 데이터베이스와 디스크에서 삭제됩니다.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '고아 메타데이터 항목 {count}개가 데이터베이스와 디스크에서 삭제됩니다.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      '{count}개의 ES-DE 에서 가져온 항목은 그대로 유지되었습니다.',
+      ' ES-DE 에서 가져온 항목 {count}개는 그대로 유지됩니다.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' ES-DE 에서 가져온 항목 {count}개는 그대로 유지됩니다.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      '삭제할 항목이 없습니다. 고아 메타데이터는 모두 ES-DE 에서 가져온 것이며, 이 도구는 이를 삭제하지 않습니다.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation 의 미디어 폴더를 찾을 수 없습니다. NeoStation 을 재시작한 후 다시 시도하세요.',
   AppLocale.cleanOrphanedMetadataFailed: '고아 메타데이터 정리 실패: {error}',
   AppLocale.rematchAchievements: 'RetroAchievements 게임 매칭',
   AppLocale.rommLinkLibrary: '라이브러리를 RomM에 연결',

@@ -369,8 +369,18 @@ const Map<String, dynamic> appLocaleIt = {
       'Nessun metadato orfano trovato.',
   AppLocale.cleanOrphanedMetadataDone:
       'Puliti {entries} voce/i di metadati e {files} file multimediali.',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '{count} voci di metadati orfane verranno eliminate dal database e dal disco.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '{count} voce di metadati orfana verrà eliminata dal database e dal disco.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      '{count} voce/i importate da ES-DE sono state lasciate intatte.',
+      ' {count} voci importate da ES-DE restano intatte.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} voce importata da ES-DE resta intatta.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'Niente da eliminare: gli unici metadati orfani sono stati importati da ES-DE, e questo strumento non li tocca.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation non trova la sua cartella dei media. Riavvia NeoStation e riprova.',
   AppLocale.cleanOrphanedMetadataFailed:
       'Impossibile pulire i metadati orfani: {error}',
   AppLocale.rematchAchievements: 'Abbina i giochi RetroAchievements',

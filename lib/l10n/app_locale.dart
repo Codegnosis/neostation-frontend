@@ -310,8 +310,22 @@ mixin AppLocale {
       'clean_orphaned_metadata_nothing_found';
   static const String cleanOrphanedMetadataDone =
       'clean_orphaned_metadata_done';
+  // The confirmation's counts follow the singular/plural pattern described at
+  // gamesCount; use lib/utils/count_label.dart. The ES-DE note is appended to
+  // another sentence, so it carries its own leading space where the language
+  // puts one between sentences.
+  static const String cleanOrphanedMetadataDelete =
+      'clean_orphaned_metadata_delete';
+  static const String cleanOrphanedMetadataDeleteOne =
+      'clean_orphaned_metadata_delete_one';
   static const String cleanOrphanedMetadataEsdeSkippedSuffix =
       'clean_orphaned_metadata_esde_skipped_suffix';
+  static const String cleanOrphanedMetadataEsdeSkippedSuffixOne =
+      'clean_orphaned_metadata_esde_skipped_suffix_one';
+  static const String cleanOrphanedMetadataNothingToDelete =
+      'clean_orphaned_metadata_nothing_to_delete';
+  static const String cleanOrphanedMetadataMediaUnavailable =
+      'clean_orphaned_metadata_media_unavailable';
   static const String cleanOrphanedMetadataFailed =
       'clean_orphaned_metadata_failed';
 

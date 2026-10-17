@@ -362,8 +362,18 @@ const Map<String, dynamic> appLocaleRu = {
       'Потерянные метаданные не найдены.',
   AppLocale.cleanOrphanedMetadataDone:
       'Очищено {entries} запис(ь/ей) метаданных и {files} медиафайл(а/ов).',
+  AppLocale.cleanOrphanedMetadataDelete:
+      'Из базы данных и с диска будут удалены потерянные записи метаданных: {count}.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '{count} потерянная запись метаданных будет удалена из базы данных и с диска.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      ' {count} запис(ь/ей), импортированных из ES-DE, оставлены нетронутыми.',
+      ' Записи, импортированные из ES-DE, остаются нетронутыми: {count}.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} запись, импортированная из ES-DE, остаётся нетронутой.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'Удалять нечего: все потерянные метаданные импортированы из ES-DE, а этот инструмент их не трогает.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation не может найти свою папку медиафайлов. Перезапустите NeoStation и попробуйте снова.',
   AppLocale.cleanOrphanedMetadataFailed:
       'Не удалось очистить потерянные метаданные: {error}',
   AppLocale.rematchAchievements: 'Сопоставить игры RetroAchievements',

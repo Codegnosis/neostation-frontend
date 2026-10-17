@@ -377,8 +377,18 @@ const Map<String, dynamic> appLocaleFr = {
       'Aucune métadonnée orpheline trouvée.',
   AppLocale.cleanOrphanedMetadataDone:
       'Nettoyé {entries} entrée(s) de métadonnées et {files} fichier(s) multimédia.',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '{count} entrées de métadonnées orphelines seront supprimées de la base de données et du disque.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '{count} entrée de métadonnées orpheline sera supprimée de la base de données et du disque.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      ' {count} entrée(s) importée(s) depuis ES-DE ont été laissées intactes.',
+      ' {count} entrées importées depuis ES-DE restent intactes.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} entrée importée depuis ES-DE reste intacte.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'Rien à supprimer : les seules métadonnées orphelines ont été importées depuis ES-DE, et cet outil n’y touche pas.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation ne trouve pas son dossier de médias. Redémarrez NeoStation et réessayez.',
   AppLocale.cleanOrphanedMetadataFailed:
       'Échec du nettoyage des métadonnées orphelines : {error}',
   AppLocale.rematchAchievements: 'Associer les jeux RetroAchievements',

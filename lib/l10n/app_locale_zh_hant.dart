@@ -301,8 +301,16 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.cleanOrphanedMetadataCleaningItem: '正在清理 {filename}...',
   AppLocale.cleanOrphanedMetadataNothingFound: '未發現孤立中介資料。',
   AppLocale.cleanOrphanedMetadataDone: '已清理 {entries} 筆中介資料和 {files} 個媒體檔案。',
+  AppLocale.cleanOrphanedMetadataDelete: '將從資料庫和磁碟中刪除 {count} 筆孤立中介資料。',
+  AppLocale.cleanOrphanedMetadataDeleteOne: '將從資料庫和磁碟中刪除 {count} 筆孤立中介資料。',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      '保留了 {count} 筆從 ES-DE 匯入的項目。',
+      '{count} 筆從 ES-DE 匯入的項目保持不變。',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      '{count} 筆從 ES-DE 匯入的項目保持不變。',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      '沒有可刪除的內容：孤立中介資料皆從 ES-DE 匯入，此工具不會刪除它們。',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation 找不到其媒體資料夾。請重新啟動 NeoStation 後再試一次。',
   AppLocale.cleanOrphanedMetadataFailed: '清理孤立中介資料失敗：{error}',
   AppLocale.rematchAchievements: '比對 RetroAchievements 遊戲',
   AppLocale.rommLinkLibrary: '將library連結至 RomM',
