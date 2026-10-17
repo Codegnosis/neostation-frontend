@@ -414,6 +414,7 @@ const Map<String, dynamic> appLocaleRu = {
       'Нажмите «Подтвердить», чтобы удалить эту папку',
   AppLocale.maxRomFoldersReached: 'Разрешено не более 5 папок ROM',
   AppLocale.romFolderRemoved: 'Папка ROM удалена',
+  AppLocale.romFolderRemoveFailed: 'Не удалось удалить папку ROM: {error}',
   AppLocale.selectRomsFolder: 'Выбрать папку ROM',
   AppLocale.scanningSystem: 'Сканирование системы',
 

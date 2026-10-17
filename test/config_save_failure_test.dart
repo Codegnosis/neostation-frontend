@@ -215,9 +215,10 @@ void main() {
 
   test('every settings change goes through the revert', () {
     // A new mutator that saves directly would bring the bug back for its
-    // setting. removeRomFolder is the exception: it applies the change first
-    // on purpose (so a scan started meanwhile skips the folder) and puts the
-    // folder back itself when the save fails.
+    // setting. removeRomFolder saves through SqliteConfigService.removeRomFolder
+    // instead (with the folder's games, in one transaction) and puts the folder
+    // back itself when that fails: it applies the change first on purpose, so a
+    // scan started meanwhile skips the folder.
     final sources = [
       'lib/providers/sqlite_config_provider/mutators.dart',
       'lib/providers/sqlite_config_provider/secondary_display.dart',
@@ -226,8 +227,7 @@ void main() {
     for (final path in sources) {
       final source = File(path).readAsStringSync();
       final direct = 'SqliteConfigService.saveConfig('.allMatches(source);
-      final allowed = path.endsWith('scanning.dart') ? 1 : 0;
-      expect(direct.length, allowed, reason: path);
+      expect(direct.length, 0, reason: path);
     }
   });
 }

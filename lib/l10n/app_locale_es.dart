@@ -421,6 +421,8 @@ const Map<String, dynamic> appLocaleEs = {
       'Presiona confirmar para eliminar esta carpeta',
   AppLocale.maxRomFoldersReached: 'Máximo 5 carpetas de ROMs permitidas',
   AppLocale.romFolderRemoved: 'Carpeta de ROMs eliminada',
+  AppLocale.romFolderRemoveFailed:
+      'No se pudo eliminar la carpeta de ROMs: {error}',
   AppLocale.selectRomsFolder: 'Seleccionar carpeta de ROMs',
   AppLocale.scanningSystem: 'Escaneando sistema',
 

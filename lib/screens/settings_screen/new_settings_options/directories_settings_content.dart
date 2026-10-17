@@ -63,6 +63,10 @@ class DirectoriesSettingsContentState
   String? _currentUserDataPath;
   bool _isLoading = true;
 
+  // A ROM folder removal is running: a second press is ignored rather than
+  // asking again about a folder that may be gone by then.
+  bool _removingRomFolder = false;
+
   // Migration progress state (shown inline, no dialog).
   bool _isMigrating = false;
   double _migrationProgress = 0.0;
@@ -526,31 +530,46 @@ class DirectoriesSettingsContentState
   }
 
   Future<void> _removeRomFolder(String path) async {
-    final confirmed = await ConfirmActionDialog.show(
-      context,
-      title: AppLocale.removeRomFolder.getString(context),
-      body: AppLocale.removeRomFolderConfirmBody.getString(context),
-      confirmLabel: AppLocale.removeRomFolder.getString(context),
-      icon: Symbols.folder_delete_rounded,
-    );
-    if (!confirmed || !mounted) return;
-
-    final configProvider = Provider.of<SqliteConfigProvider>(
-      context,
-      listen: false,
-    );
+    if (_removingRomFolder) return;
+    _removingRomFolder = true;
     try {
-      await configProvider.removeRomFolder(path);
-      await _loadCurrentPaths();
-      if (mounted) {
-        AppNotification.showNotification(
-          context,
-          AppLocale.romFolderRemoved.getString(context),
-          type: NotificationType.info,
-        );
+      final confirmed = await ConfirmActionDialog.show(
+        context,
+        title: AppLocale.removeRomFolder.getString(context),
+        body: AppLocale.removeRomFolderConfirmBody.getString(context),
+        confirmLabel: AppLocale.removeRomFolder.getString(context),
+        icon: Symbols.folder_delete_rounded,
+      );
+      if (!confirmed || !mounted) return;
+
+      final configProvider = Provider.of<SqliteConfigProvider>(
+        context,
+        listen: false,
+      );
+      try {
+        await configProvider.removeRomFolder(path);
+        if (mounted) {
+          AppNotification.showNotification(
+            context,
+            AppLocale.romFolderRemoved.getString(context),
+            type: NotificationType.info,
+          );
+        }
+      } catch (e) {
+        _log.e('Failed to remove ROM folder: $e');
+        if (mounted) {
+          AppNotification.showNotification(
+            context,
+            AppLocale.romFolderRemoveFailed
+                .getString(context)
+                .replaceFirst('{error}', '$e'.split('\n').first),
+            type: NotificationType.error,
+          );
+        }
       }
-    } catch (e) {
-      _log.e('Failed to remove ROM folder: $e');
+      await _loadCurrentPaths();
+    } finally {
+      _removingRomFolder = false;
     }
   }
 

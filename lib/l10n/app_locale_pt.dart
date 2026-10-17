@@ -418,6 +418,8 @@ const Map<String, dynamic> appLocalePt = {
   AppLocale.pressToRemoveFolder: 'Pressione Confirmar para remover esta pasta',
   AppLocale.maxRomFoldersReached: 'Máximo de 5 pastas de ROMs permitido',
   AppLocale.romFolderRemoved: 'Pasta de ROMs removida',
+  AppLocale.romFolderRemoveFailed:
+      'Não foi possível remover a pasta de ROMs: {error}',
   AppLocale.selectRomsFolder: 'Selecionar pasta de ROMs',
   AppLocale.scanningSystem: 'Varrendo sistema',
 

@@ -407,6 +407,7 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.pressToRemoveFolder: 'Tekan Konfirmasi untuk menghapus folder ini',
   AppLocale.maxRomFoldersReached: 'Maksimal 5 folder ROM diizinkan',
   AppLocale.romFolderRemoved: 'Folder ROM dihapus',
+  AppLocale.romFolderRemoveFailed: 'Gagal menghapus folder ROM: {error}',
   AppLocale.selectRomsFolder: 'Pilih folder ROM',
   AppLocale.scanningSystem: 'Memindai sistem',
 

@@ -343,6 +343,7 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.pressToRemoveFolder: '按確認鍵刪除此資料夾',
   AppLocale.maxRomFoldersReached: '最多允許 5 個 ROM 資料夾',
   AppLocale.romFolderRemoved: 'ROM 資料夾已刪除',
+  AppLocale.romFolderRemoveFailed: '無法刪除 ROM 資料夾：{error}',
   AppLocale.selectRomsFolder: '選擇 ROM 資料夾',
   AppLocale.scanningSystem: '正在掃描系統',
 
