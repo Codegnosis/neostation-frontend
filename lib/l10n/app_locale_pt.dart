@@ -1455,6 +1455,9 @@ const Map<String, dynamic> appLocalePt = {
   AppLocale.esdeResetSubtitle:
       'Remover os metadados importados e os vínculos de mídia para que a importação possa ser feita de novo',
   AppLocale.esdeResetComplete: 'Importação do ES-DE redefinida',
+  AppLocale.esdeImportFailed: 'Falha na importação do ES-DE: {error}',
+  AppLocale.esdeResetFailed:
+      'Falha ao redefinir a importação do ES-DE: {error}',
   AppLocale.esdeResetConfirmBody:
       'Isso remove todos os metadados e vínculos de mídia importados do ES-DE e desfaz a seleção da pasta. Seus jogos e arquivos de ROM não são afetados.',
   AppLocale.esdeImportNotEsdeFolder:

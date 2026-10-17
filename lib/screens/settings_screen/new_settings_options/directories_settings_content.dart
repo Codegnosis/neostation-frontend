@@ -286,7 +286,9 @@ class DirectoriesSettingsContentState
       if (mounted) {
         AppNotification.showNotification(
           context,
-          '$e',
+          AppLocale.errorConfiguringPath
+              .getString(context)
+              .replaceFirst('{error}', '$e'),
           type: NotificationType.error,
         );
       }
@@ -321,6 +323,9 @@ class DirectoriesSettingsContentState
       context,
     );
     final localeEsdeSummarySystems = AppLocale.esdeSummarySystems.getString(
+      context,
+    );
+    final localeEsdeImportFailed = AppLocale.esdeImportFailed.getString(
       context,
     );
 
@@ -365,7 +370,7 @@ class DirectoriesSettingsContentState
       // Rebuild the fallback map now that esde_media_dir rows exist.
       if (mounted) await context.read<FileProvider>().refreshEsde();
     } catch (e) {
-      error = e.toString();
+      error = localeEsdeImportFailed.replaceFirst('{error}', '$e');
       _log.e('ES-DE import failed: $e');
     }
 
@@ -457,7 +462,9 @@ class DirectoriesSettingsContentState
       if (mounted) {
         AppNotification.showNotification(
           context,
-          '$e',
+          AppLocale.esdeResetFailed
+              .getString(context)
+              .replaceFirst('{error}', '$e'),
           type: NotificationType.error,
         );
       }

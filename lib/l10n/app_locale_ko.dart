@@ -1291,6 +1291,8 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.esdeReset: 'ES-DE 가져오기 재설정',
   AppLocale.esdeResetSubtitle: '다시 가져올 수 있도록 가져온 메타데이터와 미디어 연결을 제거합니다',
   AppLocale.esdeResetComplete: 'ES-DE 가져오기를 재설정했습니다',
+  AppLocale.esdeImportFailed: 'ES-DE 가져오기 실패: {error}',
+  AppLocale.esdeResetFailed: 'ES-DE 가져오기 재설정 실패: {error}',
   AppLocale.esdeResetConfirmBody:
       '가져온 모든 ES-DE 메타데이터와 미디어 링크를 제거하고, 선택한 폴더 설정을 초기화합니다. 게임과 ROM 파일에는 영향을 주지 않습니다.',
   AppLocale.esdeImportNotEsdeFolder: '이 폴더는 ES-DE 설치 폴더가 아닙니다(gamelists 없음)',

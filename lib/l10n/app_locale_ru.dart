@@ -1437,6 +1437,8 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.esdeResetSubtitle:
       'Удалить импортированные метаданные и ссылки на медиа, чтобы импорт можно было запустить заново',
   AppLocale.esdeResetComplete: 'Импорт из ES-DE сброшен',
+  AppLocale.esdeImportFailed: 'Ошибка импорта из ES-DE: {error}',
+  AppLocale.esdeResetFailed: 'Не удалось сбросить импорт из ES-DE: {error}',
   AppLocale.esdeResetConfirmBody:
       'Будут удалены все импортированные из ES-DE метаданные и ссылки на медиа, а выбор папки будет сброшен. Ваши игры и файлы ROM не будут затронуты.',
   AppLocale.esdeImportNotEsdeFolder:

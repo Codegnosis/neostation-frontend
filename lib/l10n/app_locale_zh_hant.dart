@@ -1267,6 +1267,8 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.esdeReset: '重設 ES-DE 匯入',
   AppLocale.esdeResetSubtitle: '移除已匯入的中繼資料和媒體連結，以便重新匯入',
   AppLocale.esdeResetComplete: 'ES-DE 匯入已重設',
+  AppLocale.esdeImportFailed: 'ES-DE 匯入失敗：{error}',
+  AppLocale.esdeResetFailed: 'ES-DE 匯入重設失敗：{error}',
   AppLocale.esdeResetConfirmBody:
       '這將移除所有從 ES-DE 匯入的中繼資料和媒體連結，並清除所選資料夾設定。你的遊戲和 ROM 檔案不受影響。',
   AppLocale.esdeImportNotEsdeFolder: '此資料夾不是 ES-DE 安裝目錄（找不到 gamelists）',

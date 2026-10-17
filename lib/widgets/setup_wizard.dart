@@ -1575,8 +1575,26 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
     final localeEsdeSummarySystems = AppLocale.esdeSummarySystems.getString(
       context,
     );
+    final localeEsdeImportFailed = AppLocale.esdeImportFailed.getString(
+      context,
+    );
+    final localeErrorConfiguringPath = AppLocale.errorConfiguringPath.getString(
+      context,
+    );
 
-    await context.read<SqliteConfigProvider>().updateEsdeFolderPath(selected);
+    try {
+      await context.read<SqliteConfigProvider>().updateEsdeFolderPath(selected);
+    } catch (e) {
+      _log.e('Wizard ES-DE folder save failed: $e');
+      GlobalNotificationService().show(
+        id: 'wizard_esde_folder_error',
+        message: localeErrorConfiguringPath.replaceFirst('{error}', '$e'),
+        type: GlobalNotificationType.error,
+      );
+      return;
+    }
+    GlobalNotificationService().dismiss('wizard_esde_folder_error');
+    if (!mounted) return;
 
     setState(() {
       _isImportingEsde = true;
@@ -1619,7 +1637,7 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
       // Rebuild the artwork fallback map now esde_media_dir rows exist.
       if (mounted) await context.read<FileProvider>().refreshEsde();
     } catch (e) {
-      error = e.toString();
+      error = localeEsdeImportFailed.replaceFirst('{error}', '$e');
       _log.e('Wizard ES-DE import failed: $e');
     }
 
