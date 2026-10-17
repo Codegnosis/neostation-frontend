@@ -60,12 +60,13 @@ extension SqliteConfigScanning on SqliteConfigProvider {
     try {
       _setLoading(true);
       final newList = [..._config.romFolders, folderPath];
+      final previous = _config;
       _config = _config.copyWith(
         romFolders: newList,
         lastScan: DateTime.now(),
         setupCompleted: true,
       );
-      await SqliteConfigService.saveConfig(_config);
+      await _saveOrRevert(previous);
       if (scan) {
         await scanSystems();
       }

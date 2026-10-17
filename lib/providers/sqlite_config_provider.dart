@@ -458,6 +458,32 @@ class SqliteConfigProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// bridge in [neo_sync_provider]. Behaviourally identical to a direct call.
   void _notify() => notifyListeners();
 
+  /// Saves the config after a change from [previous]. When the save fails
+  /// (a locked database, storage that went away), puts [previous] back and
+  /// rethrows, so the app doesn't show a value the database never got and the
+  /// next save of another setting doesn't store it after all.
+  ///
+  /// If another change has replaced the config meanwhile, nothing is put back:
+  /// that change is kept, and so is the failed one, which it builds on. A save
+  /// that runs later than its change (queued behind another) passes the config
+  /// the change produced as [applied].
+  Future<void> _saveOrRevert(
+    ConfigModel previous, {
+    ConfigModel? applied,
+  }) async {
+    final attempted = _config;
+    final change = applied ?? attempted;
+    try {
+      await SqliteConfigService.saveConfig(attempted);
+    } catch (_) {
+      if (identical(_config, change)) {
+        _config = previous;
+        notifyListeners();
+      }
+      rethrow;
+    }
+  }
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
