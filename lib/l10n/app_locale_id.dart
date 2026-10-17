@@ -1444,6 +1444,8 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.esdeResetSubtitle:
       'Hapus metadata dan tautan media yang diimpor agar impor dapat dijalankan ulang',
   AppLocale.esdeResetComplete: 'Impor ES-DE diatur ulang',
+  AppLocale.esdeImportFailed: 'Impor ES-DE gagal: {error}',
+  AppLocale.esdeResetFailed: 'Gagal mengatur ulang impor ES-DE: {error}',
   AppLocale.esdeResetConfirmBody:
       'Ini menghapus semua metadata dan tautan media yang diimpor dari ES-DE serta mengosongkan pilihan folder. Game dan file ROM Anda tidak terpengaruh.',
   AppLocale.esdeImportNotEsdeFolder:

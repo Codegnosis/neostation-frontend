@@ -1487,6 +1487,9 @@ const Map<String, dynamic> appLocaleDe = {
   AppLocale.esdeResetSubtitle:
       'Importierte Metadaten und Medienverknüpfungen entfernen, damit der Import erneut ausgeführt werden kann',
   AppLocale.esdeResetComplete: 'ES-DE-Import zurückgesetzt',
+  AppLocale.esdeImportFailed: 'ES-DE-Import fehlgeschlagen: {error}',
+  AppLocale.esdeResetFailed:
+      'Zurücksetzen des ES-DE-Imports fehlgeschlagen: {error}',
   AppLocale.esdeResetConfirmBody:
       'Dadurch werden alle aus ES-DE importierten Metadaten und Medienverknüpfungen entfernt und die Ordnerauswahl wird aufgehoben. Deine Spiele und ROM-Dateien sind nicht betroffen.',
   AppLocale.esdeImportNotEsdeFolder:

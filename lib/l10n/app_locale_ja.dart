@@ -1300,6 +1300,8 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.esdeReset: 'ES-DE インポートをリセット',
   AppLocale.esdeResetSubtitle: 'インポートしたメタデータとメディアのリンクを削除し、再度インポートできるようにします',
   AppLocale.esdeResetComplete: 'ES-DE のインポートをリセットしました',
+  AppLocale.esdeImportFailed: 'ES-DE のインポートに失敗しました: {error}',
+  AppLocale.esdeResetFailed: 'ES-DE インポートのリセットに失敗しました: {error}',
   AppLocale.esdeResetConfirmBody:
       'ES-DE からインポートしたメタデータとメディアのリンクをすべて削除し、選択したフォルダーの設定を解除します。ゲームと ROM ファイルには影響しません。',
   AppLocale.esdeImportNotEsdeFolder:
