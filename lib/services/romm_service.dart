@@ -20,7 +20,13 @@ import 'logger_service.dart';
 class RommException implements Exception {
   final String message;
   final int? statusCode;
-  RommException(this.message, {this.statusCode});
+
+  /// The start of what the server answered (content type and a short,
+  /// whitespace-collapsed excerpt), for the log only: it tells a web server's
+  /// own error page from RomM's. Never shown to the user.
+  final String? serverResponse;
+
+  RommException(this.message, {this.statusCode, this.serverResponse});
 
   @override
   String toString() => 'RommException($statusCode): $message';
@@ -1164,6 +1170,7 @@ class RommService {
       throw RommException(
         'Download failed (${resp.statusCode})',
         statusCode: resp.statusCode,
+        serverResponse: await responseExcerpt(resp),
       );
     }
 
@@ -1201,6 +1208,48 @@ class RommService {
     }
     await tmpFile.rename(destFilePath);
     _log.i('RomM download complete: $destFilePath ($received bytes)');
+  }
+
+  /// The content type and first [maxChars] characters of a failed [resp]'s
+  /// body, whitespace collapsed. Reads at most 1 KiB for about [timeout] (at
+  /// most twice that when the body stalls), then stops listening, which closes
+  /// the connection, so a large, slow or never-ending error body can't stall
+  /// the download flow. Best effort: answers what it got so far if reading
+  /// fails.
+  @visibleForTesting
+  static Future<String> responseExcerpt(
+    http.StreamedResponse resp, {
+    int maxChars = 200,
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    const maxBytes = 1024;
+    final bytes = BytesBuilder(copy: false);
+    final elapsed = Stopwatch()..start();
+    var cut = false;
+    try {
+      // The stream timeout catches a body that stops arriving; the stopwatch
+      // one that keeps arriving a byte at a time.
+      await for (final chunk in resp.stream.timeout(timeout)) {
+        final room = maxBytes - bytes.length;
+        bytes.add(chunk.length > room ? chunk.sublist(0, room) : chunk);
+        if (bytes.length >= maxBytes || elapsed.elapsed >= timeout) {
+          cut = true;
+          break;
+        }
+      }
+    } catch (_) {}
+    // The cut may split a multi-byte character.
+    var text = utf8
+        .decode(bytes.takeBytes(), allowMalformed: true)
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (text.length > maxChars) {
+      text = '${text.substring(0, maxChars)}…';
+    } else if (cut) {
+      text = '$text…';
+    }
+    final type = resp.headers['content-type'];
+    return type == null ? text : '[$type] $text';
   }
 
   // ── Saves & states (asset sync) ──────────────────────────────────────────
