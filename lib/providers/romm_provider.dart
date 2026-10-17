@@ -102,6 +102,11 @@ class _CompletedRommDownload {
 class RommProvider extends ChangeNotifier {
   static final _log = LoggerService.instance;
 
+  /// [text] from the server made safe for one log line: a file name with a
+  /// line break or control character could otherwise forge log lines.
+  static String _logText(String text) =>
+      text.replaceAll(RegExp(r'[\x00-\x1f\x7f]'), ' ');
+
   final RommService _service = RommService();
 
   RommConnectionStatus _status = RommConnectionStatus.disconnected;
@@ -1689,11 +1694,16 @@ class RommProvider extends ChangeNotifier {
     FileProvider? fileProvider,
   }) async {
     final tracker = RommDownload(romId: rom.id);
+    final logName = _logText(rom.fsName);
     _downloads[rom.id] = tracker;
     _notifyDownloadState();
 
     final system = await resolveSystem(rom);
     if (system == null) {
+      _log.w(
+        'RomM: cannot download rom ${rom.id} ($logName): no system for '
+        'platform "${_logText(rom.platformSlug)}"',
+      );
       tracker
         ..status = RommDownloadStatus.failed
         ..error = RommDownloadError.noSystemMatch;
@@ -1708,6 +1718,10 @@ class RommProvider extends ChangeNotifier {
         await _existingRomDir(system, rom, romFolders) ??
         await _resolveDestDir(system, romFolders);
     if (destDir == null) {
+      _log.w(
+        'RomM: cannot download rom ${rom.id} ($logName): no writable ROM '
+        'folder for ${system.folderName}',
+      );
       tracker
         ..status = RommDownloadStatus.failed
         ..error = RommDownloadError.noWritableFolder;
@@ -1759,10 +1773,18 @@ class RommProvider extends ChangeNotifier {
     } on RommCancelledException {
       // User-cancelled: a distinct type (not a message-string match) keeps this
       // from being reported as a network failure if the message ever changes.
+      _log.i('RomM: download of rom ${rom.id} ($logName) cancelled');
       tracker.status = RommDownloadStatus.cancelled;
       _notifyDownloadState();
       return tracker;
     } on RommException catch (e) {
+      // The card only says the download failed; this line is where the reason
+      // (and what the server answered) can be found.
+      final answer = e.serverResponse;
+      _log.w(
+        'RomM: download of rom ${rom.id} ($logName) failed: ${e.message}'
+        '${answer == null || answer.isEmpty ? '' : ' — server answered $answer'}',
+      );
       tracker
         ..status = RommDownloadStatus.failed
         ..error = RommDownloadError.network
@@ -1770,6 +1792,7 @@ class RommProvider extends ChangeNotifier {
       _notifyDownloadState();
       return tracker;
     } catch (e) {
+      _log.e('RomM: download of rom ${rom.id} ($logName) failed', error: e);
       tracker
         ..status = RommDownloadStatus.failed
         ..error = RommDownloadError.network
