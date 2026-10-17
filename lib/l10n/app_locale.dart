@@ -1166,6 +1166,8 @@ mixin AppLocale {
   static const String wizardDownloadArtPack = 'wizard_download_art_pack';
   static const String wizardArtPackInstalled = 'wizard_art_pack_installed';
   static const String wizardArtPackUnavailable = 'wizard_art_pack_unavailable';
+  static const String wizardSaveFailedTitle = 'wizard_save_failed_title';
+  static const String wizardSaveFailedBody = 'wizard_save_failed_body';
   static const String userDataLocationDefault = 'user_data_location_default';
   static const String selectUserDataFolder = 'select_user_data_folder';
   static const String folderNotEmptyTitle = 'folder_not_empty_title';

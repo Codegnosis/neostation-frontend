@@ -1291,6 +1291,9 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.wizardArtPackInstalled: 'System Art Pack 已安装！你之后可以在“设置”中探索更多包。',
   AppLocale.wizardArtPackUnavailable:
       '目前无法访问 System Art Pack。联网后，你可以稍后在“设置”中安装它。',
+  AppLocale.wizardSaveFailedTitle: '设置尚未完成',
+  AppLocale.wizardSaveFailedBody:
+      'NeoStation 无法保存你的设置。请确认存储可用，然后重试。\n\n{error}',
 
   // Hide / unhide games
   AppLocale.hideGame: '隐藏游戏',
