@@ -1479,6 +1479,9 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.wizardArtPackUnavailable:
       'System Art Pack tidak dapat dijangkau saat ini. Anda dapat memasangnya '
       'nanti dari Pengaturan setelah online.',
+  AppLocale.wizardSaveFailedTitle: 'Penyiapan belum selesai',
+  AppLocale.wizardSaveFailedBody:
+      'NeoStation tidak dapat menyimpan pengaturan Anda. Pastikan penyimpanan Anda tersedia, lalu coba lagi.\n\n{error}',
 
   // Hide / unhide games
   AppLocale.hideGame: 'Sembunyikan Game',

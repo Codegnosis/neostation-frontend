@@ -1323,6 +1323,9 @@ const Map<String, dynamic> appLocaleKo = {
       'System Art Pack이 설치되었습니다! 나중에 설정에서 더 많은 팩을 살펴볼 수 있습니다.',
   AppLocale.wizardArtPackUnavailable:
       '현재 System Art Pack에 접근할 수 없습니다. 온라인 상태가 되면 설정에서 설치할 수 있습니다.',
+  AppLocale.wizardSaveFailedTitle: '설정을 완료하지 못했습니다',
+  AppLocale.wizardSaveFailedBody:
+      'NeoStation이 설정을 저장하지 못했습니다. 저장소를 사용할 수 있는지 확인한 후 다시 시도하세요.\n\n{error}',
 
   // Library search & filtering.
   AppLocale.searchTitle: '검색',

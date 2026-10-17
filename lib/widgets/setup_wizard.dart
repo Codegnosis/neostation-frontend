@@ -21,12 +21,13 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:neostation/l10n/app_locale.dart';
 import '../widgets/tv_directory_picker.dart';
 import '../widgets/folder_not_empty_dialog.dart';
+import '../widgets/info_dialog.dart';
 import 'core_footer.dart';
 import '../models/secondary_display_state.dart';
 
 /// Initial configuration wizard for the first time the app is opened
 class SetupWizard extends StatefulWidget {
-  final VoidCallback onComplete;
+  final Future<void> Function() onComplete;
 
   const SetupWizard({super.key, required this.onComplete});
 
@@ -87,6 +88,10 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
   /// True once setup is being finalised, so the per-frame secondary-display
   /// push stops re-asserting `setupWizardActive` and the dock can come in.
   bool _finishing = false;
+
+  /// True while [_finishSetup] is saving or showing its failure, so a second
+  /// press can't start another save.
+  bool _saving = false;
 
   static final _log = LoggerService.instance;
 
@@ -2041,12 +2046,23 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
   }
 
   Future<void> _finishSetup() async {
+    if (_saving) return;
+    _saving = true;
+    // The wizard's navigation isn't a manager layer: pause it while saving,
+    // so presses during the save (or on the failure dialogue below) don't
+    // press Finish or Skip again or pick another art pack.
+    _gamepadNav?.deactivate();
+
     // Stop pinning the secondary display's dock/launcher off-screen. Set before
     // any await so a rebuild racing the save can't re-assert the flag; the
     // wrapper pushes the clear once completeSetup() lands.
     _finishing = true;
 
-    // Verificar que la configuración está guardada
+    final failedTitle = AppLocale.wizardSaveFailedTitle.getString(context);
+    final failedBody = AppLocale.wizardSaveFailedBody.getString(context);
+    final ok = AppLocale.ok.getString(context);
+
+    // Warn if no ROM folder was saved
     final configProvider = Provider.of<SqliteConfigProvider>(
       context,
       listen: false,
@@ -2057,10 +2073,27 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
       _log.w('Warning: ROM folder not saved in config!');
     }
 
-    // Forzar guardado de la configuración
-    await configProvider.saveConfig();
-
-    // Llamar al callback de completado
-    widget.onComplete();
+    // Save the configuration, then mark setup as completed.
+    try {
+      await configProvider.saveConfig();
+      await widget.onComplete();
+      return;
+    } catch (e) {
+      _log.e('Finishing setup failed: $e');
+      if (!mounted) return;
+      setState(() => _finishing = false);
+      try {
+        await InfoDialog.show(
+          context,
+          title: failedTitle,
+          body: failedBody.replaceFirst('{error}', '$e'.split('\n').first),
+          okLabel: ok,
+          icon: Symbols.error_rounded,
+        );
+      } finally {
+        _saving = false;
+        if (mounted) _gamepadNav?.activate();
+      }
+    }
   }
 }

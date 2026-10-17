@@ -1513,6 +1513,9 @@ const Map<String, dynamic> appLocaleEs = {
   AppLocale.wizardArtPackUnavailable:
       'No se pudo acceder al System Art Pack en este momento. Puedes instalarlo '
       'más tarde desde Ajustes cuando estés en línea.',
+  AppLocale.wizardSaveFailedTitle: 'La configuración no se ha completado',
+  AppLocale.wizardSaveFailedBody:
+      'NeoStation no pudo guardar tus ajustes. Comprueba que tu almacenamiento esté disponible y vuelve a intentarlo.\n\n{error}',
 
   // Hide / unhide games
   AppLocale.hideGame: 'Ocultar juego',
