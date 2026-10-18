@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:neostation/providers/theme_provider.dart';
 import '../../models/secondary_display_state.dart';
 import '../../l10n/app_locale.dart';
+import '../../widgets/monospaced_clock.dart';
 
 /// Pure presentation helpers for the secondary display's Now Playing / panel
 /// chrome — theme + colour-scheme resolution and the leaf builders/formatters.
@@ -120,14 +121,25 @@ Widget buildNowPlayingStat({
   );
 }
 
-String formatPlayTime(int? seconds) {
+/// Total play time in the app language's short units ("1h 30m", "12m",
+/// "<1m"): [text] looks up an [AppLocale] key, as for [formatLastPlayed].
+String formatPlayTime(int? seconds, String Function(String key) text) {
   if (seconds == null || seconds <= 0) return '—';
   final h = seconds ~/ 3600;
   final m = (seconds % 3600) ~/ 60;
-  if (h > 0) return '${h}h ${m}m';
-  if (m > 0) return '${m}m';
-  return '<1m';
+  if (h > 0) {
+    return text(
+      AppLocale.playTimeHoursMinutes,
+    ).replaceFirst('{h}', '$h').replaceFirst('{m}', '$m');
+  }
+  if (m > 0) return text(AppLocale.playTimeMinutes).replaceFirst('{m}', '$m');
+  return text(AppLocale.playTimeUnderMinute);
 }
+
+/// The running session length as a digital HH:MM:SS reading, shown alongside
+/// the (static) total play time while a game is active. It reads the same in
+/// every language and shows the per-second tick.
+String formatSessionTime(int seconds) => MonospacedClock.format(seconds);
 
 /// How long ago [millis] was, in the app language: [text] looks up an
 /// [AppLocale] key (the panel passes `(key) => key.getString(context)`).

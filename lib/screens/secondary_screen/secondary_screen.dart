@@ -1459,7 +1459,9 @@ class _SecondaryScreenState extends State<SecondaryScreen> {
                   : NowPlayingPanel(
                       value: value,
                       sessionRunning: _sessionWatch.isRunning,
-                      sessionTime: _formatSessionTime(),
+                      sessionTime: formatSessionTime(
+                        _sessionWatch.elapsed.inSeconds,
+                      ),
                       use12HourClock:
                           value.use12HourClock ?? widget.initialUse12HourClock,
                       onRequestScreenshot: _requestScreenshot,
@@ -1818,21 +1820,6 @@ class _SecondaryScreenState extends State<SecondaryScreen> {
         ],
       ),
     );
-  }
-
-  /// The running session length, formatted down to the second so the per-second
-  /// tick is visible. Shown alongside the (static) total PLAY TIME while a game
-  /// is active.
-  String _formatSessionTime() {
-    final total = _sessionWatch.elapsed.inSeconds;
-    final h = total ~/ 3600;
-    final m = (total % 3600) ~/ 60;
-    final s = total % 60;
-    if (h > 0) {
-      return '${h}h ${m.toString().padLeft(2, '0')}m '
-          '${s.toString().padLeft(2, '0')}s';
-    }
-    return '${m}m ${s.toString().padLeft(2, '0')}s';
   }
 
   Widget _buildScrapingOverlay(SecondaryDisplayStateData value) {

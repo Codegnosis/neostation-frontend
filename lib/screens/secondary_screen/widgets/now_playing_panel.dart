@@ -108,7 +108,10 @@ class NowPlayingPanel extends StatelessWidget {
                         label: AppLocale.playTime
                             .getString(context)
                             .toUpperCase(),
-                        text: formatPlayTime(value.playTimeSeconds),
+                        text: formatPlayTime(
+                          value.playTimeSeconds,
+                          (key) => key.getString(context),
+                        ),
                       ),
                       if (sessionRunning) ...[
                         SizedBox(height: 12.r),
