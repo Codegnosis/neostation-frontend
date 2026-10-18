@@ -410,8 +410,18 @@ const Map<String, dynamic> appLocaleEs = {
       'No se encontró metadata huérfana.',
   AppLocale.cleanOrphanedMetadataDone:
       'Se limpiaron {entries} entrada(s) de metadata y {files} archivo(s) multimedia.',
+  AppLocale.cleanOrphanedMetadataDelete:
+      'Se eliminarán {count} entradas de metadata huérfana de la base de datos y del disco.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      'Se eliminará {count} entrada de metadata huérfana de la base de datos y del disco.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      ' {count} entrada(s) de ES-DE se dejaron intactas.',
+      ' {count} entradas importadas de ES-DE quedan intactas.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} entrada importada de ES-DE queda intacta.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'No hay nada que eliminar: la única metadata huérfana se importó de ES-DE y esta herramienta no la toca.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation no encuentra su carpeta de medios. Reinicia NeoStation y vuelve a intentarlo.',
   AppLocale.cleanOrphanedMetadataFailed:
       'No se pudo limpiar la metadata huérfana: {error}',
   AppLocale.rematchAchievements: 'Emparejar juegos de RetroAchievements',

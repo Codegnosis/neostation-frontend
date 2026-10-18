@@ -395,8 +395,18 @@ const Map<String, dynamic> appLocaleId = {
       'Tidak ditemukan metadata yatim.',
   AppLocale.cleanOrphanedMetadataDone:
       'Dibersihkan {entries} entri metadata dan {files} file media.',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '{count} entri metadata yatim akan dihapus dari database dan disk.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '{count} entri metadata yatim akan dihapus dari database dan disk.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      '{count} entri yang diimpor dari ES-DE dibiarkan tidak terubah.',
+      ' {count} entri yang diimpor dari ES-DE dibiarkan apa adanya.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} entri yang diimpor dari ES-DE dibiarkan apa adanya.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'Tidak ada yang perlu dihapus: satu-satunya metadata yatim diimpor dari ES-DE, dan alat ini tidak menyentuhnya.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation tidak dapat menemukan folder medianya. Mulai ulang NeoStation lalu coba lagi.',
   AppLocale.cleanOrphanedMetadataFailed:
       'Gagal membersihkan metadata yatim: {error}',
   AppLocale.rematchAchievements: 'Cocokkan Game RetroAchievements',

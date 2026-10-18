@@ -407,8 +407,18 @@ const Map<String, dynamic> appLocalePt = {
       'Não foram encontrados metadados órfãos.',
   AppLocale.cleanOrphanedMetadataDone:
       'Limpos {entries} entrada(s) de metadados e {files} ficheiro(s) de mídia.',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '{count} entradas de metadados órfãs serão eliminadas da base de dados e do disco.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '{count} entrada de metadados órfã será eliminada da base de dados e do disco.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      ' {count} entrada(s) importada(s) do ES-DE foram deixadas intactas.',
+      ' {count} entradas importadas do ES-DE ficam intactas.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} entrada importada do ES-DE fica intacta.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'Nada a eliminar: os únicos metadados órfãos foram importados do ES-DE, e esta ferramenta não mexe neles.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'O NeoStation não encontra a sua pasta de mídia. Reinicie o NeoStation e tente novamente.',
   AppLocale.cleanOrphanedMetadataFailed:
       'Falha ao limpar metadados órfãos: {error}',
   AppLocale.rematchAchievements: 'Associar jogos do RetroAchievements',

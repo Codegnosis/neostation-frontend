@@ -18,12 +18,23 @@ import 'package:neostation/services/metadata_cleanup_service.dart';
 import 'package:neostation/services/retroachievements_hash_service.dart';
 import 'package:neostation/services/rom_folder_organizer_service.dart';
 import 'package:neostation/utils/adaptive_scroll.dart';
+import 'package:neostation/utils/count_label.dart';
 import 'package:neostation/widgets/confirm_action_dialog.dart';
 import 'package:neostation/widgets/custom_notification.dart';
 import 'package:neostation/widgets/info_dialog.dart';
 import 'settings_title.dart';
 import 'widgets/settings_card_row.dart';
 import 'widgets/settings_action_button.dart';
+
+/// The bell notification type for a tool's outcome: an informational outcome
+/// (nothing to do) stays informational instead of showing as an error.
+@visibleForTesting
+GlobalNotificationType toolOutcomeNotificationType(NotificationType type) =>
+    switch (type) {
+      NotificationType.success => GlobalNotificationType.success,
+      NotificationType.error => GlobalNotificationType.error,
+      NotificationType.info => GlobalNotificationType.info,
+    };
 
 class ToolsSettingsContent extends StatefulWidget {
   final bool isContentFocused;
@@ -279,13 +290,10 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
         setState(() => _isOrganizingMultiDisc = false);
         await _loadRomFolders();
         if (completionMessage != null && completionType != null) {
-          final globalType = completionType == NotificationType.success
-              ? GlobalNotificationType.success
-              : GlobalNotificationType.error;
           GlobalNotificationService().update(
             id: notificationId,
             message: completionMessage,
-            type: globalType,
+            type: toolOutcomeNotificationType(completionType),
             progress: null,
           );
         }
@@ -314,15 +322,13 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
       context,
     );
     final localeDone = AppLocale.cleanOrphanedMetadataDone.getString(context);
-    final localeEsdeSkipped = AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix
-        .getString(context);
 
     final fileProvider = Provider.of<FileProvider>(context, listen: false);
     if (!fileProvider.isInitialized) {
       if (mounted) {
         AppNotification.showNotification(
           context,
-          localeFailed.replaceFirst('{error}', 'File provider not initialized'),
+          AppLocale.cleanOrphanedMetadataMediaUnavailable.getString(context),
           type: NotificationType.error,
         );
       }
@@ -351,17 +357,27 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
         .where((i) => i.esdeImported)
         .length;
 
+    if (neoStationCount == 0) {
+      // Only ES-DE imported rows are orphaned, and the cleanup never deletes
+      // those, so there is nothing to confirm.
+      await InfoDialog.show(
+        context,
+        title: locale,
+        body:
+            '${AppLocale.cleanOrphanedMetadataNothingToDelete.getString(context)}'
+            '\n\n${esdeEntriesKeptSuffix(context, esdeCount).trim()}',
+        okLabel: AppLocale.ok.getString(context),
+        icon: Symbols.cleaning_services_rounded,
+      );
+      return;
+    }
+
     final body = StringBuffer()
       ..writeln(localeWarning)
       ..writeln()
-      ..writeln(
-        'Found ${analysis.orphanedItems.length} orphaned metadata entr${analysis.orphanedItems.length == 1 ? 'y' : 'ies'}. '
-        '$neoStationCount will be deleted from the database and disk.',
-      );
+      ..writeln(orphanedMetadataDeleteLabel(context, neoStationCount));
     if (esdeCount > 0) {
-      body.writeln(
-        '$esdeCount ES-DE imported entr${esdeCount == 1 ? 'y' : 'ies'} will be left untouched.',
-      );
+      body.writeln(esdeEntriesKeptSuffix(context, esdeCount).trim());
     }
 
     final accentColor = Theme.of(context).colorScheme.error;
@@ -410,10 +426,7 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
 
       if (mounted) {
         final esdeSkippedNote = result.skippedEsdeItems.isNotEmpty
-            ? localeEsdeSkipped.replaceFirst(
-                '{count}',
-                result.skippedEsdeItems.length.toString(),
-              )
+            ? esdeEntriesKeptSuffix(context, result.skippedEsdeItems.length)
             : '';
         if (result.hasDeletions) {
           completionMessage =
@@ -428,8 +441,22 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
                   ) +
               esdeSkippedNote;
           completionType = NotificationType.success;
+        } else if (result.errors.isNotEmpty) {
+          // Nothing could be deleted: say it failed, not that there was
+          // nothing to clean.
+          completionMessage = localeFailed.replaceFirst(
+            '{error}',
+            result.errors.first,
+          );
+          completionType = NotificationType.error;
         } else {
-          completionMessage = localeNothingFound + esdeSkippedNote;
+          completionMessage =
+              (result.skippedEsdeItems.isNotEmpty
+                  ? AppLocale.cleanOrphanedMetadataNothingToDelete.getString(
+                      context,
+                    )
+                  : localeNothingFound) +
+              esdeSkippedNote;
           completionType = NotificationType.info;
         }
       }
@@ -443,13 +470,10 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
       if (mounted) {
         setState(() => _isCleaningMetadata = false);
         if (completionMessage != null && completionType != null) {
-          final globalType = completionType == NotificationType.success
-              ? GlobalNotificationType.success
-              : GlobalNotificationType.error;
           GlobalNotificationService().update(
             id: notificationId,
             message: completionMessage,
-            type: globalType,
+            type: toolOutcomeNotificationType(completionType),
             progress: null,
           );
         }

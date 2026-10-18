@@ -404,7 +404,7 @@ const Map<String, dynamic> appLocaleDe = {
   AppLocale.cleanOrphanedMetadataSubtitle:
       'Entfernt Metadaten und Medien, die von gelöschten ROMs zurückgelassen wurden',
   AppLocale.cleanOrphanedMetadataWarning:
-      'Dies löscht dauerhaft Metadatenzeilen und Mediendateien für ROMs, die sich nicht mehr in Ihrer Bibliothek befinden. Aus ES-DE importierte Einträge werden nicht entfernt.',
+      'Dies löscht dauerhaft Metadatenzeilen und Mediendateien für ROMs, die sich nicht mehr in deiner Bibliothek befinden. Aus ES-DE importierte Einträge werden nicht entfernt.',
   AppLocale.cleanOrphanedMetadataScanning:
       'Verwaiste Metadaten werden bereinigt...',
   AppLocale.cleanOrphanedMetadataCleaningItem: 'Bereinigung von {filename}...',
@@ -412,8 +412,18 @@ const Map<String, dynamic> appLocaleDe = {
       'Keine verwaisten Metadaten gefunden.',
   AppLocale.cleanOrphanedMetadataDone:
       '{entries} Metadateneintrag/-einträge und {files} Mediendatei(en) bereinigt.',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '{count} verwaiste Metadateneinträge werden aus der Datenbank und vom Datenträger gelöscht.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '{count} verwaister Metadateneintrag wird aus der Datenbank und vom Datenträger gelöscht.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      '{count} aus ES-DE importierte Einträge wurden unverändert gelassen.',
+      ' {count} aus ES-DE importierte Einträge bleiben unverändert.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} aus ES-DE importierter Eintrag bleibt unverändert.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'Nichts zu löschen: Die einzigen verwaisten Metadaten wurden aus ES-DE importiert, und dieses Werkzeug lässt sie unangetastet.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation findet seinen Medienordner nicht. Starte NeoStation neu und versuche es erneut.',
   AppLocale.cleanOrphanedMetadataFailed:
       'Fehler beim Bereinigen verwaister Metadaten: {error}',
   AppLocale.rematchAchievements: 'RetroAchievements-Spiele zuordnen',

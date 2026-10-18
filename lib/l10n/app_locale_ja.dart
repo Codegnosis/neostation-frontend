@@ -346,8 +346,18 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.cleanOrphanedMetadataNothingFound: '孤立したメタデータは見つかりませんでした。',
   AppLocale.cleanOrphanedMetadataDone:
       '{entries} 件のメタデータエントリと {files} 個のメディアファイルを削除しました。',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '孤立したメタデータエントリ {count} 件をデータベースとディスクから削除します。',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '孤立したメタデータエントリ {count} 件をデータベースとディスクから削除します。',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      '{count} 件の ES-DE からインポートしたエントリはそのまま残されています。',
+      'ES-DE からインポートした {count} 件のエントリはそのまま残ります。',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      'ES-DE からインポートした {count} 件のエントリはそのまま残ります。',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      '削除するものはありません。孤立したメタデータはすべて ES-DE からインポートしたもので、このツールでは削除しません。',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation のメディアフォルダが見つかりません。NeoStation を再起動してからもう一度お試しください。',
   AppLocale.cleanOrphanedMetadataFailed: '孤立したメタデータの削除に失敗しました: {error}',
   AppLocale.rematchAchievements: 'RetroAchievements のゲームを照合',
   AppLocale.rommLinkLibrary: 'ライブラリをRomMにリンク',

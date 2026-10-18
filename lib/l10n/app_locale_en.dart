@@ -395,8 +395,18 @@ const Map<String, dynamic> appLocaleEn = {
   AppLocale.cleanOrphanedMetadataNothingFound: 'No orphaned metadata found.',
   AppLocale.cleanOrphanedMetadataDone:
       'Cleaned {entries} metadata entr(y/ies) and {files} media file(s).',
+  AppLocale.cleanOrphanedMetadataDelete:
+      '{count} orphaned metadata entries will be deleted from the database and disk.',
+  AppLocale.cleanOrphanedMetadataDeleteOne:
+      '{count} orphaned metadata entry will be deleted from the database and disk.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffix:
-      ' {count} ES-DE entr(y/ies) were left untouched.',
+      ' {count} ES-DE imported entries are left untouched.',
+  AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
+      ' {count} ES-DE imported entry is left untouched.',
+  AppLocale.cleanOrphanedMetadataNothingToDelete:
+      'Nothing to delete: the only orphaned metadata was imported from ES-DE, and this tool leaves it alone.',
+  AppLocale.cleanOrphanedMetadataMediaUnavailable:
+      'NeoStation can\'t find its media folder. Restart NeoStation and try again.',
   AppLocale.cleanOrphanedMetadataFailed:
       'Failed to clean orphaned metadata: {error}',
   AppLocale.rematchAchievements: 'Match RetroAchievements Games',
