@@ -1168,6 +1168,32 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.errorScanningRoms: 'Kesalahan saat memindai ROM',
   AppLocale.romStorageNotReady:
       'Penyimpanan ROM belum siap; game yang ada tetap disimpan.',
+  AppLocale.romFolderNotAddedTitle: 'Folder ROM tidak ditambahkan',
+  AppLocale.romFolderAddFailed: 'Gagal menyimpan folder ROM: {error}',
+  AppLocale.romFolderSafMissingTitle: 'Folder ROM tanpa akses penyimpanan',
+  AppLocale.romFoldersSafMissingTitle: 'Folder ROM tanpa akses penyimpanan',
+  AppLocale.romFolderSafMissing:
+      'Sebuah folder ROM tidak dapat dibaca. Berikan akses lagi di Pengaturan > Direktori.',
+  AppLocale.romFoldersSafMissing:
+      '{count} folder ROM tidak dapat dibaca. Berikan akses lagi di Pengaturan > Direktori.',
+  AppLocale.romStorageAccessRequired:
+      'Akses penyimpanan diperlukan. Pilih folder ROM dengan pemilih file.',
+  AppLocale.romFolderAccessDenied:
+      'Tidak dapat mengakses folder ROM {folder}. Periksa izin penyimpanan.',
+  AppLocale.romFolderUnreachableTitle: 'Folder ROM tidak tersedia',
+  AppLocale.romFoldersUnreachableTitle: 'Folder ROM tidak tersedia',
+  AppLocale.romFolderUnreachable:
+      'Folder ROM {folders} tidak dapat dijangkau. Game yang ada tetap disimpan. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'Folder ROM berikut tidak dapat dijangkau: {folders}. Game yang ada tetap disimpan. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'Jalur itu berasal dari izin sementara portal desktop dan tidak dapat dipulihkan: hapus jalur itu di Pengaturan > Direktori lalu tambahkan foldernya lagi.',
+  AppLocale.romFolderAdviceReconnect:
+      'Sambungkan kembali drive, atau hapus folder di Pengaturan > Direktori.',
+  AppLocale.noRomFolderTitle: 'Tidak ada folder ROM yang diatur',
+  AppLocale.noRomFolderConfigured:
+      'Tidak ada folder ROM yang diatur, jadi tidak ada yang dipindai. Game yang ada tetap disimpan. Tambahkan lagi folder ROM Anda di Pengaturan > Direktori.',
+  AppLocale.errorScanningRomsDetail: 'Kesalahan saat memindai ROM: {error}',
   AppLocale.systemsUpdateComplete: 'Sistem berhasil diperbarui!',
   AppLocale.systemsUpdateError: 'Gagal memperbarui sistem. Coba lagi nanti.',
 

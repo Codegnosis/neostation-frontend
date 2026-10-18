@@ -1196,6 +1196,35 @@ const Map<String, dynamic> appLocaleEs = {
   AppLocale.errorScanningRoms: 'Error al escanear las ROMs',
   AppLocale.romStorageNotReady:
       'El almacenamiento de ROMs no está listo; se conservaron los juegos existentes.',
+  AppLocale.romFolderNotAddedTitle: 'Carpeta de ROMs no añadida',
+  AppLocale.romFolderAddFailed:
+      'No se pudo guardar la carpeta de ROMs: {error}',
+  AppLocale.romFolderSafMissingTitle:
+      'Carpeta de ROMs sin acceso al almacenamiento',
+  AppLocale.romFoldersSafMissingTitle:
+      'Carpetas de ROMs sin acceso al almacenamiento',
+  AppLocale.romFolderSafMissing:
+      'No se puede leer una carpeta de ROMs. Vuelve a conceder el acceso en Ajustes > Directorios.',
+  AppLocale.romFoldersSafMissing:
+      'No se pueden leer {count} carpetas de ROMs. Vuelve a conceder el acceso en Ajustes > Directorios.',
+  AppLocale.romStorageAccessRequired:
+      'Se requiere acceso al almacenamiento. Elige una carpeta de ROMs con el selector de archivos.',
+  AppLocale.romFolderAccessDenied:
+      'No se puede acceder a la carpeta de ROMs {folder}. Comprueba los permisos de almacenamiento.',
+  AppLocale.romFolderUnreachableTitle: 'Carpeta de ROMs no disponible',
+  AppLocale.romFoldersUnreachableTitle: 'Carpetas de ROMs no disponibles',
+  AppLocale.romFolderUnreachable:
+      'No se puede acceder a la carpeta de ROMs {folders}. Se conservaron los juegos existentes. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'No se puede acceder a estas carpetas de ROMs: {folders}. Se conservaron los juegos existentes. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'Esa ruta procedía de un permiso temporal del portal de escritorio y no se puede recuperar: quítala en Ajustes > Directorios y vuelve a añadir la carpeta.',
+  AppLocale.romFolderAdviceReconnect:
+      'Vuelve a conectar la unidad o quita la carpeta en Ajustes > Directorios.',
+  AppLocale.noRomFolderTitle: 'No hay ninguna carpeta de ROMs configurada',
+  AppLocale.noRomFolderConfigured:
+      'No hay ninguna carpeta de ROMs configurada, así que no había nada que escanear. Se conservaron los juegos existentes. Vuelve a añadir tu carpeta de ROMs en Ajustes > Directorios.',
+  AppLocale.errorScanningRomsDetail: 'Error al escanear las ROMs: {error}',
   AppLocale.systemsUpdateComplete: '¡Sistemas actualizados correctamente!',
   AppLocale.systemsUpdateError:
       'Error al actualizar los sistemas. Inténtalo más tarde.',

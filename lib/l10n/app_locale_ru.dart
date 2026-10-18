@@ -1166,6 +1166,32 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.errorScanningRoms: 'Ошибка при сканировании ROM',
   AppLocale.romStorageNotReady:
       'Хранилище ROM не готово; существующие игры сохранены.',
+  AppLocale.romFolderNotAddedTitle: 'Папка ROM не добавлена',
+  AppLocale.romFolderAddFailed: 'Не удалось сохранить папку ROM: {error}',
+  AppLocale.romFolderSafMissingTitle: 'Нет доступа к хранилищу для папки ROM',
+  AppLocale.romFoldersSafMissingTitle: 'Нет доступа к хранилищу для папок ROM',
+  AppLocale.romFolderSafMissing:
+      'Не удаётся прочитать папку ROM. Снова предоставьте доступ в разделе Настройки > Директории.',
+  AppLocale.romFoldersSafMissing:
+      'Не удаётся прочитать папки ROM: {count}. Снова предоставьте доступ в разделе Настройки > Директории.',
+  AppLocale.romStorageAccessRequired:
+      'Требуется доступ к хранилищу. Выберите папку ROM через окно выбора файлов.',
+  AppLocale.romFolderAccessDenied:
+      'Нет доступа к папке ROM {folder}. Проверьте разрешения на доступ к памяти.',
+  AppLocale.romFolderUnreachableTitle: 'Папка ROM недоступна',
+  AppLocale.romFoldersUnreachableTitle: 'Папки ROM недоступны',
+  AppLocale.romFolderUnreachable:
+      'Папка ROM {folders} недоступна. Существующие игры сохранены. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'Эти папки ROM недоступны: {folders}. Существующие игры сохранены. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'Этот путь получен по временному разрешению портала рабочего стола, и восстановить его нельзя: удалите его в разделе Настройки > Директории и добавьте папку снова.',
+  AppLocale.romFolderAdviceReconnect:
+      'Подключите диск снова или удалите папку в разделе Настройки > Директории.',
+  AppLocale.noRomFolderTitle: 'Папка ROM не настроена',
+  AppLocale.noRomFolderConfigured:
+      'Папка ROM не настроена, поэтому сканировать было нечего. Существующие игры сохранены. Снова добавьте папку ROM в разделе Настройки > Директории.',
+  AppLocale.errorScanningRomsDetail: 'Ошибка при сканировании ROM: {error}',
   AppLocale.systemsUpdateComplete: 'Системы успешно обновлены!',
   AppLocale.systemsUpdateError: 'Ошибка обновления систем. Попробуйте позже.',
 

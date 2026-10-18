@@ -24,6 +24,15 @@ const String _noRomFoldersNotificationId = 'rom-folders-missing';
 /// consecutive scans replace the warning in place.
 const String _safPermissionNotificationId = 'rom-folders-saf-permission';
 
+/// [key] in the app language. The provider has no BuildContext, so its
+/// messages use the context-free lookup, as the scan status does.
+String _text(String key) => key.getStringForCurrentLocale();
+
+/// The first line of an error, for a message that has to stay on one line: the
+/// setup wizard shows only the first line of `_error`, and a database error's
+/// later lines repeat the statement and its arguments.
+String _firstLine(Object error) => '$error'.split('\n').first;
+
 extension SqliteConfigScanning on SqliteConfigProvider {
   /// Registers a new filesystem directory as a ROM source.
   ///
@@ -37,10 +46,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
     // that produced it, so storing one hands the user a library that silently
     // empties later. Refuse it at the door and say why.
     if (isTransientPortalPath(folderPath)) {
-      _error =
-          'That folder came from a temporary desktop-portal path '
-          '($folderPath) and would stop working after a restart. '
-          'Pick it again with the built-in folder browser.';
+      _error = _text(AppLocale.wizardRomFolderTemporary);
       SqliteConfigProvider._log.w(
         'Rejected transient portal ROM folder: $folderPath',
       );
@@ -49,7 +55,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       // to do nothing, which is no better than the silent failure being fixed.
       GlobalNotificationService().show(
         id: _transientRomFolderNotificationId,
-        title: 'ROM folder not added',
+        title: _text(AppLocale.romFolderNotAddedTitle),
         message: _error!,
         type: GlobalNotificationType.error,
       );
@@ -72,8 +78,10 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       }
       _notify();
     } catch (e) {
-      _error = 'Error adding ROM folder: $e';
-      SqliteConfigProvider._log.e('$_error');
+      _error = _text(
+        AppLocale.romFolderAddFailed,
+      ).replaceFirst('{error}', _firstLine(e));
+      SqliteConfigProvider._log.e('Error adding ROM folder: $e');
     } finally {
       _setLoading(false);
     }
@@ -176,16 +184,20 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       return;
     }
 
-    final plural = missing.length == 1 ? '' : 's';
+    final one = missing.length == 1;
     SqliteConfigProvider._log.w(
       'SAF permission missing for ${missing.length} ROM folder(s): $missing',
     );
     GlobalNotificationService().show(
       id: _safPermissionNotificationId,
-      title: 'ROM folder$plural missing storage access',
-      message:
-          '${missing.length} ROM folder$plural cannot be read. '
-          'Re-grant access in Settings > Directories.',
+      title: _text(
+        one
+            ? AppLocale.romFolderSafMissingTitle
+            : AppLocale.romFoldersSafMissingTitle,
+      ),
+      message: _text(
+        one ? AppLocale.romFolderSafMissing : AppLocale.romFoldersSafMissing,
+      ).replaceFirst('{count}', '${missing.length}'),
       type: GlobalNotificationType.error,
     );
   }
@@ -243,9 +255,10 @@ extension SqliteConfigScanning on SqliteConfigProvider {
         if (!hasBroadPermissions &&
             !hasSafFolders &&
             _config.romFolders.isNotEmpty) {
-          _error =
-              'Storage access required. Please select a ROM folder using the file picker.';
-          SqliteConfigProvider._log.e('$_error');
+          _error = _text(AppLocale.romStorageAccessRequired);
+          SqliteConfigProvider._log.e(
+            'Storage access required; no SAF folder and no broad permission',
+          );
           _setScanning(false);
           _notify();
           return;
@@ -256,9 +269,10 @@ extension SqliteConfigScanning on SqliteConfigProvider {
           // On Android 13+ with SAF, canAccessDirectory now returns true for content://
           final canAccess = await PermissionService.canAccessDirectory(path);
           if (!canAccess) {
-            _error =
-                'Cannot access ROM folder: $path. Please check storage permissions.';
-            SqliteConfigProvider._log.e('$_error');
+            _error = _text(
+              AppLocale.romFolderAccessDenied,
+            ).replaceFirst('{folder}', path);
+            SqliteConfigProvider._log.e('Cannot access ROM folder: $path');
             _setScanning(false);
             _notify();
             return;
@@ -310,16 +324,21 @@ extension SqliteConfigScanning on SqliteConfigProvider {
         if (unreachable.isNotEmpty && await _hasStoredRoms()) {
           // A portal grant cannot be restored by plugging anything back in, so
           // that case needs different advice from a missing drive.
-          final advice = unreachable.any(isTransientPortalPath)
-              ? 'That path came from a temporary desktop-portal grant and '
-                    'cannot come back — remove it in Settings > Directories '
-                    'and add the folder again.'
-              : 'Reconnect the drive, or remove the folder in '
-                    'Settings > Directories.';
-          final plural = unreachable.length == 1 ? '' : 's';
+          final advice = _text(
+            unreachable.any(isTransientPortalPath)
+                ? AppLocale.romFolderAdvicePortal
+                : AppLocale.romFolderAdviceReconnect,
+          );
+          final one = unreachable.length == 1;
+          // The paths go in last, so one holding "{advice}" stays as it is.
           _error =
-              'Cannot reach ROM folder$plural: ${unreachable.join(', ')}. '
-              'Existing games were kept. $advice';
+              _text(
+                    one
+                        ? AppLocale.romFolderUnreachable
+                        : AppLocale.romFoldersUnreachable,
+                  )
+                  .replaceFirst('{advice}', advice)
+                  .replaceFirst('{folders}', unreachable.join(', '));
           SqliteConfigProvider._log.e(
             'Scan aborted, ${unreachable.length} unreachable ROM folder(s); '
             'library preserved: ${unreachable.join(', ')}',
@@ -336,7 +355,11 @@ extension SqliteConfigScanning on SqliteConfigProvider {
           // ending and does not need a BuildContext from this layer.
           GlobalNotificationService().show(
             id: _unreachableRomFoldersNotificationId,
-            title: 'ROM folder$plural unavailable',
+            title: _text(
+              one
+                  ? AppLocale.romFolderUnreachableTitle
+                  : AppLocale.romFoldersUnreachableTitle,
+            ),
             message: _error!,
             type: GlobalNotificationType.error,
           );
@@ -368,10 +391,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       if (!Platform.isAndroid &&
           _config.romFolders.isEmpty &&
           await _hasStoredRoms()) {
-        _error =
-            'No ROM folder is configured, so there was nothing to scan. '
-            'Existing games were kept. Add your ROM folder again in '
-            'Settings > Directories.';
+        _error = _text(AppLocale.noRomFolderConfigured);
         SqliteConfigProvider._log.e(
           'Scan aborted, no ROM folders configured while the library holds '
           'ROMs; library preserved',
@@ -383,7 +403,7 @@ extension SqliteConfigScanning on SqliteConfigProvider {
         _scanCompleted = true;
         GlobalNotificationService().show(
           id: _noRomFoldersNotificationId,
-          title: 'No ROM folder configured',
+          title: _text(AppLocale.noRomFolderTitle),
           message: _error!,
           type: GlobalNotificationType.error,
         );
@@ -404,8 +424,10 @@ extension SqliteConfigScanning on SqliteConfigProvider {
       _scanProgress = 0.0;
       _scanStatus = AppLocale.scanningSystemsRoms.getStringForCurrentLocale();
     } catch (e) {
-      _error = 'Error scanning ROMs: $e';
-      SqliteConfigProvider._log.e('$_error');
+      _error = _text(
+        AppLocale.errorScanningRomsDetail,
+      ).replaceFirst('{error}', _firstLine(e));
+      SqliteConfigProvider._log.e('Error scanning ROMs: $e');
       _setScanning(false);
       _notify();
       return;
@@ -595,8 +617,10 @@ extension SqliteConfigScanning on SqliteConfigProvider {
 
       _scanCompleted = true;
     } catch (e) {
-      _error = 'Error scanning ROMs: $e';
-      SqliteConfigProvider._log.e('$_error');
+      _error = _text(
+        AppLocale.errorScanningRomsDetail,
+      ).replaceFirst('{error}', _firstLine(e));
+      SqliteConfigProvider._log.e('Error scanning ROMs: $e');
     } finally {
       _setScanning(false);
       _notify();

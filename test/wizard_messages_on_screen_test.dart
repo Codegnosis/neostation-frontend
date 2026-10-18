@@ -210,7 +210,8 @@ void main() {
       );
       expect(checks, contains('_hasStoredRoms()'));
       final caught = checks.indexOf(
-        "\n    } catch (e) {\n      _error = 'Error scanning ROMs: \$e';",
+        '\n    } catch (e) {\n      _error = _text(\n'
+        '        AppLocale.errorScanningRomsDetail,',
       );
       expect(caught, isNot(-1), reason: 'the checks before the scan throw');
       expect(checks.substring(caught), contains('_setScanning(false);'));

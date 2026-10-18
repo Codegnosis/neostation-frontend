@@ -1070,6 +1070,31 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.romsScanned: 'ROM 스캔을 마쳤습니다',
   AppLocale.errorScanningRoms: 'ROM 스캔 중 오류가 발생했습니다',
   AppLocale.romStorageNotReady: 'ROM 저장소가 준비되지 않았습니다. 기존 게임은 유지되었습니다.',
+  AppLocale.romFolderNotAddedTitle: 'ROM 폴더가 추가되지 않았습니다',
+  AppLocale.romFolderAddFailed: 'ROM 폴더를 저장하지 못했습니다: {error}',
+  AppLocale.romFolderSafMissingTitle: '저장소 접근 권한이 없는 ROM 폴더',
+  AppLocale.romFoldersSafMissingTitle: '저장소 접근 권한이 없는 ROM 폴더',
+  AppLocale.romFolderSafMissing:
+      'ROM 폴더를 읽을 수 없습니다. 설정 > 폴더에서 접근 권한을 다시 부여하세요.',
+  AppLocale.romFoldersSafMissing:
+      'ROM 폴더 {count}개를 읽을 수 없습니다. 설정 > 폴더에서 접근 권한을 다시 부여하세요.',
+  AppLocale.romStorageAccessRequired:
+      '저장소 접근 권한이 필요합니다. 파일 선택기로 ROM 폴더를 선택하세요.',
+  AppLocale.romFolderAccessDenied:
+      'ROM 폴더 {folder}에 접근할 수 없습니다. 저장소 권한을 확인하세요.',
+  AppLocale.romFolderUnreachableTitle: 'ROM 폴더를 사용할 수 없음',
+  AppLocale.romFoldersUnreachableTitle: 'ROM 폴더를 사용할 수 없음',
+  AppLocale.romFolderUnreachable:
+      'ROM 폴더 {folders}에 접근할 수 없습니다. 기존 게임은 유지되었습니다. {advice}',
+  AppLocale.romFoldersUnreachable:
+      '다음 ROM 폴더에 접근할 수 없습니다: {folders}. 기존 게임은 유지되었습니다. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      '이 경로는 데스크톱 포털의 임시 권한에서 온 것이라 다시 사용할 수 없습니다. 설정 > 폴더에서 제거한 후 폴더를 다시 추가하세요.',
+  AppLocale.romFolderAdviceReconnect: '드라이브를 다시 연결하거나 설정 > 폴더에서 폴더를 제거하세요.',
+  AppLocale.noRomFolderTitle: 'ROM 폴더가 설정되지 않음',
+  AppLocale.noRomFolderConfigured:
+      'ROM 폴더가 설정되지 않아 스캔할 항목이 없었습니다. 기존 게임은 유지되었습니다. 설정 > 폴더에서 ROM 폴더를 다시 추가하세요.',
+  AppLocale.errorScanningRomsDetail: 'ROM 스캔 중 오류: {error}',
   AppLocale.systemsUpdateComplete: '시스템이 성공적으로 업데이트되었습니다!',
   AppLocale.systemsUpdateError: '시스템을 업데이트하지 못했습니다. 나중에 다시 시도해 주세요.',
 

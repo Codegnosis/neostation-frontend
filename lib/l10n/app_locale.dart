@@ -1166,6 +1166,31 @@ mixin AppLocale {
   static const String romsScanned = 'roms_scanned';
   static const String errorScanningRoms = 'error_scanning_roms';
   static const String romStorageNotReady = 'rom_storage_not_ready';
+  // The scan's messages (bell, setup wizard, setup prompt). Each stays on one
+  // line: the wizard shows only the first. Folder counts follow the
+  // singular/plural pattern described at gamesCount; {folders} is the list of
+  // paths and {advice} one of the romFolderAdvice* sentences.
+  // A folder from a temporary portal path reuses wizardRomFolderTemporary.
+  static const String romFolderNotAddedTitle = 'rom_folder_not_added_title';
+  static const String romFolderAddFailed = 'rom_folder_add_failed';
+  static const String romFolderSafMissingTitle = 'rom_folder_saf_missing_title';
+  static const String romFoldersSafMissingTitle =
+      'rom_folders_saf_missing_title';
+  static const String romFolderSafMissing = 'rom_folder_saf_missing';
+  static const String romFoldersSafMissing = 'rom_folders_saf_missing';
+  static const String romStorageAccessRequired = 'rom_storage_access_required';
+  static const String romFolderAccessDenied = 'rom_folder_access_denied';
+  static const String romFolderUnreachableTitle =
+      'rom_folder_unreachable_title';
+  static const String romFoldersUnreachableTitle =
+      'rom_folders_unreachable_title';
+  static const String romFolderUnreachable = 'rom_folder_unreachable';
+  static const String romFoldersUnreachable = 'rom_folders_unreachable';
+  static const String romFolderAdvicePortal = 'rom_folder_advice_portal';
+  static const String romFolderAdviceReconnect = 'rom_folder_advice_reconnect';
+  static const String noRomFolderTitle = 'no_rom_folder_title';
+  static const String noRomFolderConfigured = 'no_rom_folder_configured';
+  static const String errorScanningRomsDetail = 'error_scanning_roms_detail';
   static const String systemsUpdateComplete = 'systems_update_complete';
   static const String systemsUpdateError = 'systems_update_error';
 
@@ -1235,6 +1260,7 @@ mixin AppLocale {
   static const String wizardSaveFailedTitle = 'wizard_save_failed_title';
   static const String wizardSaveFailedBody = 'wizard_save_failed_body';
   static const String wizardRomFolderNotAdded = 'wizard_rom_folder_not_added';
+  // Also the scan's message for a folder from a temporary portal path.
   static const String wizardRomFolderTemporary = 'wizard_rom_folder_temporary';
   static const String wizardFolderNotUsable = 'wizard_folder_not_usable';
   static const String wizardArtPackFailed = 'wizard_art_pack_failed';

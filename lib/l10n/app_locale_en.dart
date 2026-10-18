@@ -1161,6 +1161,32 @@ const Map<String, dynamic> appLocaleEn = {
   AppLocale.errorScanningRoms: 'Error scanning ROMs',
   AppLocale.romStorageNotReady:
       'ROM storage is not ready; existing games were kept.',
+  AppLocale.romFolderNotAddedTitle: 'ROM folder not added',
+  AppLocale.romFolderAddFailed: 'Couldn\'t save the ROM folder: {error}',
+  AppLocale.romFolderSafMissingTitle: 'ROM folder missing storage access',
+  AppLocale.romFoldersSafMissingTitle: 'ROM folders missing storage access',
+  AppLocale.romFolderSafMissing:
+      'A ROM folder can\'t be read. Grant access to it again in Settings > Directories.',
+  AppLocale.romFoldersSafMissing:
+      '{count} ROM folders can\'t be read. Grant access to them again in Settings > Directories.',
+  AppLocale.romStorageAccessRequired:
+      'Storage access required. Pick a ROM folder with the file picker.',
+  AppLocale.romFolderAccessDenied:
+      'Can\'t access the ROM folder {folder}. Check the storage permissions.',
+  AppLocale.romFolderUnreachableTitle: 'ROM folder unavailable',
+  AppLocale.romFoldersUnreachableTitle: 'ROM folders unavailable',
+  AppLocale.romFolderUnreachable:
+      'Can\'t reach the ROM folder {folders}. Existing games were kept. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'Can\'t reach these ROM folders: {folders}. Existing games were kept. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'That path came from a temporary desktop-portal grant and can\'t come back: remove it in Settings > Directories and add the folder again.',
+  AppLocale.romFolderAdviceReconnect:
+      'Reconnect the drive, or remove the folder in Settings > Directories.',
+  AppLocale.noRomFolderTitle: 'No ROM folder configured',
+  AppLocale.noRomFolderConfigured:
+      'No ROM folder is configured, so there was nothing to scan. Existing games were kept. Add your ROM folder again in Settings > Directories.',
+  AppLocale.errorScanningRomsDetail: 'Error scanning ROMs: {error}',
   AppLocale.systemsUpdateComplete: 'Systems updated successfully!',
   AppLocale.systemsUpdateError:
       'Failed to update systems. Please try again later.',
