@@ -1189,6 +1189,35 @@ const Map<String, dynamic> appLocaleIt = {
   AppLocale.errorScanningRoms: 'Errore durante la scansione delle ROM',
   AppLocale.romStorageNotReady:
       'L’archiviazione ROM non è pronta; i giochi esistenti sono stati mantenuti.',
+  AppLocale.romFolderNotAddedTitle: 'Cartella ROM non aggiunta',
+  AppLocale.romFolderAddFailed: 'Impossibile salvare la cartella ROM: {error}',
+  AppLocale.romFolderSafMissingTitle:
+      'Cartella ROM senza accesso all’archiviazione',
+  AppLocale.romFoldersSafMissingTitle:
+      'Cartelle ROM senza accesso all’archiviazione',
+  AppLocale.romFolderSafMissing:
+      'Una cartella ROM non può essere letta. Concedi di nuovo l’accesso in Impostazioni > Directory.',
+  AppLocale.romFoldersSafMissing:
+      '{count} cartelle ROM non possono essere lette. Concedi di nuovo l’accesso in Impostazioni > Directory.',
+  AppLocale.romStorageAccessRequired:
+      'Accesso all’archiviazione necessario. Scegli una cartella ROM con il selettore di file.',
+  AppLocale.romFolderAccessDenied:
+      'Impossibile accedere alla cartella ROM {folder}. Controlla i permessi di archiviazione.',
+  AppLocale.romFolderUnreachableTitle: 'Cartella ROM non disponibile',
+  AppLocale.romFoldersUnreachableTitle: 'Cartelle ROM non disponibili',
+  AppLocale.romFolderUnreachable:
+      'Impossibile raggiungere la cartella ROM {folders}. I giochi esistenti sono stati mantenuti. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'Impossibile raggiungere queste cartelle ROM: {folders}. I giochi esistenti sono stati mantenuti. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'Quel percorso veniva da un’autorizzazione temporanea del portale desktop e non può essere ripristinato: rimuovilo in Impostazioni > Directory e aggiungi di nuovo la cartella.',
+  AppLocale.romFolderAdviceReconnect:
+      'Ricollega l’unità, oppure rimuovi la cartella in Impostazioni > Directory.',
+  AppLocale.noRomFolderTitle: 'Nessuna cartella ROM configurata',
+  AppLocale.noRomFolderConfigured:
+      'Nessuna cartella ROM è configurata, quindi non c’era nulla da scansionare. I giochi esistenti sono stati mantenuti. Aggiungi di nuovo la tua cartella ROM in Impostazioni > Directory.',
+  AppLocale.errorScanningRomsDetail:
+      'Errore durante la scansione delle ROM: {error}',
   AppLocale.systemsUpdateComplete: 'Sistemi aggiornati con successo!',
   AppLocale.systemsUpdateError:
       'Aggiornamento sistemi fallito. Riprova più tardi.',

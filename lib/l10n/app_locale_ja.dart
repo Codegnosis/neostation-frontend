@@ -1055,6 +1055,30 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.romsScanned: 'ROMをスキャンしました',
   AppLocale.errorScanningRoms: 'ROMのスキャン中にエラーが発生しました',
   AppLocale.romStorageNotReady: 'ROMストレージの準備ができていません。既存のゲームは保持されました。',
+  AppLocale.romFolderNotAddedTitle: 'ROMフォルダが追加されませんでした',
+  AppLocale.romFolderAddFailed: 'ROMフォルダを保存できませんでした: {error}',
+  AppLocale.romFolderSafMissingTitle: 'ストレージにアクセスできないROMフォルダ',
+  AppLocale.romFoldersSafMissingTitle: 'ストレージにアクセスできないROMフォルダ',
+  AppLocale.romFolderSafMissing: 'ROMフォルダを読み取れません。設定 > ディレクトリでアクセスを許可し直してください。',
+  AppLocale.romFoldersSafMissing:
+      '{count}個のROMフォルダを読み取れません。設定 > ディレクトリでアクセスを許可し直してください。',
+  AppLocale.romStorageAccessRequired:
+      'ストレージへのアクセスが必要です。ファイル選択でROMフォルダを選んでください。',
+  AppLocale.romFolderAccessDenied:
+      'ROMフォルダ {folder} にアクセスできません。ストレージの権限を確認してください。',
+  AppLocale.romFolderUnreachableTitle: 'ROMフォルダを利用できません',
+  AppLocale.romFoldersUnreachableTitle: 'ROMフォルダを利用できません',
+  AppLocale.romFolderUnreachable:
+      'ROMフォルダ {folders} にアクセスできません。既存のゲームは保持されました。{advice}',
+  AppLocale.romFoldersUnreachable:
+      'これらのROMフォルダにアクセスできません: {folders}。既存のゲームは保持されました。{advice}',
+  AppLocale.romFolderAdvicePortal:
+      'そのパスはデスクトップポータルの一時的な許可によるもので、元に戻りません。設定 > ディレクトリで削除してから、フォルダを追加し直してください。',
+  AppLocale.romFolderAdviceReconnect: 'ドライブを接続し直すか、設定 > ディレクトリでフォルダを削除してください。',
+  AppLocale.noRomFolderTitle: 'ROMフォルダが設定されていません',
+  AppLocale.noRomFolderConfigured:
+      'ROMフォルダが設定されていないため、スキャンするものがありませんでした。既存のゲームは保持されました。設定 > ディレクトリでROMフォルダを追加し直してください。',
+  AppLocale.errorScanningRomsDetail: 'ROMのスキャン中にエラーが発生しました: {error}',
   AppLocale.systemsUpdateComplete: 'システムが正常に更新されました！',
   AppLocale.systemsUpdateError: 'システムの更新に失敗しました。後でもう一度試してください。',
 

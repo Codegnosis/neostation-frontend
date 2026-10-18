@@ -1198,6 +1198,35 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.errorScanningRoms: 'Erreur lors de l’analyse des ROMs',
   AppLocale.romStorageNotReady:
       'Le stockage des ROMs n’est pas prêt ; les jeux existants ont été conservés.',
+  AppLocale.romFolderNotAddedTitle: 'Dossier de ROMs non ajouté',
+  AppLocale.romFolderAddFailed:
+      'Impossible d’enregistrer le dossier de ROMs : {error}',
+  AppLocale.romFolderSafMissingTitle: 'Dossier de ROMs sans accès au stockage',
+  AppLocale.romFoldersSafMissingTitle:
+      'Dossiers de ROMs sans accès au stockage',
+  AppLocale.romFolderSafMissing:
+      'Un dossier de ROMs ne peut pas être lu. Accordez de nouveau l’accès dans Paramètres > Répertoires.',
+  AppLocale.romFoldersSafMissing:
+      '{count} dossiers de ROMs ne peuvent pas être lus. Accordez de nouveau l’accès dans Paramètres > Répertoires.',
+  AppLocale.romStorageAccessRequired:
+      'Accès au stockage nécessaire. Choisissez un dossier de ROMs avec le sélecteur de fichiers.',
+  AppLocale.romFolderAccessDenied:
+      'Impossible d’accéder au dossier de ROMs {folder}. Vérifiez les autorisations de stockage.',
+  AppLocale.romFolderUnreachableTitle: 'Dossier de ROMs indisponible',
+  AppLocale.romFoldersUnreachableTitle: 'Dossiers de ROMs indisponibles',
+  AppLocale.romFolderUnreachable:
+      'Impossible d’atteindre le dossier de ROMs {folders}. Les jeux existants ont été conservés. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'Impossible d’atteindre ces dossiers de ROMs : {folders}. Les jeux existants ont été conservés. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'Ce chemin provenait d’une autorisation temporaire du portail de bureau et ne peut pas être rétabli : supprimez-le dans Paramètres > Répertoires et ajoutez de nouveau le dossier.',
+  AppLocale.romFolderAdviceReconnect:
+      'Rebranchez le disque ou supprimez le dossier dans Paramètres > Répertoires.',
+  AppLocale.noRomFolderTitle: 'Aucun dossier de ROMs configuré',
+  AppLocale.noRomFolderConfigured:
+      'Aucun dossier de ROMs n’est configuré, il n’y avait donc rien à analyser. Les jeux existants ont été conservés. Ajoutez de nouveau votre dossier de ROMs dans Paramètres > Répertoires.',
+  AppLocale.errorScanningRomsDetail:
+      'Erreur lors de l’analyse des ROMs : {error}',
   AppLocale.systemsUpdateComplete: 'Systèmes mis à jour avec succès !',
   AppLocale.systemsUpdateError:
       'Échec de la mise à jour des systèmes. Réessayez plus tard.',

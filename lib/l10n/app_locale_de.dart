@@ -1198,6 +1198,33 @@ const Map<String, dynamic> appLocaleDe = {
   AppLocale.errorScanningRoms: 'Fehler beim Scannen der ROMs',
   AppLocale.romStorageNotReady:
       'ROM-Speicher ist nicht bereit; vorhandene Spiele wurden beibehalten.',
+  AppLocale.romFolderNotAddedTitle: 'ROM-Ordner nicht hinzugefügt',
+  AppLocale.romFolderAddFailed:
+      'Der ROM-Ordner konnte nicht gespeichert werden: {error}',
+  AppLocale.romFolderSafMissingTitle: 'ROM-Ordner ohne Speicherzugriff',
+  AppLocale.romFoldersSafMissingTitle: 'ROM-Ordner ohne Speicherzugriff',
+  AppLocale.romFolderSafMissing:
+      'Ein ROM-Ordner kann nicht gelesen werden. Erteile den Zugriff erneut unter Einstellungen > Verzeichnisse.',
+  AppLocale.romFoldersSafMissing:
+      '{count} ROM-Ordner können nicht gelesen werden. Erteile den Zugriff erneut unter Einstellungen > Verzeichnisse.',
+  AppLocale.romStorageAccessRequired:
+      'Speicherzugriff erforderlich. Wähle einen ROM-Ordner über die Dateiauswahl.',
+  AppLocale.romFolderAccessDenied:
+      'Kein Zugriff auf den ROM-Ordner {folder}. Prüfe die Speicherberechtigungen.',
+  AppLocale.romFolderUnreachableTitle: 'ROM-Ordner nicht verfügbar',
+  AppLocale.romFoldersUnreachableTitle: 'ROM-Ordner nicht verfügbar',
+  AppLocale.romFolderUnreachable:
+      'Der ROM-Ordner {folders} ist nicht erreichbar. Vorhandene Spiele wurden beibehalten. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'Diese ROM-Ordner sind nicht erreichbar: {folders}. Vorhandene Spiele wurden beibehalten. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'Dieser Pfad stammt aus einer vorübergehenden Freigabe des Desktop-Portals und lässt sich nicht wiederherstellen: Entferne ihn unter Einstellungen > Verzeichnisse und füge den Ordner erneut hinzu.',
+  AppLocale.romFolderAdviceReconnect:
+      'Schließe das Laufwerk wieder an oder entferne den Ordner unter Einstellungen > Verzeichnisse.',
+  AppLocale.noRomFolderTitle: 'Kein ROM-Ordner eingerichtet',
+  AppLocale.noRomFolderConfigured:
+      'Es ist kein ROM-Ordner eingerichtet, daher gab es nichts zu scannen. Vorhandene Spiele wurden beibehalten. Füge deinen ROM-Ordner erneut unter Einstellungen > Verzeichnisse hinzu.',
+  AppLocale.errorScanningRomsDetail: 'Fehler beim Scannen der ROMs: {error}',
   AppLocale.systemsUpdateComplete: 'Systeme erfolgreich aktualisiert!',
   AppLocale.systemsUpdateError:
       'Fehler beim Aktualisieren der Systeme. Bitte versuche es später.',

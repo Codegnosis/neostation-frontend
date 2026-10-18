@@ -1175,6 +1175,35 @@ const Map<String, dynamic> appLocalePt = {
   AppLocale.errorScanningRoms: 'Erro ao varrer as ROMs',
   AppLocale.romStorageNotReady:
       'O armazenamento de ROMs não está pronto; os jogos existentes foram mantidos.',
+  AppLocale.romFolderNotAddedTitle: 'Pasta de ROMs não adicionada',
+  AppLocale.romFolderAddFailed:
+      'Não foi possível salvar a pasta de ROMs: {error}',
+  AppLocale.romFolderSafMissingTitle:
+      'Pasta de ROMs sem acesso ao armazenamento',
+  AppLocale.romFoldersSafMissingTitle:
+      'Pastas de ROMs sem acesso ao armazenamento',
+  AppLocale.romFolderSafMissing:
+      'Não é possível ler uma pasta de ROMs. Conceda o acesso novamente em Configurações > Diretórios.',
+  AppLocale.romFoldersSafMissing:
+      'Não é possível ler {count} pastas de ROMs. Conceda o acesso novamente em Configurações > Diretórios.',
+  AppLocale.romStorageAccessRequired:
+      'Acesso ao armazenamento necessário. Escolha uma pasta de ROMs com o seletor de arquivos.',
+  AppLocale.romFolderAccessDenied:
+      'Não é possível acessar a pasta de ROMs {folder}. Verifique as permissões de armazenamento.',
+  AppLocale.romFolderUnreachableTitle: 'Pasta de ROMs indisponível',
+  AppLocale.romFoldersUnreachableTitle: 'Pastas de ROMs indisponíveis',
+  AppLocale.romFolderUnreachable:
+      'Não é possível acessar a pasta de ROMs {folders}. Os jogos existentes foram mantidos. {advice}',
+  AppLocale.romFoldersUnreachable:
+      'Não é possível acessar estas pastas de ROMs: {folders}. Os jogos existentes foram mantidos. {advice}',
+  AppLocale.romFolderAdvicePortal:
+      'Esse caminho veio de uma permissão temporária do portal da área de trabalho e não pode ser restaurado: remova-o em Configurações > Diretórios e adicione a pasta novamente.',
+  AppLocale.romFolderAdviceReconnect:
+      'Reconecte a unidade ou remova a pasta em Configurações > Diretórios.',
+  AppLocale.noRomFolderTitle: 'Nenhuma pasta de ROMs configurada',
+  AppLocale.noRomFolderConfigured:
+      'Nenhuma pasta de ROMs está configurada, então não havia nada para varrer. Os jogos existentes foram mantidos. Adicione sua pasta de ROMs novamente em Configurações > Diretórios.',
+  AppLocale.errorScanningRomsDetail: 'Erro ao varrer as ROMs: {error}',
   AppLocale.systemsUpdateComplete: 'Sistemas atualizados com sucesso!',
   AppLocale.systemsUpdateError:
       'Falha ao atualizar sistemas. Tente mais tarde.',
