@@ -471,6 +471,8 @@ const Map<String, dynamic> appLocaleIt = {
   AppLocale.pressToRemoveFolder: 'Premi Conferma per rimuovere questa cartella',
   AppLocale.maxRomFoldersReached: 'Massimo 5 cartelle ROM consentite',
   AppLocale.romFolderRemoved: 'Cartella ROM rimossa',
+  AppLocale.romFolderRemoveFailed:
+      'Impossibile rimuovere la cartella ROM: {error}',
   AppLocale.selectRomsFolder: 'Seleziona cartella ROM',
   AppLocale.scanningSystem: 'Scansione sistema in corso',
 

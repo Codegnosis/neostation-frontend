@@ -529,6 +529,28 @@ class SqliteConfigService {
     }
   }
 
+  /// Deletes a ROM folder and its games and saves [config], which must no
+  /// longer list it, in one transaction.
+  ///
+  /// A failure partway stores none of it. Done step by step, a failure could
+  /// leave the games deleted with the folder kept, or the folder row deleted
+  /// while the caller, believing the removal had failed, still listed it, and
+  /// the next config save wrote it back.
+  static Future<void> removeRomFolder(
+    String folderPath,
+    ConfigModel config,
+  ) async {
+    assert(!config.romFolders.contains(folderPath));
+    final db = await SqliteService.getDatabase();
+    await db.transaction((_) async {
+      await SqliteService.deleteRomsByFolderPath(folderPath);
+      // saveConfig can't remove the last folder: saveUserRomFolders ignores an
+      // empty list so a blanket save never wipes the folders.
+      await SqliteService.removeRomFolder(folderPath);
+      await saveConfig(config);
+    });
+  }
+
   /// Retrieves all supported systems from the repository.
   static Future<List<SystemModel>> loadAvailableSystems() async {
     try {

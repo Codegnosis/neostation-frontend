@@ -438,6 +438,7 @@ mixin AppLocale {
   static const String pressToRemoveFolder = 'press_to_remove_folder';
   static const String maxRomFoldersReached = 'max_rom_folders_reached';
   static const String romFolderRemoved = 'rom_folder_removed';
+  static const String romFolderRemoveFailed = 'rom_folder_remove_failed';
   static const String selectRomsFolder = 'select_roms_folder';
   static const String scanningSystem = 'scanning_system';
 

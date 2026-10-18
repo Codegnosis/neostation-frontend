@@ -480,6 +480,8 @@ const Map<String, dynamic> appLocaleFr = {
       'Appuyez sur Confirmer pour supprimer ce dossier',
   AppLocale.maxRomFoldersReached: 'Maximum de 5 dossiers de ROMs autorisé',
   AppLocale.romFolderRemoved: 'Dossier de ROMs supprimé',
+  AppLocale.romFolderRemoveFailed:
+      'Impossible de supprimer le dossier de ROMs : {error}',
   AppLocale.selectRomsFolder: 'Sélectionner le dossier des ROMs',
   AppLocale.scanningSystem: 'Analyse du système en cours',
 

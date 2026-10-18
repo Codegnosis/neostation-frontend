@@ -84,8 +84,11 @@ extension SqliteConfigScanning on SqliteConfigProvider {
   /// Waits for any running scan to finish first: a scan may already be
   /// walking this folder and would write its games back after they are
   /// deleted, and this removal's own scan would be skipped while one runs.
+  ///
+  /// Throws when the removal can't be stored; nothing is removed then, and the
+  /// folder stays where it was in the list. A failure refreshing the library
+  /// afterwards is only logged: the folder is gone by then.
   Future<void> removeRomFolder(String folderPath) async {
-    var droppedFromConfig = false;
     try {
       _setLoading(true);
 
@@ -95,42 +98,44 @@ extension SqliteConfigScanning on SqliteConfigProvider {
 
       // 1. Drop the folder from the in-memory configuration before anything
       // else can run, so a scan started from here on doesn't walk it.
+      final position = _config.romFolders.indexOf(folderPath);
       final newList = _config.romFolders.where((p) => p != folderPath).toList();
-      droppedFromConfig = newList.length != _config.romFolders.length;
       _config = _config.copyWith(romFolders: newList, lastScan: DateTime.now());
 
-      // 2. Surgical cleanup in the DB
-      await GameRepository.deleteRomsByFolderPath(folderPath);
+      // 2. Delete its games and the folder, and save the configuration, in
+      // one transaction.
+      try {
+        await SqliteConfigService.removeRomFolder(folderPath, _config);
+      } catch (e) {
+        SqliteConfigProvider._log.e('Error removing ROM folder: $e');
+        // Nothing was stored, so the folder table still lists the folder: put
+        // it back where it was, or the next config save would drop it and
+        // leave its games behind.
+        if (position != -1 && !_config.romFolders.contains(folderPath)) {
+          final folders = [..._config.romFolders];
+          folders.insert(position.clamp(0, folders.length), folderPath);
+          _config = _config.copyWith(romFolders: folders);
+        }
+        rethrow;
+      }
 
-      // 3. Remove the folder itself. Saving the config below can't do it when
-      // this is the last folder: saveUserRomFolders ignores an empty list so a
-      // blanket save never wipes the folders.
-      await ConfigRepository.removeRomFolder(folderPath);
-
-      // 4. Persist the configuration
-      await SqliteConfigService.saveConfig(_config);
-
-      // 5. Decide whether to scan or just finish
-      if (newList.isNotEmpty) {
-        // Folders still remain, scan to ensure consistency
-        await scanSystems();
-      } else {
-        await SystemRepository.updateDetectedSystems([]);
+      // 3. Refresh the library: scan what remains, or clear the systems.
+      try {
+        if (newList.isNotEmpty) {
+          await scanSystems();
+        } else {
+          await SystemRepository.updateDetectedSystems([]);
+        }
+      } catch (e) {
+        SqliteConfigProvider._log.e(
+          'ROM folder removed, but refreshing the library failed: $e',
+        );
+      }
+      if (newList.isEmpty) {
         await _loadDetectedSystems(); // Reload local list (now filtered)
       }
 
       _notify();
-    } catch (e) {
-      _error = 'Error removing ROM folder: $e';
-      SqliteConfigProvider._log.e('$_error');
-      // Keep the configuration in step with the folder table, which still
-      // lists the folder: otherwise the next config save would drop the folder
-      // and leave its games behind.
-      if (droppedFromConfig && !_config.romFolders.contains(folderPath)) {
-        _config = _config.copyWith(
-          romFolders: [..._config.romFolders, folderPath],
-        );
-      }
     } finally {
       _setLoading(false);
     }
