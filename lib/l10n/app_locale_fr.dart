@@ -482,6 +482,8 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.romFolderRemoved: 'Dossier de ROMs supprimé',
   AppLocale.romFolderRemoveFailed:
       'Impossible de supprimer le dossier de ROMs : {error}',
+  AppLocale.romFolderAlreadyAdded:
+      'Ce dossier fait déjà partie de vos dossiers de ROMs',
   AppLocale.selectRomsFolder: 'Sélectionner le dossier des ROMs',
   AppLocale.scanningSystem: 'Analyse du système en cours',
 

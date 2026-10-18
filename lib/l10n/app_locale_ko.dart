@@ -402,6 +402,7 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.maxRomFoldersReached: 'ROM 폴더는 최대 5개까지 추가할 수 있습니다',
   AppLocale.romFolderRemoved: 'ROM 폴더가 제거되었습니다',
   AppLocale.romFolderRemoveFailed: 'ROM 폴더를 제거하지 못했습니다: {error}',
+  AppLocale.romFolderAlreadyAdded: '이 폴더는 이미 ROM 폴더로 추가되어 있습니다',
   AppLocale.selectRomsFolder: 'ROM 폴더 선택',
   AppLocale.scanningSystem: '시스템 검색 중',
 

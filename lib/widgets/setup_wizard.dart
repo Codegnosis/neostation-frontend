@@ -2165,8 +2165,8 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
       var keepFolders =
           result == null && folders.isNotEmpty && !Platform.isAndroid;
       if (result != null && mounted && !folders.contains(result)) {
-        // addRomFolder refuses these, and reports a failed save, only through
-        // the provider's error and the notification bell.
+        // addRomFolder refuses these only through the provider's error and the
+        // notification bell; a failed save also throws.
         if (folders.length >= 5) {
           problem = AppLocale.maxRomFoldersReached.getString(context);
           keepFolders = true;
@@ -2175,7 +2175,12 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
         } else {
           final notAdded = AppLocale.wizardRomFolderNotAdded.getString(context);
           configProvider.clearError();
-          await configProvider.addRomFolder(result, scan: false);
+          try {
+            await configProvider.addRomFolder(result, scan: false);
+          } catch (_) {
+            // Reported just below: the folder isn't in the list, and the
+            // provider's error says why.
+          }
           if (!configProvider.config.romFolders.contains(result)) {
             final reason = (configProvider.error ?? '').split('\n').first;
             problem = notAdded.replaceFirst('{error}', reason).trim();

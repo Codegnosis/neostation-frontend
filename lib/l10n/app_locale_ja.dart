@@ -403,6 +403,7 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.maxRomFoldersReached: '最大5つのROMフォルダが許可されています',
   AppLocale.romFolderRemoved: 'ROMフォルダが削除されました',
   AppLocale.romFolderRemoveFailed: 'ROMフォルダを削除できませんでした: {error}',
+  AppLocale.romFolderAlreadyAdded: 'そのフォルダはすでにROMフォルダとして追加されています',
   AppLocale.selectRomsFolder: 'ROMフォルダを選択',
   AppLocale.scanningSystem: 'システムをスキャン中',
 

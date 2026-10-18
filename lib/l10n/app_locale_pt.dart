@@ -471,6 +471,8 @@ const Map<String, dynamic> appLocalePt = {
   AppLocale.romFolderRemoved: 'Pasta de ROMs removida',
   AppLocale.romFolderRemoveFailed:
       'Não foi possível remover a pasta de ROMs: {error}',
+  AppLocale.romFolderAlreadyAdded:
+      'Essa pasta já está entre suas pastas de ROMs',
   AppLocale.selectRomsFolder: 'Selecionar pasta de ROMs',
   AppLocale.scanningSystem: 'Varrendo sistema',
 

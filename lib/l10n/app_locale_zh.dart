@@ -389,6 +389,7 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.maxRomFoldersReached: '最多允许 5 个 ROM 文件夹',
   AppLocale.romFolderRemoved: 'ROM 文件夹已删除',
   AppLocale.romFolderRemoveFailed: '无法删除 ROM 文件夹：{error}',
+  AppLocale.romFolderAlreadyAdded: '该文件夹已添加为 ROM 文件夹',
   AppLocale.selectRomsFolder: '选择 ROM 文件夹',
   AppLocale.scanningSystem: '正在扫描系统',
 

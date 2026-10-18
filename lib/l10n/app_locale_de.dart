@@ -477,6 +477,8 @@ const Map<String, dynamic> appLocaleDe = {
   AppLocale.romFolderRemoved: 'ROM-Ordner entfernt',
   AppLocale.romFolderRemoveFailed:
       'Der ROM-Ordner konnte nicht entfernt werden: {error}',
+  AppLocale.romFolderAlreadyAdded:
+      'Dieser Ordner ist bereits einer deiner ROM-Ordner',
   AppLocale.selectRomsFolder: 'ROM-Ordner auswählen',
   AppLocale.scanningSystem: 'System wird gescannt',
 

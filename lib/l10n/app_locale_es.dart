@@ -474,6 +474,8 @@ const Map<String, dynamic> appLocaleEs = {
   AppLocale.romFolderRemoved: 'Carpeta de ROMs eliminada',
   AppLocale.romFolderRemoveFailed:
       'No se pudo eliminar la carpeta de ROMs: {error}',
+  AppLocale.romFolderAlreadyAdded:
+      'Esa carpeta ya está entre tus carpetas de ROMs',
   AppLocale.selectRomsFolder: 'Seleccionar carpeta de ROMs',
   AppLocale.scanningSystem: 'Escaneando sistema',
 
