@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -172,7 +173,11 @@ class _StatusReadoutState extends State<StatusReadout> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          formatClockTime(_now, use12Hour: widget.use12HourClock),
+          formatClockTime(
+            _now,
+            use12Hour: widget.use12HourClock,
+            text: (key) => key.getString(context),
+          ),
           style: TextStyle(
             color: widget.scheme.onSurface,
             fontSize: 18.r,

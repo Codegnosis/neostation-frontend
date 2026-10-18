@@ -732,6 +732,18 @@ mixin AppLocale {
   static const String timeHoursAgo = 'time_hours_ago';
   static const String timeMinutesAgo = 'time_minutes_ago';
   static const String timeJustNow = 'time_just_now';
+  // A 12-hour clock reading: {time} is "2:09", {period} is clockAm or
+  // clockPm. Languages that put the period first (ja, ko, zh) say so here.
+  static const String clockAm = 'clock_am';
+  static const String clockPm = 'clock_pm';
+  static const String clockTime12h = 'clock_time_12h';
+  // Total play time on the second screen, in the language's short units.
+  static const String playTimeHoursMinutes = 'play_time_hours_minutes';
+  static const String playTimeMinutes = 'play_time_minutes';
+  static const String playTimeUnderMinute = 'play_time_under_minute';
+
+  // "+N this session" banner on the second screen's achievements page.
+  static const String raNewThisSession = 'ra_new_this_session';
   static const String apps = 'apps';
   static const String tracks = 'tracks';
   static const String games = 'games';

@@ -202,6 +202,7 @@ class HeaderState extends State<Header> {
               final clockText = formatClockTime(
                 _now,
                 use12Hour: configProvider.config.use12HourClock,
+                text: (key) => key.getString(context),
               );
               final showBattery =
                   _batteryLevel != -1 &&
@@ -230,6 +231,7 @@ class HeaderState extends State<Header> {
                     context,
                     widestClockText(
                       use12Hour: configProvider.config.use12HourClock,
+                      text: (key) => key.getString(context),
                     ),
                     labelStyle,
                   ),
