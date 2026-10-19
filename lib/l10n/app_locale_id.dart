@@ -457,6 +457,8 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.maxRomFoldersReached: 'Maksimal 5 folder ROM diizinkan',
   AppLocale.romFolderRemoved: 'Folder ROM dihapus',
   AppLocale.romFolderRemoveFailed: 'Gagal menghapus folder ROM: {error}',
+  AppLocale.romFolderAlreadyAdded:
+      'Folder itu sudah ditambahkan sebagai folder ROM',
   AppLocale.selectRomsFolder: 'Pilih folder ROM',
   AppLocale.scanningSystem: 'Memindai sistem',
 

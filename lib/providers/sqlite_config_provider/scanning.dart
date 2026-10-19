@@ -37,6 +37,11 @@ extension SqliteConfigScanning on SqliteConfigProvider {
   /// Registers a new filesystem directory as a ROM source.
   ///
   /// Automatically triggers a system detection scan unless [scan] is set to false.
+  ///
+  /// Throws when the folder can't be saved; it is taken back out of the
+  /// configuration then (unless another change replaced it meanwhile), and
+  /// [error] says why. A problem scanning it afterwards is the scan's to report: the
+  /// folder is stored by then.
   Future<void> addRomFolder(String folderPath, {bool scan = true}) async {
     if (folderPath.isEmpty) return;
     if (_config.romFolders.contains(folderPath)) return;
@@ -72,16 +77,25 @@ extension SqliteConfigScanning on SqliteConfigProvider {
         lastScan: DateTime.now(),
         setupCompleted: true,
       );
-      await _saveOrRevert(previous);
+      try {
+        await _saveOrRevert(previous);
+      } catch (e) {
+        _error = _text(
+          AppLocale.romFolderAddFailed,
+        ).replaceFirst('{error}', _firstLine(e));
+        SqliteConfigProvider._log.e('Error adding ROM folder: $e');
+        rethrow;
+      }
       if (scan) {
-        await scanSystems();
+        try {
+          await scanSystems();
+        } catch (e) {
+          SqliteConfigProvider._log.e(
+            'ROM folder added, but scanning it failed: $e',
+          );
+        }
       }
       _notify();
-    } catch (e) {
-      _error = _text(
-        AppLocale.romFolderAddFailed,
-      ).replaceFirst('{error}', _firstLine(e));
-      SqliteConfigProvider._log.e('Error adding ROM folder: $e');
     } finally {
       _setLoading(false);
     }

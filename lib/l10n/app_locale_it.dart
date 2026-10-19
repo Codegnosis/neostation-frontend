@@ -473,6 +473,8 @@ const Map<String, dynamic> appLocaleIt = {
   AppLocale.romFolderRemoved: 'Cartella ROM rimossa',
   AppLocale.romFolderRemoveFailed:
       'Impossibile rimuovere la cartella ROM: {error}',
+  AppLocale.romFolderAlreadyAdded:
+      'Quella cartella è già tra le tue cartelle ROM',
   AppLocale.selectRomsFolder: 'Seleziona cartella ROM',
   AppLocale.scanningSystem: 'Scansione sistema in corso',
 

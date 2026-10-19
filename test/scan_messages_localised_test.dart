@@ -160,7 +160,10 @@ void main() {
       "BEGIN SELECT RAISE(ABORT, 'disk failure'); END",
     );
 
-    await provider.addRomFolder(root.path, scan: false);
+    await expectLater(
+      provider.addRomFolder(root.path, scan: false),
+      throwsA(isA<Exception>()),
+    );
 
     final prefix = text(AppLocale.romFolderAddFailed).split('{error}').first;
     expect(provider.error, startsWith(prefix));

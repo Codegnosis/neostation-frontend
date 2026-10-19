@@ -457,6 +457,7 @@ const Map<String, dynamic> appLocaleEn = {
   AppLocale.maxRomFoldersReached: 'Maximum 5 ROM folders allowed',
   AppLocale.romFolderRemoved: 'ROM folder removed',
   AppLocale.romFolderRemoveFailed: 'Couldn\'t remove the ROM folder: {error}',
+  AppLocale.romFolderAlreadyAdded: 'That folder is already in your ROM folders',
   AppLocale.selectRomsFolder: 'Select ROMs Folder',
   AppLocale.scanningSystem: 'Scanning system',
 

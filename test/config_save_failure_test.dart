@@ -194,8 +194,10 @@ void main() {
     final provider = SqliteConfigProvider();
     await failSaves();
 
-    // addRomFolder reports the failure through the provider's error state.
-    await provider.addRomFolder(root.path, scan: false);
+    await expectLater(
+      provider.addRomFolder(root.path, scan: false),
+      throwsA(isA<SqliteException>()),
+    );
 
     expect(provider.config.romFolders, isEmpty);
     expect(provider.config.setupCompleted, isFalse);
