@@ -36,6 +36,93 @@ GlobalNotificationType toolOutcomeNotificationType(NotificationType type) =>
       NotificationType.info => GlobalNotificationType.info,
     };
 
+/// The orphan cleanup's outcome message and type. [done] holds `{entries}` and
+/// `{files}`; [esdeKept] and [notRemoved] give the appended notes (each starting
+/// with the language's separator) for a count.
+///
+/// Rows that failed to delete are reported as such, never as cleaned; the
+/// per-row error text stays in the log (it is the service's English).
+@visibleForTesting
+(String, NotificationType) orphanCleanupOutcome(
+  MetadataCleanupResult result, {
+  required String done,
+  required String nothingFound,
+  required String nothingToDelete,
+  required String Function(int count) esdeKept,
+  required String Function(int count) notRemoved,
+}) {
+  final esdeNote = result.skippedEsdeItems.isNotEmpty
+      ? esdeKept(result.skippedEsdeItems.length)
+      : '';
+  final failed = result.errors.length;
+  if (result.hasDeletions) {
+    final message =
+        done
+            .replaceFirst('{entries}', '${result.deletedItems.length}')
+            .replaceFirst('{files}', '${result.deletedMediaFiles}') +
+        esdeNote;
+    return failed > 0
+        ? (message + notRemoved(failed), NotificationType.error)
+        : (message, NotificationType.success);
+  }
+  if (failed > 0) {
+    // Nothing could be deleted: say it failed, not that there was nothing
+    // to clean.
+    return (notRemoved(failed).trim(), NotificationType.error);
+  }
+  return (
+    (result.skippedEsdeItems.isNotEmpty ? nothingToDelete : nothingFound) +
+        esdeNote,
+    NotificationType.info,
+  );
+}
+
+/// The multi-disc organiser's outcome message and type. [done] holds
+/// `{groups}`, `{files}`, `{playlists}` and `{skipped}`; [noSetsFound] holds
+/// `{skipped}`; [partialFailure] holds `{failed}` and `{result}`.
+///
+/// When every set failed there is nothing else to report, so the failure
+/// stands alone rather than also saying that no sets were found.
+@visibleForTesting
+(String, NotificationType) multiDiscOutcome(
+  RomFolderOrganizerResult result, {
+  required String done,
+  required String noSetsFound,
+  required String partialFailure,
+  required String skippedSuffix,
+}) {
+  final skippedNote = result.rootsSkipped > 0
+      ? skippedSuffix.replaceFirst('{count}', '${result.rootsSkipped}')
+      : '';
+  final summary = result.hasChanges
+      ? done
+            .replaceFirst('{groups}', '${result.groupsOrganized}')
+            .replaceFirst('{files}', '${result.filesMoved}')
+            .replaceFirst('{playlists}', '${result.playlistsCreated}')
+            .replaceFirst('{skipped}', skippedNote)
+      : noSetsFound.replaceFirst('{skipped}', skippedNote);
+  if (result.hasFailures) {
+    return (
+      partialFailure
+          .replaceFirst('{failed}', '${result.groupsFailed}')
+          .replaceFirst(
+            '{result}',
+            // On SAF a set's folder is often created before its move fails,
+            // so a run where every set failed can still count a folder.
+            result.groupsOrganized > 0 || result.filesMoved > 0
+                ? summary
+                : skippedNote.trim(),
+          )
+          .trim(),
+      NotificationType.error,
+    );
+  }
+  return (
+    summary,
+    result.hasChanges ? NotificationType.success : NotificationType.info,
+  );
+}
+
 class ToolsSettingsContent extends StatefulWidget {
   final bool isContentFocused;
   final int selectedContentIndex;
@@ -252,32 +339,13 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
       }
 
       if (mounted) {
-        final skippedNote = result.rootsSkipped > 0
-            ? localeSkippedSuffix.replaceFirst(
-                '{count}',
-                result.rootsSkipped.toString(),
-              )
-            : '';
-        completionMessage = result.hasChanges
-            ? localeDone
-                  .replaceFirst('{groups}', result.groupsOrganized.toString())
-                  .replaceFirst('{files}', result.filesMoved.toString())
-                  .replaceFirst(
-                    '{playlists}',
-                    result.playlistsCreated.toString(),
-                  )
-                  .replaceFirst('{skipped}', skippedNote)
-            : localeNoSetsFound.replaceFirst('{skipped}', skippedNote);
-        if (result.hasFailures) {
-          completionMessage = localePartialFailure
-              .replaceFirst('{failed}', result.groupsFailed.toString())
-              .replaceFirst('{result}', completionMessage);
-          completionType = NotificationType.error;
-        } else {
-          completionType = result.hasChanges
-              ? NotificationType.success
-              : NotificationType.info;
-        }
+        (completionMessage, completionType) = multiDiscOutcome(
+          result,
+          done: localeDone,
+          noSetsFound: localeNoSetsFound,
+          partialFailure: localePartialFailure,
+          skippedSuffix: localeSkippedSuffix,
+        );
       }
     } catch (e, stackTrace) {
       _log.e('Failed to organize multi-disc games: $e', stackTrace: stackTrace);
@@ -425,40 +493,16 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
       );
 
       if (mounted) {
-        final esdeSkippedNote = result.skippedEsdeItems.isNotEmpty
-            ? esdeEntriesKeptSuffix(context, result.skippedEsdeItems.length)
-            : '';
-        if (result.hasDeletions) {
-          completionMessage =
-              localeDone
-                  .replaceFirst(
-                    '{entries}',
-                    result.deletedItems.length.toString(),
-                  )
-                  .replaceFirst(
-                    '{files}',
-                    result.deletedMediaFiles.toString(),
-                  ) +
-              esdeSkippedNote;
-          completionType = NotificationType.success;
-        } else if (result.errors.isNotEmpty) {
-          // Nothing could be deleted: say it failed, not that there was
-          // nothing to clean.
-          completionMessage = localeFailed.replaceFirst(
-            '{error}',
-            result.errors.first,
-          );
-          completionType = NotificationType.error;
-        } else {
-          completionMessage =
-              (result.skippedEsdeItems.isNotEmpty
-                  ? AppLocale.cleanOrphanedMetadataNothingToDelete.getString(
-                      context,
-                    )
-                  : localeNothingFound) +
-              esdeSkippedNote;
-          completionType = NotificationType.info;
-        }
+        (completionMessage, completionType) = orphanCleanupOutcome(
+          result,
+          done: localeDone,
+          nothingFound: localeNothingFound,
+          nothingToDelete: AppLocale.cleanOrphanedMetadataNothingToDelete
+              .getString(context),
+          esdeKept: (count) => esdeEntriesKeptSuffix(context, count),
+          notRemoved: (count) =>
+              orphanedMetadataNotRemovedSuffix(context, count),
+        );
       }
     } catch (e, stackTrace) {
       _log.e('Failed to clean orphaned metadata: $e', stackTrace: stackTrace);
@@ -600,9 +644,8 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
                           : Symbols.emoji_events_rounded,
                       selected: isSelected,
                     ),
-                    belowContent: _buildInlineProgress(
-                      context,
-                      rematchProgress,
+                    belowContent: ToolInlineStatus(
+                      notification: rematchProgress,
                     ),
                   ),
                   SettingsCardRow(
@@ -623,9 +666,8 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
                           widget.isContentFocused &&
                           widget.selectedContentIndex == 1,
                     ),
-                    belowContent: _buildInlineProgress(
-                      context,
-                      metadataProgress,
+                    belowContent: ToolInlineStatus(
+                      notification: metadataProgress,
                     ),
                   ),
                   SettingsCardRow(
@@ -645,9 +687,8 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
                           widget.isContentFocused &&
                           widget.selectedContentIndex == 2,
                     ),
-                    belowContent: _buildInlineProgress(
-                      context,
-                      multiDiscProgress,
+                    belowContent: ToolInlineStatus(
+                      notification: multiDiscProgress,
                     ),
                   ),
                   SettingsCardRow(
@@ -668,9 +709,8 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
                           widget.isContentFocused &&
                           widget.selectedContentIndex == 3,
                     ),
-                    belowContent: _buildInlineProgress(
-                      context,
-                      rommLinkProgress,
+                    belowContent: ToolInlineStatus(
+                      notification: rommLinkProgress,
                     ),
                   ),
                 ],
@@ -694,52 +734,68 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
 
   /// Inline progress shown inside the card row while a long-running tool runs,
   /// mirroring the notification the header bell keeps for the same operation.
-  Widget _buildInlineProgress(
-    BuildContext context,
-    GlobalNotificationData? notification,
-  ) {
-    if (notification == null || notification.progress == null) {
+}
+
+/// A tool's status under its card: a bar with the progress while it runs, then
+/// its outcome message once it has finished.
+///
+/// A finished run carries no progress (the bar is dropped so it doesn't read as
+/// still running), but its message stays until the notification is dismissed.
+@visibleForTesting
+class ToolInlineStatus extends StatelessWidget {
+  final GlobalNotificationData? notification;
+
+  const ToolInlineStatus({super.key, required this.notification});
+
+  @override
+  Widget build(BuildContext context) {
+    final notification = this.notification;
+    if (notification == null) return const SizedBox.shrink();
+    final progress = notification.progress;
+    // Running but no progress yet: nothing to show.
+    if (progress == null && notification.ongoing) {
       return const SizedBox.shrink();
     }
 
     final theme = Theme.of(context);
-    final progress = notification.progress!;
 
     return Padding(
       padding: EdgeInsets.only(top: 8.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(2.r),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 4.r,
-                    backgroundColor: theme.colorScheme.surface.withValues(
-                      alpha: 0.4,
-                    ),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      theme.colorScheme.primary,
+          if (progress != null) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(2.r),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 4.r,
+                      backgroundColor: theme.colorScheme.surface.withValues(
+                        alpha: 0.4,
+                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(width: 8.r),
-              Text(
-                '${(progress * 100).round()}%',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontSize: 10.r,
-                  fontWeight: FontWeight.w600,
+                SizedBox(width: 8.r),
+                Text(
+                  '${(progress * 100).round()}%',
+                  style: TextStyle(
+                    color: theme.colorScheme.primary,
+                    fontSize: 10.r,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          if (notification.message.isNotEmpty) ...[
+              ],
+            ),
             SizedBox(height: 4.r),
+          ],
+          if (notification.message.isNotEmpty)
             Text(
               notification.message,
               style: TextStyle(
@@ -749,7 +805,6 @@ class ToolsSettingsContentState extends State<ToolsSettingsContent> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ],
         ],
       ),
     );

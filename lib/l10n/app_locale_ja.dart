@@ -354,6 +354,10 @@ const Map<String, dynamic> appLocaleJa = {
       'ES-DE からインポートした {count} 件のエントリはそのまま残ります。',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       'ES-DE からインポートした {count} 件のエントリはそのまま残ります。',
+  AppLocale.cleanOrphanedMetadataNotRemoved:
+      '{count} 件のエントリを削除できませんでした。もう一度ツールを実行してください。',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne:
+      '{count} 件のエントリを削除できませんでした。もう一度ツールを実行してください。',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       '削除するものはありません。孤立したメタデータはすべて ES-DE からインポートしたもので、このツールでは削除しません。',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:

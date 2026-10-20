@@ -425,6 +425,10 @@ const Map<String, dynamic> appLocaleFr = {
       ' {count} entrées importées depuis ES-DE restent intactes.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       ' {count} entrée importée depuis ES-DE reste intacte.',
+  AppLocale.cleanOrphanedMetadataNotRemoved:
+      ' {count} entrées n’ont pas pu être supprimées. Relancez l’outil pour réessayer.',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne:
+      ' {count} entrée n’a pas pu être supprimée. Relancez l’outil pour réessayer.',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       'Rien à supprimer : les seules métadonnées orphelines ont été importées depuis ES-DE, et cet outil n’y touche pas.',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:

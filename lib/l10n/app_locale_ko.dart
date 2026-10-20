@@ -355,6 +355,10 @@ const Map<String, dynamic> appLocaleKo = {
       ' ES-DE 에서 가져온 항목 {count}개는 그대로 유지됩니다.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       ' ES-DE 에서 가져온 항목 {count}개는 그대로 유지됩니다.',
+  AppLocale.cleanOrphanedMetadataNotRemoved:
+      ' 항목 {count}개를 제거하지 못했습니다. 도구를 다시 실행하세요.',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne:
+      ' 항목 {count}개를 제거하지 못했습니다. 도구를 다시 실행하세요.',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       '삭제할 항목이 없습니다. 고아 메타데이터는 모두 ES-DE 에서 가져온 것이며, 이 도구는 이를 삭제하지 않습니다.',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:
