@@ -1311,6 +1311,18 @@ const Map<String, dynamic> appLocalePt = {
   AppLocale.rommTesting: 'Testando...',
   AppLocale.rommConnectionSuccess: 'Conexão bem-sucedida',
   AppLocale.rommConnectionFailed: 'Falha na conexão',
+  AppLocale.rommErrorTls:
+      'Não foi possível estabelecer uma conexão segura (HTTPS). Se o seu servidor RomM não usar HTTPS, digite a URL começando com http://.',
+  AppLocale.rommErrorUnreachable:
+      'Não foi possível acessar o servidor RomM: {error}',
+  AppLocale.rommErrorTimeout: 'O servidor RomM não respondeu a tempo.',
+  AppLocale.rommErrorInvalidApiKey: 'A chave de API foi recusada.',
+  AppLocale.rommErrorUnexpectedStatus:
+      'O servidor respondeu com um erro ({error}). Verifique se a URL aponta para o seu servidor RomM.',
+  AppLocale.rommErrorNotRomm:
+      'Essa URL não respondeu como um servidor RomM. Verifique a URL do servidor.',
+  AppLocale.rommErrorServerStatus:
+      'O servidor RomM respondeu com um erro ({error}).',
   AppLocale.rommConnectedAs: 'Conectado como {user}',
   AppLocale.rommCredentialsRequired:
       'Informe a URL do servidor, o usuário e a senha',

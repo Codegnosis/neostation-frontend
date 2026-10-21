@@ -1362,6 +1362,16 @@ mixin AppLocale {
   static const String rommTesting = 'romm_testing';
   static const String rommConnectionSuccess = 'romm_connection_success';
   static const String rommConnectionFailed = 'romm_connection_failed';
+  // Why connecting to RomM failed (RommFailure); {error} is the system's reason
+  // or the server's status code.
+  static const String rommErrorTls = 'romm_error_tls';
+  static const String rommErrorUnreachable = 'romm_error_unreachable';
+  static const String rommErrorTimeout = 'romm_error_timeout';
+  static const String rommErrorInvalidApiKey = 'romm_error_invalid_api_key';
+  static const String rommErrorUnexpectedStatus =
+      'romm_error_unexpected_status';
+  static const String rommErrorNotRomm = 'romm_error_not_romm';
+  static const String rommErrorServerStatus = 'romm_error_server_status';
   static const String rommConnectedAs = 'romm_connected_as';
   static const String rommCredentialsRequired = 'romm_credentials_required';
   static const String rommAuthPassword = 'romm_auth_password';

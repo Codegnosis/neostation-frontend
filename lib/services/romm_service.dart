@@ -16,17 +16,72 @@ import '../models/romm_play_session.dart';
 import '../models/romm_rom.dart';
 import 'logger_service.dart';
 
-/// Raised when a RomM API call fails; [message] is safe to surface to the user.
+/// Why connecting to a RomM server failed, so the UI can say it in the app
+/// language. Everything else is [RommFailure.other].
+enum RommFailure {
+  /// The address answered, but not over TLS (most often an http-only server
+  /// reached as https://, which is what an address without a scheme becomes).
+  tls,
+
+  /// The server couldn't be reached at all; [RommException.detail] holds the
+  /// system's reason.
+  unreachable,
+
+  /// The server didn't answer in time.
+  timeout,
+
+  /// The username or password was rejected.
+  invalidCredentials,
+
+  /// The API key was rejected.
+  invalidApiKey,
+
+  /// The server answered with a status other than success or rejection;
+  /// [RommException.statusCode] holds it.
+  unexpectedStatus,
+
+  /// The server answered, but not like RomM (no token in its answer, or not
+  /// the JSON RomM sends).
+  notRomm,
+
+  /// A server already confirmed as RomM answered a request with an error
+  /// status; [RommException.statusCode] holds it.
+  serverError,
+
+  /// Any other failure: shown as the generic "connection failed".
+  other,
+}
+
+/// The start of a response body, whitespace collapsed, for the log: enough to
+/// tell a router's login page or another app from RomM.
+String _bodyExcerpt(String body) {
+  final text = body.replaceAll(RegExp(r'\s+'), ' ').trim();
+  return text.length <= 160 ? text : '${text.substring(0, 160)}…';
+}
+
+/// Raised when a RomM API call fails. [message] is English, for the log; the
+/// UI says [kind] in the app language instead.
 class RommException implements Exception {
   final String message;
   final int? statusCode;
+  final RommFailure kind;
+
+  /// A detail worth showing with [kind], e.g. the system's reason a server
+  /// couldn't be reached.
+  final String? detail;
 
   /// The start of what the server answered (content type and a short,
   /// whitespace-collapsed excerpt), for the log only: it tells a web server's
   /// own error page from RomM's. Never shown to the user.
   final String? serverResponse;
 
-  RommException(this.message, {this.statusCode, this.serverResponse});
+  RommException(
+    this.message, {
+    this.statusCode,
+    this.serverResponse,
+    this.kind = RommFailure.other,
+    this.detail,
+  });
 
   @override
   String toString() => 'RommException($statusCode): $message';
@@ -269,8 +324,8 @@ class RommService {
   }
 
   /// Establishes (or confirms) a usable credential, dispatching on the mode the
-  /// service was configured in. Throws [RommException] with a user-facing
-  /// message on failure.
+  /// service was configured in. Throws [RommException] on failure; its
+  /// [RommException.kind] says why.
   Future<void> authenticate() async {
     if (_baseUrl.isEmpty) {
       throw RommException('Server URL is empty');
@@ -292,36 +347,55 @@ class RommService {
           .get(_uri('/api/users/me'), headers: _authHeaders)
           .timeout(const Duration(seconds: 30));
     } on TimeoutException {
-      throw RommException('Connection timed out');
+      throw RommException('Connection timed out', kind: RommFailure.timeout);
     } on HandshakeException {
       throw RommException(
         'TLS handshake failed — try an http:// URL if the server is not HTTPS',
+        kind: RommFailure.tls,
       );
     } on SocketException catch (e) {
-      throw RommException('Cannot reach server: ${e.message}');
+      throw RommException(
+        'Cannot reach server: ${e.message}',
+        kind: RommFailure.unreachable,
+        detail: e.message,
+      );
     } catch (e) {
       throw RommException('Connection failed: $e');
     }
     _checkSession(session);
 
     if (resp.statusCode == 401 || resp.statusCode == 403) {
-      throw RommException('Invalid API key', statusCode: resp.statusCode);
+      throw RommException(
+        'Invalid API key',
+        statusCode: resp.statusCode,
+        kind: RommFailure.invalidApiKey,
+      );
     }
     if (resp.statusCode != 200) {
       throw RommException(
         'Authentication failed (${resp.statusCode})',
         statusCode: resp.statusCode,
+        serverResponse: _bodyExcerpt(resp.body),
+        kind: RommFailure.unexpectedStatus,
       );
     }
 
+    // Anything can answer 200 at this path (a router's login page, a web
+    // app's catch-all), so an answer that isn't JSON isn't RomM. A JSON answer
+    // without the expected shape only costs us the display name.
+    final Object? decoded;
     try {
-      final decoded = jsonDecode(resp.body);
-      if (decoded is Map<String, dynamic>) {
-        final name = decoded['username']?.toString();
-        if (name != null && name.isNotEmpty) _username = name;
-      }
+      decoded = jsonDecode(resp.body);
     } catch (_) {
-      // The key works; a surprising body shape only costs us the display name.
+      throw RommException(
+        'Server did not answer like RomM',
+        serverResponse: _bodyExcerpt(resp.body),
+        kind: RommFailure.notRomm,
+      );
+    }
+    if (decoded is Map<String, dynamic>) {
+      final name = decoded['username']?.toString();
+      if (name != null && name.isNotEmpty) _username = name;
     }
   }
 
@@ -353,13 +427,18 @@ class RommService {
         playtimeGranted = true;
       }
     } on TimeoutException {
-      throw RommException('Connection timed out');
+      throw RommException('Connection timed out', kind: RommFailure.timeout);
     } on HandshakeException {
       throw RommException(
         'TLS handshake failed — try an http:// URL if the server is not HTTPS',
+        kind: RommFailure.tls,
       );
     } on SocketException catch (e) {
-      throw RommException('Cannot reach server: ${e.message}');
+      throw RommException(
+        'Cannot reach server: ${e.message}',
+        kind: RommFailure.unreachable,
+        detail: e.message,
+      );
     } catch (e) {
       throw RommException('Connection failed: $e');
     }
@@ -369,12 +448,15 @@ class RommService {
       throw RommException(
         'Invalid username or password',
         statusCode: resp.statusCode,
+        kind: RommFailure.invalidCredentials,
       );
     }
     if (resp.statusCode != 200) {
       throw RommException(
         'Authentication failed (${resp.statusCode})',
         statusCode: resp.statusCode,
+        serverResponse: _bodyExcerpt(resp.body),
+        kind: RommFailure.unexpectedStatus,
       );
     }
 
@@ -414,10 +496,24 @@ class RommService {
   }
 
   void _applyTokenResponse(String responseBody) {
-    final json = jsonDecode(responseBody) as Map<String, dynamic>;
+    // A server that isn't RomM (a router's login page, another app on the
+    // port) can answer 200 with something else entirely.
+    final Map<String, dynamic> json;
+    try {
+      json = jsonDecode(responseBody) as Map<String, dynamic>;
+    } catch (_) {
+      throw RommException(
+        'Server did not answer with a token',
+        serverResponse: _bodyExcerpt(responseBody),
+        kind: RommFailure.notRomm,
+      );
+    }
     final access = json['access_token']?.toString();
     if (access == null || access.isEmpty) {
-      throw RommException('Server did not return an access token');
+      throw RommException(
+        'Server did not return an access token',
+        kind: RommFailure.notRomm,
+      );
     }
     _accessToken = access;
     final refresh = json['refresh_token']?.toString();
@@ -454,7 +550,7 @@ class RommService {
       usesApiKey || (_accessToken != null && _accessToken!.isNotEmpty);
 
   /// Authenticates and performs a lightweight call to confirm the connection
-  /// and credentials are valid (used by the settings "Test" button).
+  /// and credentials are valid (used by [RommProvider.connect]).
   Future<void> verifyConnection() async {
     await authenticate();
     // In API-key mode authenticate() *is* the authorized `/api/users/me` call,
@@ -462,10 +558,21 @@ class RommService {
     if (usesApiKey) return;
     // A successful, authorized call confirms the token works end-to-end. Hit
     // the lightweight `/api/users/me` rather than downloading the full platform
-    // list — same auth guarantee, a fraction of the payload. Error mapping is
-    // unchanged: authenticate() surfaces bad credentials as 401/403, and any
-    // other failure surfaces as the shared "Request failed"/network message.
-    await _authedGet('/api/users/me');
+    // list — same auth guarantee, a fraction of the payload. authenticate()
+    // surfaces bad credentials as 401/403. The token has just proven this is
+    // RomM, so an error status from this call is the server's
+    // ([RommFailure.serverError]), not a wrong address.
+    try {
+      await _authedGet('/api/users/me');
+    } on RommException catch (e) {
+      if (e.kind != RommFailure.other || e.statusCode == null) rethrow;
+      throw RommException(
+        e.message,
+        statusCode: e.statusCode,
+        serverResponse: e.serverResponse,
+        kind: RommFailure.serverError,
+      );
+    }
   }
 
   /// Validates a restored session, allowing cached tokens to refresh normally.

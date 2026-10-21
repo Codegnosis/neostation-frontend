@@ -1182,6 +1182,15 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.rommTesting: '테스트 중...',
   AppLocale.rommConnectionSuccess: '연결에 성공했습니다',
   AppLocale.rommConnectionFailed: '연결에 실패했습니다',
+  AppLocale.rommErrorTls:
+      '보안(HTTPS) 연결을 설정할 수 없습니다. RomM 서버가 HTTPS를 사용하지 않는다면 http://로 시작하는 URL을 입력하세요.',
+  AppLocale.rommErrorUnreachable: 'RomM 서버에 연결할 수 없습니다: {error}',
+  AppLocale.rommErrorTimeout: 'RomM 서버가 제때 응답하지 않았습니다.',
+  AppLocale.rommErrorInvalidApiKey: 'API 키가 거부되었습니다.',
+  AppLocale.rommErrorUnexpectedStatus:
+      '서버가 오류로 응답했습니다({error}). URL이 RomM 서버를 가리키는지 확인하세요.',
+  AppLocale.rommErrorNotRomm: '이 URL은 RomM 서버처럼 응답하지 않았습니다. 서버 URL을 확인하세요.',
+  AppLocale.rommErrorServerStatus: 'RomM 서버가 오류로 응답했습니다({error}).',
   AppLocale.rommConnectedAs: '{user}(으)로 연결됨',
   AppLocale.rommCredentialsRequired: '서버 URL, 사용자 이름, 비밀번호를 입력하세요',
   AppLocale.rommAuthPassword: '비밀번호',

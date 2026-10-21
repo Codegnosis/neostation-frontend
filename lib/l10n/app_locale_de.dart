@@ -1332,6 +1332,18 @@ const Map<String, dynamic> appLocaleDe = {
   AppLocale.rommTesting: 'Wird getestet...',
   AppLocale.rommConnectionSuccess: 'Verbindung erfolgreich',
   AppLocale.rommConnectionFailed: 'Verbindung fehlgeschlagen',
+  AppLocale.rommErrorTls:
+      'Keine sichere (HTTPS-)Verbindung möglich. Wenn dein RomM-Server kein HTTPS nutzt, gib seine URL mit http:// am Anfang ein.',
+  AppLocale.rommErrorUnreachable: 'RomM-Server nicht erreichbar: {error}',
+  AppLocale.rommErrorTimeout:
+      'Der RomM-Server hat nicht rechtzeitig geantwortet.',
+  AppLocale.rommErrorInvalidApiKey: 'Der API-Schlüssel wurde abgelehnt.',
+  AppLocale.rommErrorUnexpectedStatus:
+      'Der Server hat mit einem Fehler geantwortet ({error}). Prüfe, ob die URL auf deinen RomM-Server zeigt.',
+  AppLocale.rommErrorNotRomm:
+      'Unter dieser URL antwortet kein RomM-Server. Prüfe die Server-URL.',
+  AppLocale.rommErrorServerStatus:
+      'Der RomM-Server hat mit einem Fehler geantwortet ({error}).',
   AppLocale.rommConnectedAs: 'Verbunden als {user}',
   AppLocale.rommCredentialsRequired:
       'Gib Server-URL, Benutzername und Passwort ein',
