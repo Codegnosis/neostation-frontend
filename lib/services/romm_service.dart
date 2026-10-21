@@ -496,24 +496,29 @@ class RommService {
     Future<T> Function() send, {
     required int Function(T resp) statusOf,
   }) async {
+    // Both attempts map a timeout or an unreachable server the same way, so a
+    // caller never sees a raw exception just because a token was refreshed.
+    Future<T> attempt() async {
+      try {
+        return await send();
+      } on TimeoutException {
+        throw RommException('Request timed out');
+      } on SocketException catch (e) {
+        throw RommException('Cannot reach server: ${e.message}');
+      }
+    }
+
     final session = _session;
     await _ensureToken();
     _checkSession(session);
-    T resp;
-    try {
-      resp = await send();
-    } on TimeoutException {
-      throw RommException('Request timed out');
-    } on SocketException catch (e) {
-      throw RommException('Cannot reach server: ${e.message}');
-    }
+    final resp = await attempt();
     final status = statusOf(resp);
     if (status != 401 && status != 403) return resp;
     _checkSession(session);
     if (usesApiKey) return resp;
     await (status == 401 ? _refreshAccessToken() : authenticate());
     _checkSession(session);
-    return send();
+    return attempt();
   }
 
   /// Issues an authenticated GET for a server-relative path+query, applying the
@@ -1132,6 +1137,20 @@ class RommService {
 
   // ── Download ─────────────────────────────────────────────────────────────
 
+  /// How long [downloadRom] waits for the response headers.
+  @visibleForTesting
+  static const downloadRequestTimeout = Duration(seconds: 60);
+
+  /// How long [downloadRom] waits for the next chunk of the body. There is no
+  /// limit on the whole transfer: a multi-GB ROM over slow wifi is fine, as
+  /// long as it keeps arriving.
+  @visibleForTesting
+  static const downloadStallTimeout = Duration(seconds: 60);
+
+  /// How often [downloadRom] asks its `shouldCancel` while it waits on the
+  /// server, so a cancel reaches a download that has stopped arriving.
+  static const _cancelPollInterval = Duration(milliseconds: 250);
+
   /// Streams a ROM download to [destFilePath].
   ///
   /// Writes to a sibling `.part` temp file and renames it into place only on
@@ -1139,12 +1158,21 @@ class RommService {
   /// Streaming (not buffering) keeps memory flat for multi-GB ROMs.
   ///
   /// [onProgress] receives `(receivedBytes, totalBytes?)`. [shouldCancel] is
-  /// polled between chunks; returning true aborts and cleans up the temp file.
+  /// polled between chunks, and every [_cancelPollInterval] while waiting on
+  /// the server; returning true aborts with [RommCancelledException] and
+  /// cleans up the temp file.
+  ///
+  /// The headers must arrive within [requestTimeout] and each chunk of the
+  /// body within [stallTimeout] of the last, or the download fails with a
+  /// [RommException]. A timeout, a cancel or any other failure aborts the
+  /// request, which closes its connection.
   Future<void> downloadRom(
     RommRom rom, {
     required String destFilePath,
     void Function(int received, int? total)? onProgress,
     bool Function()? shouldCancel,
+    Duration requestTimeout = downloadRequestTimeout,
+    Duration stallTimeout = downloadStallTimeout,
   }) async {
     final fileName = rom.fsName.isNotEmpty ? rom.fsName : '${rom.id}';
     final endpoint =
@@ -1157,57 +1185,114 @@ class RommService {
     }
     await Directory(path.dirname(destFilePath)).create(recursive: true);
 
-    // Build a fresh request each attempt so the shared retry policy (401 →
-    // refresh, 403 → re-auth) picks up the new token on its second try.
-    final resp = await _sendWithAuthRetry<http.StreamedResponse>(
-      () => _httpClient.send(
-        http.Request('GET', _uri(endpoint))..headers.addAll(_authHeaders),
-      ),
-      statusOf: (r) => r.statusCode,
-    );
-
-    if (resp.statusCode != 200) {
-      throw RommException(
-        'Download failed (${resp.statusCode})',
-        statusCode: resp.statusCode,
-        serverResponse: await responseExcerpt(resp),
-      );
+    // Completing [abort] tells the client to drop the request (and its
+    // socket). It is shared by both attempts of the auth retry and completed
+    // on every way out of this method; once the body has been read in full,
+    // completing it has no effect.
+    final abort = Completer<void>();
+    void fireAbort() {
+      if (!abort.isCompleted) abort.complete();
     }
 
-    final total = resp.contentLength;
-    var received = 0;
-    final sink = tmpFile.openWrite();
+    // Completes with null when [shouldCancel] says so. A plain value, never
+    // an error, so a cancel that lands after the download has moved on is
+    // nobody's unhandled exception. While the body streams, the poll also
+    // cancels [chunks], which ends a pending `moveNext` with false: racing
+    // every chunk against this future instead left a listener on it per
+    // chunk, hundreds of megabytes over a large download.
+    final cancelled = Completer<Never?>();
+    StreamIterator<List<int>>? chunks;
+    final cancelPoll = shouldCancel == null
+        ? null
+        : Timer.periodic(_cancelPollInterval, (_) {
+            if (!cancelled.isCompleted && shouldCancel()) {
+              cancelled.complete(null);
+              chunks?.cancel();
+            }
+          });
+
+    IOSink? sink;
+    // Only a failure while the body streams to disk is reported as a
+    // "Download error"; anything else reaches the caller as it was thrown.
+    var reading = false;
     try {
-      await for (final chunk in resp.stream) {
-        if (shouldCancel?.call() ?? false) {
-          await sink.close();
-          await tmpFile.delete();
-          throw RommCancelledException();
+      // Build a fresh request each attempt so the shared retry policy (401 →
+      // refresh, 403 → re-auth) picks up the new token on its second try.
+      final resp = await _sendWithAuthRetry<http.StreamedResponse>(() async {
+        final sent = _httpClient
+            .send(
+              http.AbortableRequest(
+                'GET',
+                _uri(endpoint),
+                abortTrigger: abort.future,
+              )..headers.addAll(_authHeaders),
+            )
+            .timeout(requestTimeout);
+        final answered = await Future.any<http.StreamedResponse?>([
+          sent,
+          cancelled.future,
+        ]);
+        if (answered == null) throw RommCancelledException();
+        return answered;
+      }, statusOf: (r) => r.statusCode);
+
+      if (resp.statusCode != 200) {
+        throw RommException(
+          'Download failed (${resp.statusCode})',
+          statusCode: resp.statusCode,
+          serverResponse: await responseExcerpt(resp),
+        );
+      }
+
+      final total = resp.contentLength;
+      var received = 0;
+      chunks = StreamIterator(resp.stream.timeout(stallTimeout));
+      final out = sink = tmpFile.openWrite();
+      reading = true;
+      while (true) {
+        final bool more;
+        try {
+          more = await chunks.moveNext();
+          if (cancelled.isCompleted) throw RommCancelledException();
+        } on TimeoutException {
+          throw RommException(
+            'Download stalled: no data for ${stallTimeout.inSeconds} s',
+          );
         }
-        sink.add(chunk);
+        if (!more) break;
+        if (shouldCancel?.call() ?? false) throw RommCancelledException();
+        final chunk = chunks.current;
+        out.add(chunk);
         received += chunk.length;
         onProgress?.call(received, total);
       }
-      await sink.flush();
-      await sink.close();
-    } catch (e) {
-      try {
-        await sink.close();
-      } catch (_) {}
-      if (await tmpFile.exists()) {
-        await tmpFile.delete();
-      }
-      if (e is RommException) rethrow;
-      throw RommException('Download error: $e');
-    }
+      await out.flush();
+      await out.close();
+      sink = null;
+      reading = false;
 
-    // Replace any existing destination, then move temp into place.
-    final destFile = File(destFilePath);
-    if (await destFile.exists()) {
-      await destFile.delete();
+      // Replace any existing destination, then move temp into place.
+      final destFile = File(destFilePath);
+      if (await destFile.exists()) {
+        await destFile.delete();
+      }
+      await tmpFile.rename(destFilePath);
+      _log.i('RomM download complete: $destFilePath ($received bytes)');
+    } catch (e) {
+      fireAbort();
+      try {
+        await sink?.close();
+      } catch (_) {}
+      try {
+        if (await tmpFile.exists()) await tmpFile.delete();
+      } catch (_) {}
+      if (e is RommException || !reading) rethrow;
+      throw RommException('Download error: $e');
+    } finally {
+      cancelPoll?.cancel();
+      fireAbort();
+      await chunks?.cancel();
     }
-    await tmpFile.rename(destFilePath);
-    _log.i('RomM download complete: $destFilePath ($received bytes)');
   }
 
   /// The content type and first [maxChars] characters of a failed [resp]'s
