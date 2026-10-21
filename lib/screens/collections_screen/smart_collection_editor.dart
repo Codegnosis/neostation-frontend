@@ -59,7 +59,7 @@ class _RuleDraft {
   Object? value;
   num? upper;
   _RuleDraft({
-    this.field = SmartField.system,
+    this.field = SmartField.title,
     this.operator = SmartOperator.isEqual,
     this.value,
     this.upper,

@@ -361,9 +361,14 @@ void main() {
       final ctx = await host(tester, const Size(1280, 720));
       final result = SmartCollectionEditor.show(ctx, initialName: 'New smart');
       await tester.pumpAndSettle();
+      expect(find.text('Title'), findsOneWidget);
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
       expect(find.text('Enter a valid value for this rule.'), findsOneWidget);
+      await tester.tap(find.text('Title'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('System'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Choose a value'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Super Nintendo').first);
