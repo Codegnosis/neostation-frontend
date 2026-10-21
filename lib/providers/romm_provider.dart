@@ -515,40 +515,15 @@ class RommProvider extends ChangeNotifier {
     }
   }
 
-  /// Validates credentials against the server without persisting them.
-  /// Returns null on success, or a user-facing error message.
-  ///
-  /// Pass either [username]/[password] or an [apiKey], matching [connect].
-  Future<String?> testConnection({
-    required String serverUrl,
-    String username = '',
-    String password = '',
-    String apiKey = '',
-  }) async {
-    final probe = RommService()
-      ..configure(
-        serverUrl: serverUrl,
-        username: username,
-        password: password,
-        apiKey: apiKey,
-      );
-    try {
-      await probe.verifyConnection();
-      return null;
-    } on RommException catch (e) {
-      return e.message;
-    } catch (e) {
-      return 'Connection failed: $e';
-    }
-  }
-
   /// Authenticates, persists credentials + tokens, and marks the provider
-  /// connected. Returns null on success or a user-facing error message.
+  /// connected. Returns null on success, or the failure: its
+  /// [RommException.kind] says why in a form the UI can translate
+  /// (`rommFailureMessage`), its message is English for the log.
   ///
   /// Pass either [username]/[password] for the OAuth2 password grant or an
   /// [apiKey] for a RomM Client API Token; the mode that isn't used is stored
   /// empty, so reconnecting one way clears the other way's secret.
-  Future<String?> connect({
+  Future<RommException?> connect({
     required String serverUrl,
     String username = '',
     String password = '',
@@ -568,15 +543,22 @@ class RommProvider extends ChangeNotifier {
     try {
       await _service.verifyConnection();
     } on RommException catch (e) {
+      // The user sees a translated message for e.kind; the cause is here.
+      _log.w(
+        'RomM: connecting to ${_service.baseUrl} failed (${e.kind.name}): '
+        '${e.message}'
+        '${e.serverResponse == null ? '' : ' — server answered: ${e.serverResponse}'}',
+      );
       _status = RommConnectionStatus.error;
       _lastError = e.message;
       notifyListeners();
-      return e.message;
+      return e;
     } catch (e) {
+      _log.w('RomM: connecting to ${_service.baseUrl} failed: $e');
       _status = RommConnectionStatus.error;
       _lastError = 'Connection failed: $e';
       notifyListeners();
-      return _lastError;
+      return RommException(_lastError!);
     }
 
     await RommRepository.saveConfig(

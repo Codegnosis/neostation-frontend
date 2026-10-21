@@ -1295,6 +1295,17 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.rommTesting: 'Menguji...',
   AppLocale.rommConnectionSuccess: 'Koneksi berhasil',
   AppLocale.rommConnectionFailed: 'Koneksi gagal',
+  AppLocale.rommErrorTls:
+      'Tidak dapat membuat koneksi aman (HTTPS). Jika server RomM Anda tidak menggunakan HTTPS, masukkan URL-nya dengan awalan http://.',
+  AppLocale.rommErrorUnreachable: 'Server RomM tidak dapat dijangkau: {error}',
+  AppLocale.rommErrorTimeout: 'Server RomM tidak merespons tepat waktu.',
+  AppLocale.rommErrorInvalidApiKey: 'Kunci API ditolak.',
+  AppLocale.rommErrorUnexpectedStatus:
+      'Server merespons dengan kesalahan ({error}). Periksa apakah URL tersebut mengarah ke server RomM Anda.',
+  AppLocale.rommErrorNotRomm:
+      'URL itu tidak merespons seperti server RomM. Periksa URL server.',
+  AppLocale.rommErrorServerStatus:
+      'Server RomM merespons dengan kesalahan ({error}).',
   AppLocale.rommConnectedAs: 'Terhubung sebagai {user}',
   AppLocale.rommCredentialsRequired:
       'Masukkan URL server, nama pengguna, dan kata sandi',

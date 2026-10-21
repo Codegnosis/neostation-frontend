@@ -1292,6 +1292,17 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.rommTesting: 'Проверка...',
   AppLocale.rommConnectionSuccess: 'Подключение установлено',
   AppLocale.rommConnectionFailed: 'Не удалось подключиться',
+  AppLocale.rommErrorTls:
+      'Не удалось установить защищённое (HTTPS) соединение. Если ваш сервер RomM не использует HTTPS, введите его URL, начиная с http://.',
+  AppLocale.rommErrorUnreachable:
+      'Не удаётся подключиться к серверу RomM: {error}',
+  AppLocale.rommErrorTimeout: 'Сервер RomM не ответил вовремя.',
+  AppLocale.rommErrorInvalidApiKey: 'Ключ API отклонён.',
+  AppLocale.rommErrorUnexpectedStatus:
+      'Сервер ответил ошибкой ({error}). Проверьте, что URL указывает на ваш сервер RomM.',
+  AppLocale.rommErrorNotRomm:
+      'По этому URL отвечает не сервер RomM. Проверьте URL сервера.',
+  AppLocale.rommErrorServerStatus: 'Сервер RomM ответил ошибкой ({error}).',
   AppLocale.rommConnectedAs: 'Подключено как {user}',
   AppLocale.rommCredentialsRequired:
       'Введите URL сервера, имя пользователя и пароль',

@@ -1139,6 +1139,15 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.rommTesting: '正在测试...',
   AppLocale.rommConnectionSuccess: '连接成功',
   AppLocale.rommConnectionFailed: '连接失败',
+  AppLocale.rommErrorTls:
+      '无法建立安全（HTTPS）连接。如果您的 RomM 服务器不使用 HTTPS，请输入以 http:// 开头的 URL。',
+  AppLocale.rommErrorUnreachable: '无法连接到 RomM 服务器：{error}',
+  AppLocale.rommErrorTimeout: 'RomM 服务器未及时响应。',
+  AppLocale.rommErrorInvalidApiKey: 'API 密钥被拒绝。',
+  AppLocale.rommErrorUnexpectedStatus:
+      '服务器返回了错误（{error}）。请检查 URL 是否指向您的 RomM 服务器。',
+  AppLocale.rommErrorNotRomm: '该 URL 的响应不像 RomM 服务器。请检查服务器 URL。',
+  AppLocale.rommErrorServerStatus: 'RomM 服务器返回了错误（{error}）。',
   AppLocale.rommConnectedAs: '已以 {user} 身份连接',
   AppLocale.rommCredentialsRequired: '请输入服务器 URL、用户名和密码',
   AppLocale.rommAuthPassword: '密码',

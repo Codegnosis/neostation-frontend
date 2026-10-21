@@ -68,14 +68,16 @@ void main() {
 
   test('connect rejects a token that fails an authenticated request', () async {
     serve(403);
-    expect(
-      await provider.connect(
-        serverUrl: 'https://romm.local',
-        username: 'testuser',
-        password: 'password',
-      ),
-      isNotNull,
+    final failure = await provider.connect(
+      serverUrl: 'https://romm.local',
+      username: 'testuser',
+      password: 'password',
     );
+    expect(failure, isNotNull);
+    // The token proved the server is RomM, so this is the server's error, and
+    // the connect screen says so in the app language.
+    expect(failure!.kind, RommFailure.serverError);
+    expect(failure.statusCode, 403);
     expect(provider.status, RommConnectionStatus.error);
     expect(requests, contains('/api/users/me'));
     expect(await RommRepository.getConfig(), isNull);

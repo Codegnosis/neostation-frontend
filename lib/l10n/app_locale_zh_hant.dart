@@ -1140,6 +1140,15 @@ const Map<String, dynamic> appLocaleZhHant = {
   AppLocale.rommTesting: '正在測試...',
   AppLocale.rommConnectionSuccess: '連線成功',
   AppLocale.rommConnectionFailed: '連線失敗',
+  AppLocale.rommErrorTls:
+      '無法建立安全（HTTPS）連線。如果您的 RomM 伺服器不使用 HTTPS，請輸入以 http:// 開頭的 URL。',
+  AppLocale.rommErrorUnreachable: '無法連線到 RomM 伺服器：{error}',
+  AppLocale.rommErrorTimeout: 'RomM 伺服器未及時回應。',
+  AppLocale.rommErrorInvalidApiKey: 'API 金鑰遭到拒絕。',
+  AppLocale.rommErrorUnexpectedStatus:
+      '伺服器回傳了錯誤（{error}）。請確認 URL 是否指向您的 RomM 伺服器。',
+  AppLocale.rommErrorNotRomm: '該 URL 的回應不像 RomM 伺服器。請檢查伺服器 URL。',
+  AppLocale.rommErrorServerStatus: 'RomM 伺服器回傳了錯誤（{error}）。',
   AppLocale.rommConnectedAs: '已以 {user} 身分連線',
   AppLocale.rommCredentialsRequired: '請輸入伺服器 URL、使用者名稱和密碼',
   AppLocale.rommAuthPassword: '密碼',

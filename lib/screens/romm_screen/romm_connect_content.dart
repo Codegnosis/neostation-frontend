@@ -17,6 +17,7 @@ import '../../sync/providers/romm_provider.dart';
 import '../../sync/sync_manager.dart';
 import '../../utils/gamepad_nav.dart';
 import '../../utils/login_form_selection.dart';
+import '../../utils/romm_failure_message.dart';
 import '../../widgets/custom_notification.dart';
 import '../app_screen.dart';
 
@@ -271,7 +272,7 @@ class _RommConnectContentState extends State<RommConnectContent>
     if (error != null) {
       AppNotification.showNotification(
         context,
-        error,
+        rommFailureMessage(error, (key) => key.getString(context)),
         type: NotificationType.error,
       );
     } else {

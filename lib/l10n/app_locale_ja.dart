@@ -1175,6 +1175,16 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.rommTesting: 'テスト中...',
   AppLocale.rommConnectionSuccess: '接続に成功しました',
   AppLocale.rommConnectionFailed: '接続に失敗しました',
+  AppLocale.rommErrorTls:
+      '安全な（HTTPS）接続を確立できませんでした。RomM サーバーが HTTPS を使用していない場合は、http:// から始まる URL を入力してください。',
+  AppLocale.rommErrorUnreachable: 'RomM サーバーに接続できません: {error}',
+  AppLocale.rommErrorTimeout: 'RomM サーバーが時間内に応答しませんでした。',
+  AppLocale.rommErrorInvalidApiKey: 'API キーが拒否されました。',
+  AppLocale.rommErrorUnexpectedStatus:
+      'サーバーがエラーを返しました（{error}）。URL が RomM サーバーを指しているか確認してください。',
+  AppLocale.rommErrorNotRomm:
+      'その URL は RomM サーバーとして応答しませんでした。サーバー URL を確認してください。',
+  AppLocale.rommErrorServerStatus: 'RomM サーバーがエラーを返しました（{error}）。',
   AppLocale.rommConnectedAs: '{user} として接続中',
   AppLocale.rommCredentialsRequired: 'サーバー URL、ユーザー名、パスワードを入力してください',
   AppLocale.rommAuthPassword: 'パスワード',
