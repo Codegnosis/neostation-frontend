@@ -403,6 +403,10 @@ const Map<String, dynamic> appLocaleEn = {
       ' {count} ES-DE imported entries are left untouched.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       ' {count} ES-DE imported entry is left untouched.',
+  AppLocale.cleanOrphanedMetadataNotRemoved:
+      ' {count} entries couldn\'t be removed. Run the tool again to retry.',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne:
+      ' {count} entry couldn\'t be removed. Run the tool again to retry.',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       'Nothing to delete: the only orphaned metadata was imported from ES-DE, and this tool leaves it alone.',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:

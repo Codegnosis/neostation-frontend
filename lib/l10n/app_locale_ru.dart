@@ -409,6 +409,10 @@ const Map<String, dynamic> appLocaleRu = {
       ' Записи, импортированные из ES-DE, остаются нетронутыми: {count}.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       ' {count} запись, импортированная из ES-DE, остаётся нетронутой.',
+  AppLocale.cleanOrphanedMetadataNotRemoved:
+      ' Не удалось удалить записи: {count}. Запустите инструмент ещё раз.',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne:
+      ' Не удалось удалить {count} запись. Запустите инструмент ещё раз.',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       'Удалять нечего: все потерянные метаданные импортированы из ES-DE, а этот инструмент их не трогает.',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:

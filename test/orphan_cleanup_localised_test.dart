@@ -63,14 +63,14 @@ void main() {
           ),
         ),
       );
-      // The completion note uses the same helper, with the count of entries
-      // actually skipped.
+      // The completion note uses the same helper; orphanCleanupOutcome gives
+      // it the count of entries actually skipped (tools_outcome_test).
       expect(
         clean,
         matches(
           RegExp(
-            r'esdeEntriesKeptSuffix\(\s*context,\s*'
-            r'result\.skippedEsdeItems\.length,?\s*\)',
+            r'esdeKept:\s*\(count\)\s*=>\s*'
+            r'esdeEntriesKeptSuffix\(\s*context,\s*count,?\s*\)',
           ),
         ),
       );
@@ -118,18 +118,11 @@ void main() {
   group('the outcome notification', () {
     test('says the cleanup failed when nothing could be deleted', () {
       // A failed delete lands in result.errors, not result.deletedItems, so
-      // a run where every delete failed has no deletions; the old mapping
-      // happened to show that as an error, an info type would not.
-      final failed = RegExp(
-        r'\} else if \(result\.errors\.isNotEmpty\) \{(.*?)\n        \}',
-        dotAll: true,
-      ).firstMatch(clean);
-      expect(failed, isNotNull, reason: 'no branch for a failed cleanup');
-      expect(failed!.group(1), contains('localeFailed'));
-      expect(failed.group(1), contains('NotificationType.error'));
+      // a run where every delete failed has no deletions. The outcome is
+      // chosen by orphanCleanupOutcome, whose cases tools_outcome_test checks.
       expect(
-        clean.indexOf('if (result.hasDeletions)'),
-        lessThan(clean.indexOf('} else if (result.errors.isNotEmpty)')),
+        clean,
+        contains('(completionMessage, completionType) = orphanCleanupOutcome('),
       );
     });
 
@@ -224,6 +217,27 @@ void main() {
       expect(
         await label(tester, 'ru', (c) => orphanedMetadataDeleteLabel(c, 7)),
         endsWith(': 7.'),
+      );
+    });
+
+    testWidgets('the not-removed note changes form at exactly one', (
+      tester,
+    ) async {
+      expect(
+        await label(
+          tester,
+          'en',
+          (c) => orphanedMetadataNotRemovedSuffix(c, 1),
+        ),
+        " 1 entry couldn't be removed. Run the tool again to retry.",
+      );
+      expect(
+        await label(
+          tester,
+          'en',
+          (c) => orphanedMetadataNotRemovedSuffix(c, 3),
+        ),
+        " 3 entries couldn't be removed. Run the tool again to retry.",
       );
     });
 

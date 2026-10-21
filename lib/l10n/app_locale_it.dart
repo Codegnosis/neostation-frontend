@@ -417,6 +417,10 @@ const Map<String, dynamic> appLocaleIt = {
       ' {count} voci importate da ES-DE restano intatte.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       ' {count} voce importata da ES-DE resta intatta.',
+  AppLocale.cleanOrphanedMetadataNotRemoved:
+      ' Impossibile rimuovere {count} voci. Esegui di nuovo lo strumento.',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne:
+      ' Impossibile rimuovere {count} voce. Esegui di nuovo lo strumento.',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       'Niente da eliminare: gli unici metadati orfani sono stati importati da ES-DE, e questo strumento non li tocca.',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:

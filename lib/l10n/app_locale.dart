@@ -359,6 +359,12 @@ mixin AppLocale {
       'clean_orphaned_metadata_esde_skipped_suffix';
   static const String cleanOrphanedMetadataEsdeSkippedSuffixOne =
       'clean_orphaned_metadata_esde_skipped_suffix_one';
+  // Entries a cleanup couldn't remove; appended like the ES-DE note, so it
+  // carries its own leading space where the language spaces sentences.
+  static const String cleanOrphanedMetadataNotRemoved =
+      'clean_orphaned_metadata_not_removed';
+  static const String cleanOrphanedMetadataNotRemovedOne =
+      'clean_orphaned_metadata_not_removed_one';
   static const String cleanOrphanedMetadataNothingToDelete =
       'clean_orphaned_metadata_nothing_to_delete';
   static const String cleanOrphanedMetadataMediaUnavailable =

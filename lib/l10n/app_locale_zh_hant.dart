@@ -344,6 +344,8 @@ const Map<String, dynamic> appLocaleZhHant = {
       '{count} 筆從 ES-DE 匯入的項目保持不變。',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       '{count} 筆從 ES-DE 匯入的項目保持不變。',
+  AppLocale.cleanOrphanedMetadataNotRemoved: '有 {count} 筆項目無法刪除，請再次執行此工具。',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne: '有 {count} 筆項目無法刪除，請再次執行此工具。',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       '沒有可刪除的內容：孤立中介資料皆從 ES-DE 匯入，此工具不會刪除它們。',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:

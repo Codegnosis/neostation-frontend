@@ -403,6 +403,10 @@ const Map<String, dynamic> appLocaleId = {
       ' {count} entri yang diimpor dari ES-DE dibiarkan apa adanya.',
   AppLocale.cleanOrphanedMetadataEsdeSkippedSuffixOne:
       ' {count} entri yang diimpor dari ES-DE dibiarkan apa adanya.',
+  AppLocale.cleanOrphanedMetadataNotRemoved:
+      ' {count} entri tidak dapat dihapus. Jalankan alat ini lagi untuk mencoba ulang.',
+  AppLocale.cleanOrphanedMetadataNotRemovedOne:
+      ' {count} entri tidak dapat dihapus. Jalankan alat ini lagi untuk mencoba ulang.',
   AppLocale.cleanOrphanedMetadataNothingToDelete:
       'Tidak ada yang perlu dihapus: satu-satunya metadata yatim diimpor dari ES-DE, dan alat ini tidak menyentuhnya.',
   AppLocale.cleanOrphanedMetadataMediaUnavailable:
