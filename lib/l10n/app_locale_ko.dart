@@ -1155,6 +1155,7 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.romDirectories: 'ROM 폴더',
   AppLocale.tools: '도구',
   AppLocale.toolsSubtitle: 'ROM 정리에 도움이 되는 도구',
+  AppLocale.toolsStillRunning: '도구가 아직 실행 중입니다. 완료될 때까지 기다려 주세요.',
   AppLocale.addRomFolder: 'ROM 폴더 추가',
   AppLocale.removeRomFolder: '제거',
   // RomM (원격 라이브러리 탐색 + 다운로드)
@@ -1195,6 +1196,9 @@ const Map<String, dynamic> appLocaleKo = {
       '서버가 오류로 응답했습니다({error}). URL이 RomM 서버를 가리키는지 확인하세요.',
   AppLocale.rommErrorNotRomm: '이 URL은 RomM 서버처럼 응답하지 않았습니다. 서버 URL을 확인하세요.',
   AppLocale.rommErrorServerStatus: 'RomM 서버가 오류로 응답했습니다({error}).',
+  AppLocale.rommErrorUnreadable: 'RomM 서버가 앱에서 읽을 수 없는 응답을 보냈습니다.',
+  AppLocale.rommErrorLoadFailed: 'RomM에서 불러오지 못했습니다. 다시 시도하세요.',
+  AppLocale.rommErrorSignInRejected: 'RomM 로그인이 거부되었습니다. 다시 로그인하세요.',
   AppLocale.rommConnectedAs: '{user}(으)로 연결됨',
   AppLocale.rommCredentialsRequired: '서버 URL, 사용자 이름, 비밀번호를 입력하세요',
   AppLocale.rommAuthPassword: '비밀번호',

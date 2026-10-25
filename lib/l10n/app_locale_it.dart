@@ -1294,6 +1294,8 @@ const Map<String, dynamic> appLocaleIt = {
   AppLocale.romDirectories: 'Directory ROM',
   AppLocale.tools: 'Strumenti',
   AppLocale.toolsSubtitle: 'Strumenti per aiutarti a organizzare le tue ROM',
+  AppLocale.toolsStillRunning:
+      'Uno strumento è ancora in esecuzione. Attendi che finisca.',
   AppLocale.addRomFolder: 'Aggiungi cartella ROM',
   AppLocale.removeRomFolder: 'Rimuovi',
   // RomM (remote library browse + download)
@@ -1341,6 +1343,11 @@ const Map<String, dynamic> appLocaleIt = {
       'Quell’URL non ha risposto come un server RomM. Controlla l’URL del server.',
   AppLocale.rommErrorServerStatus:
       'Il server RomM ha risposto con un errore ({error}).',
+  AppLocale.rommErrorUnreadable:
+      'Il server RomM ha inviato una risposta che l’app non è riuscita a leggere.',
+  AppLocale.rommErrorLoadFailed: 'Impossibile caricare da RomM. Riprova.',
+  AppLocale.rommErrorSignInRejected:
+      'Il tuo accesso a RomM è stato rifiutato. Accedi di nuovo.',
   AppLocale.rommConnectedAs: 'Connesso come {user}',
   AppLocale.rommCredentialsRequired:
       'Inserisci URL del server, utente e password',
