@@ -11,7 +11,6 @@ import 'package:neostation/models/system_model.dart';
 import 'package:neostation/screens/app_screen.dart';
 import 'package:neostation/services/sfx_service.dart';
 import 'package:provider/provider.dart';
-import '../../../themes/corner_radii.dart';
 import '../../../utils/gamepad_nav.dart';
 import '../../../services/game_service.dart';
 import '../../../utils/game_launch_utils.dart';
@@ -24,7 +23,6 @@ import '../../game_screen/my_games_list.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'grid_geometry.dart';
 import 'widgets/grid_loading_state.dart';
-import '../../../services/ra_library_match_runner.dart';
 import 'widgets/grid_empty_state.dart';
 import 'my_systems_carousel.dart';
 import 'package:neostation/widgets/custom_notification.dart';
@@ -154,38 +152,18 @@ class MySystems extends StatelessWidget {
           }
 
           // If a non-blocking background scan is active, overlay a progress
-          // toast. The RetroAchievements pass that runs after the scan gets the
-          // same treatment: it is the other half of "the library is still
-          // settling", and it is deliberately on this branch and not the
-          // isGlobalScanning one above, so it never blocks the grid.
-          return ValueListenableBuilder<RaMatchProgress?>(
-            valueListenable: RaLibraryMatchRunner.progress,
-            builder: (context, raProgress, _) {
-              // A splash-holding pass is never seen here — the startup screen
-              // is still up. This row is for the pass that resumes after a game
-              // session, which runs against a library already on screen.
-              final showRaRow = raProgress != null && !raProgress.holdsSplash;
-              if (!configProvider.isScanning && !showRaRow) {
-                return systemsWidget;
-              }
-              return Column(
-                children: [
-                  if (configProvider.isScanning)
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: SystemScanProgressWidget(),
-                    ),
-                  Expanded(child: systemsWidget),
-                  // Below the grid, not above it: the header floats over the
-                  // top of this column and would clip the row out of sight.
-                  if (showRaRow)
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: SystemScanProgressWidget(),
-                    ),
-                ],
-              );
-            },
+          // toast above the grid. RetroAchievements matching reports through
+          // the global notification centre instead of adding a second row here.
+          if (!configProvider.isScanning) return systemsWidget;
+
+          return Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: SystemScanProgressWidget(),
+              ),
+              Expanded(child: systemsWidget),
+            ],
           );
         },
       ),
@@ -1191,8 +1169,6 @@ class _SystemCardGridViewState extends State<SystemCardGridView> {
         final List<Widget> cardWidgets = [];
         final Set<int> placedIndices = {};
 
-        double? selLeft, selTop, selWidth, selHeight;
-
         for (int r = 0; r < grid.length; r++) {
           for (int c = 0; c < grid[r].length; c++) {
             final cardIdx = grid[r][c];
@@ -1219,13 +1195,6 @@ class _SystemCardGridViewState extends State<SystemCardGridView> {
               // Center the card vertically inside the row band.
               final rowItemHeight = rowItemHeights[r];
               top = rowTop(r) + (rowItemHeight - cardHeight) / 2;
-            }
-
-            if (cardIdx == widget.selectedIndex) {
-              selLeft = left;
-              selTop = top;
-              selWidth = width;
-              selHeight = cardHeight;
             }
 
             final bool cardIsSelected = cardIdx == widget.selectedIndex;
@@ -1263,6 +1232,7 @@ class _SystemCardGridViewState extends State<SystemCardGridView> {
                   key: ValueKey('system_card_${card.title}_$cardIdx'),
                   info: card,
                   isSelected: cardIsSelected,
+                  showShadow: false,
                   isCompact:
                       card.isGame &&
                       widget.recentCardSize == RecentCardSizes.twoByOne,
@@ -1308,35 +1278,6 @@ class _SystemCardGridViewState extends State<SystemCardGridView> {
           }
         }
 
-        final focusIndicator =
-            (selLeft != null &&
-                selTop != null &&
-                selWidth != null &&
-                selHeight != null)
-            ? Positioned(
-                key: const ValueKey('focus_indicator'),
-                left: selLeft + 1.r,
-                top: selTop + 1.r,
-                width: selWidth - 2.r,
-                height: selHeight - 2.r,
-                child: IgnorePointer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          Theme.of(
-                            context,
-                          ).extension<CornerRadii>()?.radiusExternal ??
-                          BorderRadius.circular(14.r),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        width: 2.r,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            : const SizedBox.shrink();
-
         return SingleChildScrollView(
           controller: _scrollController,
           clipBehavior: Clip.none,
@@ -1345,10 +1286,7 @@ class _SystemCardGridViewState extends State<SystemCardGridView> {
           ),
           child: SizedBox(
             height: totalHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [...cardWidgets, focusIndicator],
-            ),
+            child: Stack(clipBehavior: Clip.none, children: cardWidgets),
           ),
         );
       },
