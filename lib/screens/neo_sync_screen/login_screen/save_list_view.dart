@@ -640,11 +640,14 @@ class _SaveListViewState extends State<SaveListView> {
 
         final success = await neoSyncProvider.deleteOnlineFile(selectedFile.id);
         if (success) {
-          final remainingFiles = neoSyncProvider.onlineFiles.length - 1;
-          if (_selectedSaveIndex >= remainingFiles && remainingFiles > 0) {
-            setState(() => _selectedSaveIndex = remainingFiles - 1);
-          } else if (remainingFiles == 0) {
-            setState(() => _selectedSaveIndex = 0);
+          // The provider has already dropped the deleted save.
+          final remainingFiles = neoSyncProvider.onlineFiles.length;
+          if (mounted && _selectedSaveIndex >= remainingFiles) {
+            setState(
+              () => _selectedSaveIndex = remainingFiles > 0
+                  ? remainingFiles - 1
+                  : 0,
+            );
           }
           await neoSyncProvider.loadQuota();
           if (!mounted) return;
