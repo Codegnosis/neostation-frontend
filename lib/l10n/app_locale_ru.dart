@@ -1222,6 +1222,13 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.errorScanningRomsDetail: 'Ошибка при сканировании ROM: {error}',
   AppLocale.systemsUpdateComplete: 'Системы успешно обновлены!',
   AppLocale.systemsUpdateError: 'Ошибка обновления систем. Попробуйте позже.',
+  AppLocale.checkSystemsUpdates: 'Проверить обновления систем',
+  AppLocale.systemsUpdateChecking: 'Проверка обновлений систем...',
+  AppLocale.systemsUpToDate: 'Системы в актуальном состоянии (v{version})',
+  AppLocale.systemsUpdateCheckFailed:
+      'Не удалось проверить обновления систем. Проверьте подключение к интернету и попробуйте снова.',
+  AppLocale.systemsUpdateNeedsNewerApp:
+      'Для новой версии систем нужна более новая версия NeoStation. Сначала обновите приложение.',
 
   AppLocale.checkingCredentials: 'Проверка учетных данных...',
   AppLocale.scrapeNoCredentials:

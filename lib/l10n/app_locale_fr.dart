@@ -1269,6 +1269,13 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.systemsUpdateComplete: 'Systèmes mis à jour avec succès !',
   AppLocale.systemsUpdateError:
       'Échec de la mise à jour des systèmes. Réessayez plus tard.',
+  AppLocale.checkSystemsUpdates: 'Rechercher des mises à jour des systèmes',
+  AppLocale.systemsUpdateChecking: 'Recherche de mises à jour des systèmes...',
+  AppLocale.systemsUpToDate: 'Les systèmes sont à jour (v{version})',
+  AppLocale.systemsUpdateCheckFailed:
+      'Impossible de rechercher les mises à jour des systèmes. Vérifiez votre connexion Internet et réessayez.',
+  AppLocale.systemsUpdateNeedsNewerApp:
+      'Une version plus récente des systèmes nécessite une version plus récente de NeoStation. Mettez d’abord l’application à jour.',
 
   AppLocale.checkingCredentials: 'Vérification des identifiants...',
   AppLocale.scrapeNoCredentials:

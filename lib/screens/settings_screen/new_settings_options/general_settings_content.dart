@@ -25,6 +25,9 @@ import 'widgets/language_picker_overlay.dart';
 import 'widgets/custom_sounds_dialog.dart';
 import '../../../services/permission_service.dart';
 import '../../../services/sfx_service.dart';
+import '../../../services/systems_update_service.dart';
+import '../../../utils/systems_update_flow.dart';
+import 'widgets/settings_action_button.dart';
 
 /// A specialized content panel for system-wide configuration, including platform-specific orchestration (Windows/Android/Linux).
 ///
@@ -50,6 +53,10 @@ class GeneralSettingsContentState extends State<GeneralSettingsContent>
     with WidgetsBindingObserver {
   bool _isDefaultLauncher = false;
 
+  /// The installed systems version, shown on the check-for-updates row. Empty
+  /// until it has loaded.
+  String _systemsVersion = '';
+
   static final _log = LoggerService.instance;
 
   final ScrollController _scrollController = ScrollController();
@@ -74,19 +81,60 @@ class GeneralSettingsContentState extends State<GeneralSettingsContent>
     WidgetsBinding.instance.addObserver(this);
     _loadFullscreenState();
     _checkDefaultLauncher();
+    _loadSystemsVersion();
+    SystemsUpdateFlow.checking.addListener(_onSystemsCheckChanged);
+    SystemsUpdateFlow.running.addListener(_onSystemsUpdateRunChanged);
 
     // Pre-allocate keys for maximum theoretical setting items (the fixed rows
     // plus one per navigation tab that can be toggled).
-    for (int i = 0; i < 18 + NavTab.values.length; i++) {
+    for (int i = 0; i < 19 + NavTab.values.length; i++) {
       _itemKeys.add(GlobalKey());
     }
   }
 
   @override
   void dispose() {
+    SystemsUpdateFlow.checking.removeListener(_onSystemsCheckChanged);
+    SystemsUpdateFlow.running.removeListener(_onSystemsUpdateRunChanged);
     WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Swaps the row's subtitle between the version and "Checking...".
+  void _onSystemsCheckChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// A run that ended, from here or from start-up, may have installed a new
+  /// version, so the row re-reads it.
+  void _onSystemsUpdateRunChanged() {
+    if (!SystemsUpdateFlow.running.value) _loadSystemsVersion();
+  }
+
+  Future<void> _loadSystemsVersion() async {
+    try {
+      final version = await SystemsUpdateService.currentVersion();
+      if (!mounted) return;
+      setState(() => _systemsVersion = version);
+    } catch (e) {
+      _log.w('Failed to read the systems version: $e');
+    }
+  }
+
+  /// Checks for a systems update now, through the same flow as start-up.
+  ///
+  /// Not awaited: the flow outlives this panel and reports its outcome through
+  /// the notification bell, and the row follows it through the listeners
+  /// above. A press while a check is already running joins that one.
+  void _checkForSystemsUpdate() {
+    unawaited(
+      SystemsUpdateFlow.run(
+        context,
+        trigger: SystemsUpdateTrigger.manual,
+        library: SystemsUpdateLibrary.of(context.read<SqliteConfigProvider>()),
+      ),
+    );
   }
 
   @override
@@ -203,6 +251,7 @@ class GeneralSettingsContentState extends State<GeneralSettingsContent>
     count++; // Ignore hidden files in scan
     count++; // Auto-update App
     count++; // Auto-update Systems
+    count++; // Check for Systems Updates
     count++; // SFX Sounds
     count++; // SFX volume (dimmed, but still navigable, while SFX are off)
     count++; // Custom sounds
@@ -341,6 +390,13 @@ class GeneralSettingsContentState extends State<GeneralSettingsContent>
       configProvider.updateAutoUpdateSystems(
         !configProvider.config.autoUpdateSystems,
       );
+      return;
+    }
+    currentItemIndex++;
+
+    // Protocol: Check for Systems Updates now.
+    if (index == currentItemIndex) {
+      _checkForSystemsUpdate();
       return;
     }
     currentItemIndex++;
@@ -683,6 +739,35 @@ class GeneralSettingsContentState extends State<GeneralSettingsContent>
                             .updateAutoUpdateSystems(value);
                       },
                       activeColor: theme.colorScheme.primary,
+                    ),
+                  );
+                }(),
+
+                // Setting: Check for Systems Updates now.
+                SizedBox(height: 12.r),
+                () {
+                  final index = currentItemIdx++;
+                  final focused =
+                      widget.isContentFocused &&
+                      widget.selectedContentIndex == index;
+                  return SettingRow(
+                    key: _itemKeys[index],
+                    onTap: () => selectItem(index),
+                    focused: focused,
+                    title: AppLocale.checkSystemsUpdates.getString(context),
+                    subtitle: SystemsUpdateFlow.checking.value
+                        ? AppLocale.systemsUpdateChecking.getString(context)
+                        : AppLocale.systemsUpdateCurrentVersion
+                              .getString(context)
+                              .replaceFirst(
+                                '{version}',
+                                _systemsVersion.isNotEmpty
+                                    ? _systemsVersion
+                                    : '-',
+                              ),
+                    trailing: SettingsActionButton(
+                      icon: Symbols.system_update_alt_rounded,
+                      selected: focused,
                     ),
                   );
                 }(),

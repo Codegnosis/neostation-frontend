@@ -1223,6 +1223,12 @@ mixin AppLocale {
   static const String errorScanningRomsDetail = 'error_scanning_roms_detail';
   static const String systemsUpdateComplete = 'systems_update_complete';
   static const String systemsUpdateError = 'systems_update_error';
+  static const String checkSystemsUpdates = 'check_systems_updates';
+  static const String systemsUpdateChecking = 'systems_update_checking';
+  static const String systemsUpToDate = 'systems_up_to_date';
+  static const String systemsUpdateCheckFailed = 'systems_update_check_failed';
+  static const String systemsUpdateNeedsNewerApp =
+      'systems_update_needs_newer_app';
 
   // ---------------------------------------------------------------------------
   // Scraper single-game progress & result messages

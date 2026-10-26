@@ -1218,6 +1218,13 @@ const Map<String, dynamic> appLocaleEn = {
   AppLocale.systemsUpdateComplete: 'Systems updated successfully!',
   AppLocale.systemsUpdateError:
       'Failed to update systems. Please try again later.',
+  AppLocale.checkSystemsUpdates: 'Check for Systems Updates',
+  AppLocale.systemsUpdateChecking: 'Checking for systems updates...',
+  AppLocale.systemsUpToDate: 'Systems are up to date (v{version})',
+  AppLocale.systemsUpdateCheckFailed:
+      "Couldn't check for systems updates. Check your internet connection and try again.",
+  AppLocale.systemsUpdateNeedsNewerApp:
+      'A newer systems version needs a newer NeoStation. Update the app first.',
 
   AppLocale.checkingCredentials: 'Checking credentials...',
   AppLocale.scrapeNoCredentials:

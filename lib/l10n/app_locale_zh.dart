@@ -1076,6 +1076,11 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.errorScanningRomsDetail: '扫描 ROM 时出错：{error}',
   AppLocale.systemsUpdateComplete: '系统更新成功！',
   AppLocale.systemsUpdateError: '系统更新失败，请稍后再试。',
+  AppLocale.checkSystemsUpdates: '检查系统更新',
+  AppLocale.systemsUpdateChecking: '正在检查系统更新...',
+  AppLocale.systemsUpToDate: '系统已是最新版本（v{version}）',
+  AppLocale.systemsUpdateCheckFailed: '无法检查系统更新。请检查网络连接后重试。',
+  AppLocale.systemsUpdateNeedsNewerApp: '新版系统配置需要更新版本的 NeoStation。请先更新应用。',
 
   AppLocale.checkingCredentials: '正在检查凭据...',
   AppLocale.scrapeNoCredentials: '未发现 ScreenScraper 凭据。请登录。',

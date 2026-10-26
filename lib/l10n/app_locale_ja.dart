@@ -1112,6 +1112,13 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.errorScanningRomsDetail: 'ROMのスキャン中にエラーが発生しました: {error}',
   AppLocale.systemsUpdateComplete: 'システムが正常に更新されました！',
   AppLocale.systemsUpdateError: 'システムの更新に失敗しました。後でもう一度試してください。',
+  AppLocale.checkSystemsUpdates: 'システムの更新を確認',
+  AppLocale.systemsUpdateChecking: 'システムの更新を確認中...',
+  AppLocale.systemsUpToDate: 'システムは最新です (v{version})',
+  AppLocale.systemsUpdateCheckFailed:
+      'システムの更新を確認できませんでした。インターネット接続を確認して、もう一度お試しください。',
+  AppLocale.systemsUpdateNeedsNewerApp:
+      '新しいシステムバージョンには、より新しい NeoStation が必要です。先にアプリを更新してください。',
 
   AppLocale.checkingCredentials: '資格情報を確認中...',
   AppLocale.scrapeNoCredentials: 'ScreenScraperの資格情報が見つかりません。ログインしてください。',
