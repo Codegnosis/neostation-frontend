@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -158,6 +159,8 @@ class _CustomSaveFoldersViewState extends State<CustomSaveFoldersView> {
     _log.i('CustomSaveFolder: picker start for $system / $emulatorSlug');
     try {
       String? selected;
+      // A folder from another provider has no path the upload can read.
+      var unusable = false;
       if (Platform.isAndroid) {
         final isTV = await PermissionService.isTelevision();
         if (!mounted) return;
@@ -165,15 +168,19 @@ class _CustomSaveFoldersViewState extends State<CustomSaveFoldersView> {
         if (isTV) {
           selected = await TvDirectoryPicker.show(context);
         } else {
-          final uri = await PermissionService.requestFolderAccess();
-          if (uri != null) {
-            final hasFiles = await PermissionService.hasAllFilesAccess();
-            selected =
-                await UserDataLocationService.resolveAndroidUserDataPath(
-                  uri.toString(),
-                  hasAllFilesAccess: hasFiles,
-                ) ??
-                UserDataLocationService.safUriToRealPath(uri.toString());
+          try {
+            final uri = await PermissionService.requestFolderAccess();
+            if (uri != null) {
+              // The folder as picked, not the user-data resolver's choice.
+              selected = UserDataLocationService.safUriToRealPath(
+                uri.toString(),
+              );
+              unusable = selected == null;
+            }
+          } on PlatformException catch (e) {
+            if (e.code == 'PICKER_FAILED' && mounted) {
+              selected = await TvDirectoryPicker.show(context);
+            }
           }
         }
       } else {
@@ -187,7 +194,16 @@ class _CustomSaveFoldersViewState extends State<CustomSaveFoldersView> {
         );
       }
 
-      if (selected == null || !mounted) return;
+      if (selected == null || !mounted) {
+        if (unusable && mounted) {
+          custom.AppNotification.showNotification(
+            context,
+            AppLocale.wizardFolderNotUsable.getString(context),
+            type: custom.NotificationType.error,
+          );
+        }
+        return;
+      }
       selected = selected.replaceFirst(RegExp(r'[\\/]+$'), '');
       final String folderPath = selected;
       if (!Directory(folderPath).existsSync()) {
@@ -242,6 +258,9 @@ class _CustomSaveFoldersViewState extends State<CustomSaveFoldersView> {
           );
         }
 
+        // A sync already running makes the upload return without listing the
+        // folder, so its file count says nothing about this folder.
+        final wasBusy = provider.isSyncing;
         provider.addListener(listener);
         try {
           await provider.syncCustomSaveFolder(system, emulatorSlug);
@@ -250,16 +269,34 @@ class _CustomSaveFoldersViewState extends State<CustomSaveFoldersView> {
         }
 
         if (!mounted) return;
-        custom.AppNotification.showNotification(
-          context,
-          AppLocale.customFolderUploadComplete
-              .getString(context)
-              .replaceFirst('{uploaded}', '${provider.uploadedFiles}')
-              .replaceFirst('{skipped}', '${provider.skippedFiles}'),
-          type: custom.NotificationType.success,
-          notificationId: notificationId,
-          progress: 1,
-        );
+        if (!wasBusy && provider.totalFiles == 0) {
+          // Nothing to upload: an empty folder, or one NeoStation can't list.
+          // Without All files access, say how to grant it.
+          final needsAllFilesAccess =
+              !await PermissionService.hasAllFilesAccess();
+          if (!mounted) return;
+          final allFilesHint = needsAllFilesAccess
+              ? '\n${AppLocale.userDataFolderGrantAllFiles.getString(context)}'
+              : '';
+          custom.AppNotification.showNotification(
+            context,
+            '${AppLocale.neoSyncNoSave.getString(context)}$allFilesHint',
+            type: custom.NotificationType.info,
+            notificationId: notificationId,
+            progress: 1,
+          );
+        } else {
+          custom.AppNotification.showNotification(
+            context,
+            AppLocale.customFolderUploadComplete
+                .getString(context)
+                .replaceFirst('{uploaded}', '${provider.uploadedFiles}')
+                .replaceFirst('{skipped}', '${provider.skippedFiles}'),
+            type: custom.NotificationType.success,
+            notificationId: notificationId,
+            progress: 1,
+          );
+        }
       } finally {
         if (mounted) setState(() => _syncing = false);
       }
