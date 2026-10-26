@@ -250,6 +250,9 @@ class DirectoriesSettingsContentState
   Future<void> _selectEsdeFolder() async {
     try {
       String? selected;
+      // A folder from another provider has no path the import can read.
+      var unusable = false;
+      var needsAllFilesAccess = false;
 
       if (Platform.isAndroid) {
         final isTV = await PermissionService.isTelevision();
@@ -260,14 +263,14 @@ class DirectoriesSettingsContentState
           try {
             final uri = await PermissionService.requestFolderAccess();
             if (uri != null) {
-              final uriStr = uri.toString();
-              final hasFiles = await PermissionService.hasAllFilesAccess();
-              selected =
-                  await UserDataLocationService.resolveAndroidUserDataPath(
-                    uriStr,
-                    hasAllFilesAccess: hasFiles,
-                  ) ??
-                  UserDataLocationService.safUriToRealPath(uriStr);
+              // The folder as picked. The import reads it as files, which
+              // needs All files access; without it, keep the folder and say so.
+              selected = UserDataLocationService.safUriToRealPath(
+                uri.toString(),
+              );
+              unusable = selected == null;
+              needsAllFilesAccess =
+                  !unusable && !await PermissionService.hasAllFilesAccess();
             }
           } on PlatformException catch (e) {
             if (e.code == 'PICKER_FAILED' && mounted) {
@@ -282,7 +285,16 @@ class DirectoriesSettingsContentState
         );
       }
 
-      if (selected == null || !mounted) return;
+      if (selected == null || !mounted) {
+        if (unusable && mounted) {
+          AppNotification.showNotification(
+            context,
+            AppLocale.wizardFolderNotUsable.getString(context),
+            type: NotificationType.error,
+          );
+        }
+        return;
+      }
       if (selected.endsWith(Platform.pathSeparator)) {
         selected = selected.substring(0, selected.length - 1);
       }
@@ -291,6 +303,13 @@ class DirectoriesSettingsContentState
       // Refresh the fallback map so any already-recorded systems resolve.
       if (mounted) await context.read<FileProvider>().refreshEsde();
       if (mounted) setState(() {});
+      if (needsAllFilesAccess && mounted) {
+        AppNotification.showNotification(
+          context,
+          AppLocale.userDataFolderGrantAllFiles.getString(context),
+          type: NotificationType.info,
+        );
+      }
     } catch (e) {
       _log.e('ES-DE folder selection failed: $e');
       if (mounted) {
@@ -338,6 +357,18 @@ class DirectoriesSettingsContentState
     final localeEsdeImportFailed = AppLocale.esdeImportFailed.getString(
       context,
     );
+    final localeGrantAllFiles = AppLocale.userDataFolderGrantAllFiles.getString(
+      context,
+    );
+
+    // On Android the import reads the folder as files, which needs All files
+    // access; when the folder couldn't be read, say so.
+    final needsAllFilesAccess =
+        Platform.isAndroid &&
+        !await PermissionService.isTelevision() &&
+        !await PermissionService.hasAllFilesAccess();
+    if (!mounted) return;
+    final allFilesHint = needsAllFilesAccess ? '\n$localeGrantAllFiles' : '';
 
     setState(() {
       _isImporting = true;
@@ -398,7 +429,7 @@ class DirectoriesSettingsContentState
         // No gamelists/ dir — the picked folder isn't an ES-DE installation.
         GlobalNotificationService().update(
           id: notificationId,
-          message: localeEsdeImportNotEsdeFolder,
+          message: '$localeEsdeImportNotEsdeFolder$allFilesHint',
           type: GlobalNotificationType.error,
           progress: null,
         );
@@ -406,7 +437,7 @@ class DirectoriesSettingsContentState
         // Valid ES-DE folder, but nothing here mapped to a NeoStation system.
         GlobalNotificationService().update(
           id: notificationId,
-          message: localeEsdeImportNothingFound,
+          message: '$localeEsdeImportNothingFound$allFilesHint',
           type: GlobalNotificationType.info,
           progress: null,
         );
