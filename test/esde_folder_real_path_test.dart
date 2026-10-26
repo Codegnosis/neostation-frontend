@@ -8,7 +8,8 @@ import 'package:neostation/services/user_data_location_service.dart';
 /// resolver, which swaps any folder for NeoStation's own app storage on the SD
 /// card when one is present. The import then looked in the wrong place and
 /// said the folder wasn't an ES-DE installation. Both pickers now keep the
-/// folder that was picked, and say when All files access is missing.
+/// folder that was picked; when an import then finds nothing without All files
+/// access, it says how to grant it.
 void main() {
   final settings = File(
     'lib/screens/settings_screen/new_settings_options/'
@@ -37,25 +38,35 @@ void main() {
       expect(body, isNot(contains('resolveAndroidUserDataPath')));
       expect(body, contains('UserDataLocationService.safUriToRealPath('));
     });
-
-    test('the $where ES-DE picker says when All files access is missing', () {
-      final body = picker();
-      // Only when it's missing.
-      expect(body, contains('!await PermissionService.hasAllFilesAccess()'));
-      expect(body, contains('AppLocale.userDataFolderGrantAllFiles'));
-    });
   }
 
-  test('Settings shows the hint once the folder is stored', () {
+  test('Settings stores the picked folder without asking for All files '
+      'access', () {
+    // The picker's folder grant lets the import read the folder, so the
+    // message waits for an import that finds nothing.
     final body = method(settings, 'Future<void> _selectEsdeFolder()');
-    final stored = body.indexOf('updateEsdeFolderPath(selected)');
-    final hint = body.indexOf('AppLocale.userDataFolderGrantAllFiles');
-    expect(stored, isNot(-1));
-    expect(hint, greaterThan(stored));
+    expect(body, contains('updateEsdeFolderPath(selected)'));
+    expect(body, isNot(contains('AppLocale.userDataFolderGrantAllFiles')));
+    expect(body, isNot(contains('hasAllFilesAccess')));
+  });
+
+  test('the wizard adds the hint only when All files access is off', () {
+    final body = method(wizard, 'Future<void> _runWizardEsdeImport()');
     expect(
-      body.substring(stored, hint),
-      contains('if (needsAllFilesAccess && mounted)'),
+      body,
+      contains('!unusable && !await PermissionService.hasAllFilesAccess();'),
     );
+    expect(body, contains('AppLocale.userDataFolderGrantAllFiles'));
+  });
+
+  test("the wizard's in-app browser fallback also adds the hint", () {
+    final body = method(wizard, 'Future<void> _runWizardEsdeImport()');
+    final caught = body.indexOf('on PlatformException catch (e) {');
+    expect(caught, isNot(-1));
+    final fallback = body.substring(caught, body.indexOf('} else {', caught));
+    expect(fallback, contains('TvDirectoryPicker.show(context)'));
+    expect(fallback, contains('needsAllFilesAccess ='));
+    expect(fallback, contains('!await PermissionService.hasAllFilesAccess()'));
   });
 
   test("the wizard adds the hint when the import couldn't read the folder", () {

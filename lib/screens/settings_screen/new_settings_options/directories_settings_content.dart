@@ -252,7 +252,6 @@ class DirectoriesSettingsContentState
       String? selected;
       // A folder from another provider has no path the import can read.
       var unusable = false;
-      var needsAllFilesAccess = false;
 
       if (Platform.isAndroid) {
         final isTV = await PermissionService.isTelevision();
@@ -263,14 +262,11 @@ class DirectoriesSettingsContentState
           try {
             final uri = await PermissionService.requestFolderAccess();
             if (uri != null) {
-              // The folder as picked. The import reads it as files, which
-              // needs All files access; without it, keep the folder and say so.
+              // The folder as picked, never NeoStation's own storage.
               selected = UserDataLocationService.safUriToRealPath(
                 uri.toString(),
               );
               unusable = selected == null;
-              needsAllFilesAccess =
-                  !unusable && !await PermissionService.hasAllFilesAccess();
             }
           } on PlatformException catch (e) {
             if (e.code == 'PICKER_FAILED' && mounted) {
@@ -303,13 +299,6 @@ class DirectoriesSettingsContentState
       // Refresh the fallback map so any already-recorded systems resolve.
       if (mounted) await context.read<FileProvider>().refreshEsde();
       if (mounted) setState(() {});
-      if (needsAllFilesAccess && mounted) {
-        AppNotification.showNotification(
-          context,
-          AppLocale.userDataFolderGrantAllFiles.getString(context),
-          type: NotificationType.info,
-        );
-      }
     } catch (e) {
       _log.e('ES-DE folder selection failed: $e');
       if (mounted) {
@@ -361,8 +350,8 @@ class DirectoriesSettingsContentState
       context,
     );
 
-    // On Android the import reads the folder as files, which needs All files
-    // access; when the folder couldn't be read, say so.
+    // Without All files access, a folder NeoStation can't read looks empty to
+    // the import; when it finds nothing, say how to grant it.
     final needsAllFilesAccess =
         Platform.isAndroid &&
         !await PermissionService.isTelevision() &&

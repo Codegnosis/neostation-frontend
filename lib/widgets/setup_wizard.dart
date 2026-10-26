@@ -1609,7 +1609,8 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
     String? selected;
     // A folder from another provider has no path the import can read.
     var unusable = false;
-    // The import reads the folder as files, which needs All files access.
+    // Without All files access, a folder NeoStation can't read looks empty to
+    // the import.
     var needsAllFilesAccess = false;
     _gamepadNav?.deactivate();
     try {
@@ -1633,6 +1634,10 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
           } on PlatformException catch (e) {
             if (e.code == 'PICKER_FAILED' && mounted) {
               selected = await TvDirectoryPicker.show(context);
+              // The in-app browser leaves no folder grant behind.
+              needsAllFilesAccess =
+                  selected != null &&
+                  !await PermissionService.hasAllFilesAccess();
             }
           }
         }
