@@ -239,6 +239,7 @@ void main() {
     for (final path in [
       'lib/services/music_player_service.dart',
       'lib/repositories/custom_sfx_repository.dart',
+      'lib/services/update_service.dart',
     ]) {
       test('$path copies through writeChunksToFile, not an IOSink', () {
         final source = File(path).readAsStringSync();
