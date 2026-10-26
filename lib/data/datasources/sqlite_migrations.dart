@@ -656,6 +656,9 @@ class SqliteMigrations {
       case 172:
         db.execute(createRaCatalogueSyncTableSql);
         break;
+      case 175:
+        await _migrateToVersion175(db);
+        break;
       default:
         _log.w('No migration defined for version $version');
     }
@@ -7269,6 +7272,34 @@ class SqliteMigrations {
       _log.i('Migration v165 completed');
     } catch (e, stackTrace) {
       _log.e('Error in migration v165: $e');
+      _log.e('   StackTrace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  /// Migration v175: adds `app_emulators.supported_extensions`.
+  ///
+  /// Emulator entries can declare which formats they launch (ISO, shortcut,
+  /// serial file, folder...). A null value means "no declaration" and keeps the
+  /// legacy behaviour: compatible with every extension of the system.
+  static Future<void> _migrateToVersion175(Database db) async {
+    _log.i('Migration v175: Adding supported_extensions to app_emulators');
+    try {
+      final columns = db
+          .select('PRAGMA table_info(app_emulators)')
+          .map((row) => row['name'].toString())
+          .toSet();
+      if (!columns.contains('supported_extensions')) {
+        db.execute(
+          'ALTER TABLE app_emulators ADD COLUMN supported_extensions TEXT',
+        );
+        _log.i('Column supported_extensions added via v175');
+      } else {
+        _log.i('Column supported_extensions already exists');
+      }
+      _log.i('Migration v175 completed');
+    } catch (e, stackTrace) {
+      _log.e('Error in migration v175: $e');
       _log.e('   StackTrace: $stackTrace');
       rethrow;
     }
