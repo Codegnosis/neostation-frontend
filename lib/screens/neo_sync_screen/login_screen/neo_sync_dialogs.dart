@@ -34,17 +34,32 @@ class _DeleteCloudSaveDialogState extends State<DeleteCloudSaveDialog> {
 
   bool disableNeoSync = false;
 
+  /// Where keyboard focus is decides what Enter does, as it reaches the
+  /// navigation's select as well as the focused control: on Cancel it
+  /// cancels, on the switch it only toggles the switch.
+  final FocusNode _cancelFocus = FocusNode(debugLabel: 'delete_save_cancel');
+  final FocusNode _switchFocus = FocusNode(debugLabel: 'delete_save_switch');
+  bool _closing = false;
+
+  /// Closes the prompt once. A keyboard Enter reaches both the navigation's
+  /// select and the focused button, so it arrives here twice.
+  void _close(bool confirmed) {
+    if (_closing) return;
+    _closing = true;
+    if (confirmed) widget.onDisableNeoSyncChanged(disableNeoSync);
+    Navigator.of(context).pop(confirmed);
+  }
+
   @override
   void initState() {
     super.initState();
     _gamepadNav = GamepadNavigation(
       onSelectItem: () {
-        widget.onDisableNeoSyncChanged(disableNeoSync);
-        Navigator.of(context).pop(true);
+        // The switch toggles itself through focus.
+        if (_switchFocus.hasFocus) return;
+        _close(!_cancelFocus.hasFocus);
       },
-      onBack: () {
-        Navigator.of(context).pop(false);
-      },
+      onBack: () => _close(false),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -62,6 +77,8 @@ class _DeleteCloudSaveDialogState extends State<DeleteCloudSaveDialog> {
   void dispose() {
     GamepadNavigationManager.popLayer(_layerId);
     _gamepadNav.dispose();
+    _cancelFocus.dispose();
+    _switchFocus.dispose();
     super.dispose();
   }
 
@@ -174,6 +191,7 @@ class _DeleteCloudSaveDialogState extends State<DeleteCloudSaveDialog> {
                 Transform.scale(
                   scale: 0.7,
                   child: Switch(
+                    focusNode: _switchFocus,
                     value: disableNeoSync,
                     onChanged: (value) {
                       setState(() {
@@ -223,7 +241,8 @@ class _DeleteCloudSaveDialogState extends State<DeleteCloudSaveDialog> {
       actionsPadding: EdgeInsets.only(right: 12.r, bottom: 12.r),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          focusNode: _cancelFocus,
+          onPressed: () => _close(false),
           style: TextButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 6.r),
           ),
@@ -253,10 +272,7 @@ class _DeleteCloudSaveDialogState extends State<DeleteCloudSaveDialog> {
         ),
         ElevatedButton(
           autofocus: true,
-          onPressed: () {
-            widget.onDisableNeoSyncChanged(disableNeoSync);
-            Navigator.of(context).pop(true);
-          },
+          onPressed: () => _close(true),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.error,
             foregroundColor: Theme.of(context).colorScheme.onError,
@@ -315,13 +331,20 @@ class _SuccessDialogState extends State<SuccessDialog> {
   /// The dialogue's own navigation layer, as for [DeleteCloudSaveDialog].
   late final String _layerId = 'neo_sync_success#${identityHashCode(this)}';
 
+  bool _closing = false;
+
+  /// Closes the dialogue once. A keyboard Enter reaches both the navigation's
+  /// select and the focused button, so it arrives here twice.
+  void _close() {
+    if (_closing) return;
+    _closing = true;
+    widget.onClose();
+  }
+
   @override
   void initState() {
     super.initState();
-    _gamepadNav = GamepadNavigation(
-      onSelectItem: widget.onClose,
-      onBack: widget.onClose,
-    );
+    _gamepadNav = GamepadNavigation(onSelectItem: _close, onBack: _close);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _gamepadNav.initialize();
@@ -380,7 +403,7 @@ class _SuccessDialogState extends State<SuccessDialog> {
       actions: [
         ElevatedButton(
           autofocus: true,
-          onPressed: widget.onClose,
+          onPressed: _close,
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.primary,
             foregroundColor: theme.colorScheme.onPrimary,
@@ -441,13 +464,20 @@ class _ErrorDialogState extends State<ErrorDialog> {
   /// The dialogue's own navigation layer, as for [DeleteCloudSaveDialog].
   late final String _layerId = 'neo_sync_error#${identityHashCode(this)}';
 
+  bool _closing = false;
+
+  /// Closes the dialogue once. A keyboard Enter reaches both the navigation's
+  /// select and the focused button, so it arrives here twice.
+  void _close() {
+    if (_closing) return;
+    _closing = true;
+    widget.onClose();
+  }
+
   @override
   void initState() {
     super.initState();
-    _gamepadNav = GamepadNavigation(
-      onSelectItem: widget.onClose,
-      onBack: widget.onClose,
-    );
+    _gamepadNav = GamepadNavigation(onSelectItem: _close, onBack: _close);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _gamepadNav.initialize();
@@ -510,7 +540,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
       actions: [
         ElevatedButton(
           autofocus: true,
-          onPressed: widget.onClose,
+          onPressed: _close,
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.primary,
             foregroundColor: theme.colorScheme.onPrimary,

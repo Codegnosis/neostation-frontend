@@ -347,6 +347,136 @@ void main() {
     }
   }
 
+  // A keyboard Enter reaches the dialogue's navigation and Flutter's focus
+  // system, which activates the autofocused button as well. Each closed the
+  // dialogue, so the second took the screen beneath with it.
+  for (final name in ['delete cloud save', 'success', 'error']) {
+    testWidgets('keyboard Enter closes the $name dialogue once', (
+      tester,
+    ) async {
+      final ctx = await pumpHost(tester);
+      final closes = <Object?>[];
+      dialogues[name]!(ctx, closes);
+      await tester.pumpAndSettle();
+
+      await pressKey(tester, LogicalKeyboardKey.enter);
+
+      expect(closes, hasLength(1));
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        find.byType(_HostScreen),
+        findsOneWidget,
+        reason: 'the screen beneath closed too',
+      );
+    });
+  }
+
+  /// Whether keyboard focus is inside the dialogue's only [type] control.
+  bool focusedOn(WidgetTester tester, Type type) {
+    final focused = FocusManager.instance.primaryFocus?.context;
+    if (focused == null) return false;
+    final control = tester.element(find.byType(type));
+    var inside = focused == control;
+    focused.visitAncestorElements((element) {
+      if (element == control) inside = true;
+      return !inside;
+    });
+    return inside;
+  }
+
+  /// Tabs until keyboard focus is on the dialogue's [type] control.
+  Future<void> tabTo(WidgetTester tester, Type type) async {
+    for (var i = 0; i < 4 && !focusedOn(tester, type); i++) {
+      await pressKey(tester, LogicalKeyboardKey.tab);
+    }
+    expect(focusedOn(tester, type), isTrue, reason: 'Tab never reached $type');
+  }
+
+  testWidgets('Enter on a focused Cancel cancels the delete', (tester) async {
+    final ctx = await pumpHost(tester);
+    final closes = <Object?>[];
+    dialogues['delete cloud save']!(ctx, closes);
+    await tester.pumpAndSettle();
+
+    await tabTo(tester, TextButton);
+    await pressKey(tester, LogicalKeyboardKey.enter);
+
+    expect(closes, [false], reason: 'the save would have been deleted');
+    expect(find.byType(_HostScreen), findsOneWidget);
+  });
+
+  testWidgets('Enter on the focused switch only toggles it', (tester) async {
+    final ctx = await pumpHost(tester);
+    final closes = <Object?>[];
+    final disable = <bool>[];
+    showDialog<bool>(
+      context: ctx,
+      barrierDismissible: false,
+      builder: (_) => DeleteCloudSaveDialog(
+        file: _save(1),
+        onDisableNeoSyncChanged: disable.add,
+      ),
+    ).then(closes.add);
+    await tester.pumpAndSettle();
+
+    await tabTo(tester, Switch);
+    await pressKey(tester, LogicalKeyboardKey.enter);
+
+    expect(closes, isEmpty, reason: 'the save would have been deleted');
+    expect(disable, [true]);
+    expect(find.byType(DeleteCloudSaveDialog), findsOneWidget);
+  });
+
+  // The switch reports each change; confirming reports its value once more,
+  // cancelling doesn't.
+  for (final (label, button, expected) in [
+    ('confirming', _a, [true, true]),
+    ('cancelling', _b, [true]),
+  ]) {
+    testWidgets('$label the delete reports "also disable NeoSync" as before', (
+      tester,
+    ) async {
+      final ctx = await pumpHost(tester);
+      final disable = <bool>[];
+      showDialog<bool>(
+        context: ctx,
+        barrierDismissible: false,
+        builder: (_) => DeleteCloudSaveDialog(
+          file: _save(1),
+          onDisableNeoSyncChanged: disable.add,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      await press(tester, button);
+
+      expect(disable, expected);
+      expect(find.byType(AlertDialog), findsNothing);
+    });
+  }
+
+  for (final (label, button, expected) in [
+    ('Delete', ElevatedButton, true),
+    ('Cancel', TextButton, false),
+  ]) {
+    testWidgets('a click on $label closes the delete prompt with $expected', (
+      tester,
+    ) async {
+      final ctx = await pumpHost(tester);
+      final closes = <Object?>[];
+      dialogues['delete cloud save']!(ctx, closes);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(button));
+      await tester.pumpAndSettle();
+
+      expect(closes, [expected]);
+      expect(find.byType(_HostScreen), findsOneWidget);
+    });
+  }
+
   group('the save list', () {
     late _FakeNeoSync neoSync;
 
@@ -367,13 +497,18 @@ void main() {
         .widget<OnlineSavesListView>(find.byType(OnlineSavesListView))
         .selectedIndex;
 
-    /// Walks from the search field, over the filter chips, to the second save.
-    Future<void> focusSecondSave(WidgetTester tester) async {
+    /// Walks from the search field, over the filter chips, to save [index].
+    Future<void> focusSave(WidgetTester tester, int index) async {
       await pressKey(tester, LogicalKeyboardKey.arrowDown); // filters
       await pressKey(tester, LogicalKeyboardKey.arrowDown); // first save
-      await pressKey(tester, LogicalKeyboardKey.arrowDown); // second save
-      expect(highlighted(tester), 1);
+      for (var i = 0; i < index; i++) {
+        await pressKey(tester, LogicalKeyboardKey.arrowDown);
+      }
+      expect(highlighted(tester), index);
     }
+
+    /// Walks from the search field, over the filter chips, to the second save.
+    Future<void> focusSecondSave(WidgetTester tester) => focusSave(tester, 1);
 
     testWidgets('keeps the highlighted save when the delete prompt closes', (
       tester,
@@ -421,6 +556,61 @@ void main() {
         expect(highlighted(tester), 2, reason: 'the selection was reset');
       },
     );
+
+    // The provider has already dropped the deleted save when the list works
+    // out the new highlight; it took one off again, so deleting either of the
+    // last two saves landed two rows above the end.
+    for (final (count, deleted, after) in [
+      (3, 0, 0),
+      (3, 1, 1),
+      (3, 2, 1),
+      (4, 2, 2),
+      (4, 3, 2),
+      (2, 1, 0),
+    ]) {
+      testWidgets(
+        'deleting save ${deleted + 1} of $count highlights save ${after + 1}',
+        (tester) async {
+          await pumpSaveList(tester);
+          neoSync.saves
+            ..clear()
+            ..addAll([for (var n = 1; n <= count; n++) _save(n)]);
+          neoSync.service
+            ..succeed = true
+            ..onDeleted = (id) => neoSync.saves.removeWhere((f) => f.id == id);
+          await tester.pumpAndSettle();
+          await focusSave(tester, deleted);
+
+          await press(tester, _a);
+          await press(tester, _a);
+
+          expect(neoSync.service.deleted, ['save-${deleted + 1}']);
+          expect(highlighted(tester), after);
+        },
+      );
+    }
+
+    testWidgets('keyboard Enter, Enter deletes the save and keeps the list', (
+      tester,
+    ) async {
+      await pumpSaveList(tester);
+      neoSync.service
+        ..succeed = true
+        ..onDeleted = (id) => neoSync.saves.removeWhere((f) => f.id == id);
+      await focusSecondSave(tester);
+
+      await pressKey(tester, LogicalKeyboardKey.enter);
+      expect(find.byType(DeleteCloudSaveDialog), findsOneWidget);
+      await pressKey(tester, LogicalKeyboardKey.enter);
+
+      expect(neoSync.service.deleted, ['save-2']);
+      expect(find.byType(DeleteCloudSaveDialog), findsNothing);
+      expect(
+        find.byType(SaveListView),
+        findsOneWidget,
+        reason: 'the list closed with the prompt',
+      );
+    });
 
     testWidgets('a later return to the list starts from the top again', (
       tester,
