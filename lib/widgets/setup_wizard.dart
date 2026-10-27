@@ -1609,6 +1609,9 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
     String? selected;
     // A folder from another provider has no path the import can read.
     var unusable = false;
+    // Without All files access, a folder NeoStation can't read looks empty to
+    // the import.
+    var needsAllFilesAccess = false;
     _gamepadNav?.deactivate();
     try {
       if (Platform.isAndroid) {
@@ -1620,19 +1623,21 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
           try {
             final uri = await PermissionService.requestFolderAccess();
             if (uri != null) {
-              final uriStr = uri.toString();
-              final hasFiles = await PermissionService.hasAllFilesAccess();
-              selected =
-                  await UserDataLocationService.resolveAndroidUserDataPath(
-                    uriStr,
-                    hasAllFilesAccess: hasFiles,
-                  ) ??
-                  UserDataLocationService.safUriToRealPath(uriStr);
+              // The folder as picked, never NeoStation's own storage.
+              selected = UserDataLocationService.safUriToRealPath(
+                uri.toString(),
+              );
               unusable = selected == null;
+              needsAllFilesAccess =
+                  !unusable && !await PermissionService.hasAllFilesAccess();
             }
           } on PlatformException catch (e) {
             if (e.code == 'PICKER_FAILED' && mounted) {
               selected = await TvDirectoryPicker.show(context);
+              // The in-app browser leaves no folder grant behind.
+              needsAllFilesAccess =
+                  selected != null &&
+                  !await PermissionService.hasAllFilesAccess();
             }
           }
         }
@@ -1682,6 +1687,10 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
       context,
     );
     final localeEsdeTitle = AppLocale.wizardEsdeStepTitle.getString(context);
+    // Added to the not-found results when All files access is missing.
+    final allFilesHint = needsAllFilesAccess
+        ? '\n${AppLocale.userDataFolderGrantAllFiles.getString(context)}'
+        : '';
 
     try {
       await context.read<SqliteConfigProvider>().updateEsdeFolderPath(selected);
@@ -1775,21 +1784,24 @@ class _SetupWizardState extends State<SetupWizard> with WidgetsBindingObserver {
     } else if (result != null && !result.gamelistsDirFound) {
       GlobalNotificationService().update(
         id: notificationId,
-        message: localeEsdeImportNotEsdeFolder,
+        message: '$localeEsdeImportNotEsdeFolder$allFilesHint',
         type: GlobalNotificationType.error,
         progress: null,
       );
-      await _showWizardMessage(localeEsdeTitle, localeEsdeImportNotEsdeFolder);
+      await _showWizardMessage(
+        localeEsdeTitle,
+        '$localeEsdeImportNotEsdeFolder$allFilesHint',
+      );
     } else if (!matched) {
       GlobalNotificationService().update(
         id: notificationId,
-        message: localeEsdeImportNothingFound,
+        message: '$localeEsdeImportNothingFound$allFilesHint',
         type: GlobalNotificationType.info,
         progress: null,
       );
       await _showWizardMessage(
         localeEsdeTitle,
-        localeEsdeImportNothingFound,
+        '$localeEsdeImportNothingFound$allFilesHint',
         icon: Symbols.info_rounded,
       );
     } else {

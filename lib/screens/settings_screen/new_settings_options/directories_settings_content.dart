@@ -250,6 +250,8 @@ class DirectoriesSettingsContentState
   Future<void> _selectEsdeFolder() async {
     try {
       String? selected;
+      // A folder from another provider has no path the import can read.
+      var unusable = false;
 
       if (Platform.isAndroid) {
         final isTV = await PermissionService.isTelevision();
@@ -260,14 +262,11 @@ class DirectoriesSettingsContentState
           try {
             final uri = await PermissionService.requestFolderAccess();
             if (uri != null) {
-              final uriStr = uri.toString();
-              final hasFiles = await PermissionService.hasAllFilesAccess();
-              selected =
-                  await UserDataLocationService.resolveAndroidUserDataPath(
-                    uriStr,
-                    hasAllFilesAccess: hasFiles,
-                  ) ??
-                  UserDataLocationService.safUriToRealPath(uriStr);
+              // The folder as picked, never NeoStation's own storage.
+              selected = UserDataLocationService.safUriToRealPath(
+                uri.toString(),
+              );
+              unusable = selected == null;
             }
           } on PlatformException catch (e) {
             if (e.code == 'PICKER_FAILED' && mounted) {
@@ -282,7 +281,16 @@ class DirectoriesSettingsContentState
         );
       }
 
-      if (selected == null || !mounted) return;
+      if (selected == null || !mounted) {
+        if (unusable && mounted) {
+          AppNotification.showNotification(
+            context,
+            AppLocale.wizardFolderNotUsable.getString(context),
+            type: NotificationType.error,
+          );
+        }
+        return;
+      }
       if (selected.endsWith(Platform.pathSeparator)) {
         selected = selected.substring(0, selected.length - 1);
       }
@@ -338,6 +346,18 @@ class DirectoriesSettingsContentState
     final localeEsdeImportFailed = AppLocale.esdeImportFailed.getString(
       context,
     );
+    final localeGrantAllFiles = AppLocale.userDataFolderGrantAllFiles.getString(
+      context,
+    );
+
+    // Without All files access, a folder NeoStation can't read looks empty to
+    // the import; when it finds nothing, say how to grant it.
+    final needsAllFilesAccess =
+        Platform.isAndroid &&
+        !await PermissionService.isTelevision() &&
+        !await PermissionService.hasAllFilesAccess();
+    if (!mounted) return;
+    final allFilesHint = needsAllFilesAccess ? '\n$localeGrantAllFiles' : '';
 
     setState(() {
       _isImporting = true;
@@ -398,7 +418,7 @@ class DirectoriesSettingsContentState
         // No gamelists/ dir — the picked folder isn't an ES-DE installation.
         GlobalNotificationService().update(
           id: notificationId,
-          message: localeEsdeImportNotEsdeFolder,
+          message: '$localeEsdeImportNotEsdeFolder$allFilesHint',
           type: GlobalNotificationType.error,
           progress: null,
         );
@@ -406,7 +426,7 @@ class DirectoriesSettingsContentState
         // Valid ES-DE folder, but nothing here mapped to a NeoStation system.
         GlobalNotificationService().update(
           id: notificationId,
-          message: localeEsdeImportNothingFound,
+          message: '$localeEsdeImportNothingFound$allFilesHint',
           type: GlobalNotificationType.info,
           progress: null,
         );
