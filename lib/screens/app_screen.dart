@@ -7,9 +7,8 @@ import 'package:neostation/utils/nav_tabs.dart';
 import 'package:neostation/models/config_model.dart';
 import 'package:neostation/providers/sqlite_config_provider.dart';
 import 'package:neostation/services/update_service.dart';
-import 'package:neostation/services/systems_update_service.dart';
 import 'package:neostation/widgets/update_dialog.dart';
-import 'package:neostation/widgets/systems_update_dialog.dart';
+import 'package:neostation/utils/systems_update_flow.dart';
 import 'package:neostation/services/logger_service.dart';
 import 'package:neostation/services/game/game_session_manager.dart';
 import 'package:neostation/services/ra_library_match_runner.dart';
@@ -221,16 +220,15 @@ class AppScreenState extends State<AppScreen> with WidgetsBindingObserver {
       }
     }
 
-    // Systems/emulator config update check (network).
-    Future<void>? systemsRescan;
-    if (configProvider.config.autoUpdateSystems) {
-      final systemsUpdated = await _checkAndShowSystemsUpdate(configProvider);
-      if (systemsUpdated && mounted) {
-        // New definitions were applied — re-scan to reflect them. Wait for the
-        // initial scan to settle first, since scanSystems ignores concurrent calls.
-        await initialScan;
-        if (mounted) systemsRescan = configProvider.scanSystems();
-      }
+    // Systems/emulator config update check (network). When an update is
+    // applied the flow re-scans to reflect it, after the initial scan settles
+    // (scanSystems ignores concurrent calls), and returns once that is done.
+    if (configProvider.config.autoUpdateSystems && mounted) {
+      await SystemsUpdateFlow.run(
+        context,
+        trigger: SystemsUpdateTrigger.startup,
+        library: SystemsUpdateLibrary.of(configProvider),
+      );
     }
 
     // Match whatever the scan just added. After the scan, never before it: the
@@ -238,7 +236,6 @@ class AppScreenState extends State<AppScreen> with WidgetsBindingObserver {
     // ROMs are not in it yet. That includes the systems-update re-scan, which
     // can bring a system into RA range for the first time.
     await initialScan;
-    await systemsRescan;
     await _runStartupRaMatch(configProvider, holdsSplash: true);
   }
 
@@ -367,31 +364,6 @@ class AppScreenState extends State<AppScreen> with WidgetsBindingObserver {
       }
     } catch (e) {
       _log.e('AppScreen: App update check failure', error: e);
-    }
-    return false;
-  }
-
-  /// Checks for systems/emulator config updates and shows the dialog if found.
-  /// Returns true if the update was accepted and applied (caller triggers scan).
-  Future<bool> _checkAndShowSystemsUpdate(
-    SqliteConfigProvider configProvider,
-  ) async {
-    try {
-      final updateInfo = await SystemsUpdateService.checkForUpdate();
-      if (updateInfo == null || !mounted) return false;
-
-      final updated = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => SystemsUpdateDialog(updateInfo: updateInfo),
-      );
-
-      if (updated == true && mounted) {
-        await configProvider.reloadSystemDefinitions();
-        return true;
-      }
-    } catch (e) {
-      _log.e('AppScreen: Systems update check failure', error: e);
     }
     return false;
   }

@@ -46,6 +46,39 @@ class SystemsUpdateInfo {
   });
 }
 
+/// What [SystemsUpdateService.check] found when it asked for the manifest.
+///
+/// Start-up only needs to know whether there is an update; the manual check in
+/// Settings also has to say why there is nothing to install.
+sealed class SystemsUpdateCheck {
+  const SystemsUpdateCheck();
+}
+
+/// A newer systems version is available and this app can use it.
+final class SystemsUpdateAvailable extends SystemsUpdateCheck {
+  final SystemsUpdateInfo info;
+  const SystemsUpdateAvailable(this.info);
+}
+
+/// The installed systems are the newest ones published.
+final class SystemsUpToDate extends SystemsUpdateCheck {
+  /// The installed systems version.
+  final String version;
+  const SystemsUpToDate(this.version);
+}
+
+/// The manifest could not be fetched or read: offline, a server error, a
+/// timeout, or a response that is not the manifest (a captive portal, say).
+final class SystemsUpdateCheckFailed extends SystemsUpdateCheck {
+  const SystemsUpdateCheckFailed();
+}
+
+/// A newer systems version exists, but its manifest declares a minimum app
+/// version this build does not meet.
+final class SystemsUpdateNeedsNewerApp extends SystemsUpdateCheck {
+  const SystemsUpdateNeedsNewerApp();
+}
+
 /// Service that keeps the bundled system JSON configs up-to-date from the
 /// main NeoStation frontend repository.
 ///
@@ -199,28 +232,48 @@ class SystemsUpdateService {
     }
   }
 
+  /// The installed systems version, or `''` if none has been recorded yet.
+  static Future<String> currentVersion() => SqliteService.getSystemsVersion();
+
   /// Checks the remote manifest and returns [SystemsUpdateInfo] if an update is
   /// available, without downloading anything.
   static Future<SystemsUpdateInfo?> checkForUpdate() async {
+    final result = await check();
+    return result is SystemsUpdateAvailable ? result.info : null;
+  }
+
+  /// Checks the remote manifest without downloading anything, and reports
+  /// which outcome it reached.
+  ///
+  /// Being up to date is decided before the app's minimum version: a manifest
+  /// this build is too old for still says nothing new about the systems the
+  /// user already has.
+  static Future<SystemsUpdateCheck> check() async {
     try {
       final manifest = await _fetchManifest();
-      if (manifest == null) return null;
-
-      if (!await _appMeetsManifestMinimum(manifest)) return null;
+      if (manifest == null) return const SystemsUpdateCheckFailed();
 
       final remoteVersion = manifest['latest_version']?.toString() ?? '';
-      if (remoteVersion.isEmpty) return null;
+      if (remoteVersion.isEmpty) return const SystemsUpdateCheckFailed();
 
       final localVersion = await SqliteService.getSystemsVersion();
-      if (_meetsMinimumVersion(localVersion, remoteVersion)) return null;
+      if (_meetsMinimumVersion(localVersion, remoteVersion)) {
+        return SystemsUpToDate(localVersion);
+      }
 
-      return SystemsUpdateInfo(
-        currentVersion: localVersion,
-        remoteVersion: remoteVersion,
+      if (!await _appMeetsManifestMinimum(manifest)) {
+        return const SystemsUpdateNeedsNewerApp();
+      }
+
+      return SystemsUpdateAvailable(
+        SystemsUpdateInfo(
+          currentVersion: localVersion,
+          remoteVersion: remoteVersion,
+        ),
       );
     } catch (e) {
-      _log.w('SystemsUpdateService: checkForUpdate error: $e');
-      return null;
+      _log.w('SystemsUpdateService: check error: $e');
+      return const SystemsUpdateCheckFailed();
     }
   }
 

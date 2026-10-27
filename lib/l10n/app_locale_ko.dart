@@ -1121,6 +1121,13 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.errorScanningRomsDetail: 'ROM 스캔 중 오류: {error}',
   AppLocale.systemsUpdateComplete: '시스템이 성공적으로 업데이트되었습니다!',
   AppLocale.systemsUpdateError: '시스템을 업데이트하지 못했습니다. 나중에 다시 시도해 주세요.',
+  AppLocale.checkSystemsUpdates: '시스템 업데이트 확인',
+  AppLocale.systemsUpdateChecking: '시스템 업데이트 확인 중...',
+  AppLocale.systemsUpToDate: '시스템이 최신 상태입니다 (v{version})',
+  AppLocale.systemsUpdateCheckFailed:
+      '시스템 업데이트를 확인하지 못했습니다. 인터넷 연결을 확인한 후 다시 시도해 주세요.',
+  AppLocale.systemsUpdateNeedsNewerApp:
+      '새 시스템 버전을 사용하려면 최신 NeoStation이 필요합니다. 먼저 앱을 업데이트해 주세요.',
 
   AppLocale.checkingCredentials: '로그인 정보 확인 중...',
   AppLocale.scrapeNoCredentials: 'ScreenScraper 로그인 정보가 없습니다. 로그인해 주세요.',

@@ -107,6 +107,15 @@ extension SqliteConfigScanning on SqliteConfigProvider {
     }
   }
 
+  /// Completes once no scan (full or single-system) is running, at once when
+  /// none is. [scanSystems] drops a call made while a scan runs, so a caller
+  /// whose scan must not be lost waits here first.
+  Future<void> whenScansIdle() async {
+    while (_scansIdle != null) {
+      await _scansIdle!.future;
+    }
+  }
+
   /// Removes a registered ROM directory and purges associated ROM entries from the database.
   ///
   /// Waits for any running scan to finish first: a scan may already be

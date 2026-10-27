@@ -199,4 +199,39 @@ void main() {
       expect(provider.config.romFolders, [kept.path]);
     },
   );
+
+  // The systems update waits on this before its rescan: scanSystems drops a
+  // call made while a scan runs, so a wait that returns early loses the
+  // rescan with the new definitions.
+  group('whenScansIdle', () {
+    test('waits for a running scan to end', () async {
+      final root = await romRoot('idle', 300);
+      final provider = SqliteConfigProvider();
+      await provider.addRomFolder(root.path, scan: false);
+
+      final scan = provider.scanSystems();
+      expect(provider.isScanning, isTrue);
+
+      bool? scanningWhenIdle;
+      final idle = provider.whenScansIdle().then(
+        (_) => scanningWhenIdle = provider.isScanning,
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(scanningWhenIdle, isNull, reason: 'returned while scanning');
+
+      await scan;
+      await idle;
+      expect(scanningWhenIdle, isFalse);
+    });
+
+    test('completes at once when no scan runs', () async {
+      final provider = SqliteConfigProvider();
+      var idle = false;
+
+      unawaited(provider.whenScansIdle().then((_) => idle = true));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(idle, isTrue);
+    });
+  });
 }

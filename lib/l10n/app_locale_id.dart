@@ -1225,6 +1225,13 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.errorScanningRomsDetail: 'Kesalahan saat memindai ROM: {error}',
   AppLocale.systemsUpdateComplete: 'Sistem berhasil diperbarui!',
   AppLocale.systemsUpdateError: 'Gagal memperbarui sistem. Coba lagi nanti.',
+  AppLocale.checkSystemsUpdates: 'Periksa Pembaruan Sistem',
+  AppLocale.systemsUpdateChecking: 'Memeriksa pembaruan sistem...',
+  AppLocale.systemsUpToDate: 'Sistem sudah versi terbaru (v{version})',
+  AppLocale.systemsUpdateCheckFailed:
+      'Tidak dapat memeriksa pembaruan sistem. Periksa koneksi internet Anda dan coba lagi.',
+  AppLocale.systemsUpdateNeedsNewerApp:
+      'Versi sistem yang lebih baru memerlukan NeoStation yang lebih baru. Perbarui aplikasi terlebih dahulu.',
 
   AppLocale.checkingCredentials: 'Memeriksa kredensial...',
   AppLocale.scrapeNoCredentials:
