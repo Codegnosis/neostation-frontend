@@ -11,6 +11,7 @@ import 'package:archive/archive_io.dart';
 import 'package:neostation/services/logger_service.dart';
 
 import 'package:neostation/services/permission_service.dart';
+import 'package:neostation/utils/chunked_file_writer.dart';
 import 'package:neostation/utils/version_compare.dart';
 
 /// Service responsible for orchestrating the over-the-air (OTA) update lifecycle.
@@ -175,7 +176,7 @@ class UpdateService {
   ) async {
     try {
       // 1. Localize the update binary to a temporary directory.
-      final downloadedFile = await _downloadFile(
+      final downloadedFile = await downloadUpdateFile(
         updateInfo.downloadUrl,
         updateInfo.fileName,
         onProgress,
@@ -208,8 +209,11 @@ class UpdateService {
     }
   }
 
-  /// Downloads a file from a URL with real-time progress tracking.
-  static Future<File?> _downloadFile(
+  /// Downloads a file from a URL, reporting progress as bytes are written.
+  ///
+  /// Returns null on failure, with any partial file removed.
+  @visibleForTesting
+  static Future<File?> downloadUpdateFile(
     String url,
     String fileName,
     void Function(double progress)? onProgress,
@@ -228,19 +232,19 @@ class UpdateService {
       final contentLength = response.contentLength ?? 0;
       var downloadedBytes = 0;
 
-      final sink = file.openWrite();
-
-      await for (final chunk in response.stream) {
-        sink.add(chunk);
-        downloadedBytes += chunk.length;
-
-        if (contentLength > 0 && onProgress != null) {
-          final progress = downloadedBytes / contentLength;
-          onProgress(progress);
+      // Each chunk is written before the next is read, so a full disk stops
+      // the download; the partial file is removed.
+      Stream<List<int>> written() async* {
+        await for (final chunk in response.stream) {
+          yield chunk;
+          downloadedBytes += chunk.length;
+          if (contentLength > 0 && onProgress != null) {
+            onProgress(downloadedBytes / contentLength);
+          }
         }
       }
 
-      await sink.close();
+      await writeChunksToFile(file, written());
       return file;
     } catch (e) {
       _log.e('UpdateService: File download failed', error: e);
