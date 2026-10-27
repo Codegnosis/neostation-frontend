@@ -130,6 +130,7 @@ class MySystems extends StatelessWidget {
                         currentSystem,
                         configProvider,
                       ),
+                      onWestPressed: () => _openSearch(context),
                     ),
                   ),
                 ),
@@ -144,6 +145,10 @@ class MySystems extends StatelessWidget {
                     currentSystem,
                     configProvider,
                   ),
+                  onSearch: () {
+                    SfxService().playNavSound();
+                    _openSearch(context);
+                  },
                 ),
               ],
             );
@@ -221,6 +226,7 @@ class MySystems extends StatelessWidget {
               bindYButton: false,
               onYPressed: () =>
                   _openSystemOptions(context, currentSystem, configProvider),
+              onWestPressed: () => _openSearch(context),
               onEnterPressed: () {
                 final current = selectedIndex < allSystems.length
                     ? allSystems[selectedIndex]
@@ -245,6 +251,10 @@ class MySystems extends StatelessWidget {
           },
           onOptions: () =>
               _openSystemOptions(context, currentSystem, configProvider),
+          onSearch: () {
+            SfxService().playNavSound();
+            _openSearch(context);
+          },
         ),
       ],
     );
@@ -287,7 +297,8 @@ class MySystems extends StatelessWidget {
     }
   }
 
-  /// Opens the library search from the Options dialog.
+  /// Opens the library search from the Options dialog, or library-wide from
+  /// the West face button.
   ///
   /// The same hand-off [_navigateToSystem] makes for the Search card, minus
   /// its secondary-display refresh: that would repaint the second screen for
@@ -658,6 +669,7 @@ class SystemCardGridView extends StatefulWidget {
     this.onYPressed,
     this.onBackPressed,
     this.onXPressed,
+    this.onWestPressed,
     this.bindYButton = true,
     this.systems = const [],
     this.recentCardSize = RecentCardSizes.defaultSize,
@@ -703,6 +715,10 @@ class SystemCardGridView extends StatefulWidget {
   /// X. Unbound on the systems screen; the collections browser opens its view
   /// picker with it.
   final VoidCallback? onXPressed;
+
+  /// The West face button (X on an Xbox pad, Y on a Nintendo-style one). The
+  /// systems screen opens the library search with it.
+  final VoidCallback? onWestPressed;
 
   /// Whether the gamepad's Y button fires [onYPressed].
   ///

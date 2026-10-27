@@ -1445,6 +1445,11 @@ class _SystemGamesListState extends State<SystemGamesList> {
     );
   }
 
+  /// The library search the West face button opens, or null in the music
+  /// library, where that button keeps its old X / Y actions.
+  VoidCallback? get _searchAction =>
+      widget.system.folderName == 'music' ? null : _openSearchFromButton;
+
   /// Builds the game carousel view with letter-based navigation.
   Widget _buildGamesCarousel() {
     return GamesCarousel(
@@ -1465,6 +1470,7 @@ class _SystemGamesListState extends State<SystemGamesList> {
       onPlay: _selectCurrentGame,
       onFavorite: _toggleFavorite,
       onYButton: _openGameOptions,
+      onSearch: _searchAction,
       selectedItemKey: _selectedItemKey,
       onRandom: _showRandomGameDialog,
       onOptions: _openGameOptions,
@@ -1504,6 +1510,7 @@ class _SystemGamesListState extends State<SystemGamesList> {
       onPlay: _selectCurrentGame,
       onFavorite: _toggleFavorite,
       onYButton: _openGameOptions,
+      onSearch: _searchAction,
       selectedItemKey: _selectedItemKey,
       onRandom: _showRandomGameDialog,
       onOptions: _openGameOptions,
@@ -2007,6 +2014,7 @@ class _SystemGamesListState extends State<SystemGamesList> {
           onPlayGame: _selectCurrentGame,
           onToggleFavorite: _toggleFavorite,
           onOpenGameSettings: _openGameOptions,
+          onSearch: _searchAction,
           onBack: _goBack,
           onGameUpdated: _handleGameUpdated, // Sync UI after metadata edits.
           onFavoriteToggled: _handleFavoriteToggledFromCard,
