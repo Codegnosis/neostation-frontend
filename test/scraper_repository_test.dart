@@ -305,6 +305,22 @@ void main() {
       expect(games.first['filename'], 'game.steam');
     });
 
+    test('getSteamGamesWithScrapeStatus reports what other sources did', () async {
+      await db.execute(
+        "INSERT INTO user_roms (filename, rom_path, app_system_id, title_id, ss_manual_game_id) VALUES ('Game.steam', '/roms/steam/Game.steam', 'steam', '12345', 277144)",
+      );
+      // Metadata rows elsewhere are matched without regard to case.
+      await db.execute(
+        "INSERT INTO user_screenscraper_metadata (app_system_id, filename) VALUES ('steam', 'game.steam')",
+      );
+
+      final games = await ScraperRepository.getSteamGamesWithScrapeStatus(
+        'steam',
+      );
+      expect(games.single['ss_manual_game_id'], 277144);
+      expect(games.single['metadata_filename'], 'game.steam');
+    });
+
     test('upsertSteamMetadata inserts metadata', () async {
       await ScraperRepository.upsertSteamMetadata({
         'filename': 'game.steam',

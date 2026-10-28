@@ -1023,10 +1023,12 @@ class ScraperRepository {
     final db = await SqliteService.getDatabase();
     return await db.rawQuery(
       '''
-      SELECT ur.filename, ur.rom_path, ur.title_id, usm.is_fully_scraped
+      SELECT ur.filename, ur.rom_path, ur.title_id, ur.ss_manual_game_id,
+        usm.filename AS metadata_filename
       FROM user_roms ur
       LEFT JOIN user_screenscraper_metadata usm 
-        ON ur.app_system_id = usm.app_system_id AND ur.filename = usm.filename
+        ON ur.app_system_id = usm.app_system_id
+        AND ur.filename = usm.filename COLLATE NOCASE
       WHERE ur.app_system_id = ? 
         AND ur.title_id IS NOT NULL
       ''',
