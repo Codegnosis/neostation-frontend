@@ -182,7 +182,7 @@ class _FolderNotEmptyDialogState extends State<FolderNotEmptyDialog> {
                               label: AppLocale.cancel.getString(context),
                               onTap: _cancel,
                               backgroundColor: theme.colorScheme.tertiary,
-                              textColor: theme.colorScheme.onSurface,
+                              textColor: theme.colorScheme.onTertiary,
                             ),
                           ),
                           SizedBox(width: 8.r),

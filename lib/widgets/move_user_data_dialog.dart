@@ -212,7 +212,7 @@ class _MoveUserDataDialogState extends State<MoveUserDataDialog> {
                               label: AppLocale.cancel.getString(context),
                               onTap: _cancel,
                               backgroundColor: theme.colorScheme.tertiary,
-                              textColor: theme.colorScheme.onSurface,
+                              textColor: theme.colorScheme.onTertiary,
                             ),
                           ),
                           SizedBox(width: 8.r),
