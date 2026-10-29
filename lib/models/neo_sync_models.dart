@@ -420,6 +420,30 @@ enum GameSyncStatus {
   error,
 }
 
+/// What uploading a custom save folder did, so the screen can say so.
+enum CustomFolderUploadOutcome {
+  /// NeoSync isn't signed in; nothing ran.
+  notSignedIn,
+
+  /// Another sync was running; nothing ran.
+  busy,
+
+  /// No folder is configured, or it no longer exists.
+  noFolder,
+
+  /// The folder holds no save files NeoStation can read.
+  empty,
+
+  /// Every save uploaded or was already up to date.
+  uploaded,
+
+  /// At least one save failed to upload.
+  failed,
+
+  /// The NeoSync account is out of storage.
+  quotaExceeded,
+}
+
 /// Represents the comprehensive synchronization state of a specific game.
 class GameSyncState {
   /// Unique identifier of the game.

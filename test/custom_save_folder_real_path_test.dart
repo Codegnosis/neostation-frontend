@@ -56,40 +56,69 @@ void main() {
     expect(fallback, contains('TvDirectoryPicker.show(context)'));
   });
 
+  // The text shown for one upload outcome: from its `case` to the next one,
+  // or to the end of the switch.
+  String outcomeBranch(String body, String outcome) {
+    final start = body.indexOf('case CustomFolderUploadOutcome.$outcome:');
+    expect(start, isNot(-1), reason: '$outcome has no case');
+    final next = body.indexOf('case CustomFolderUploadOutcome.', start + 1);
+    return body.substring(start, next == -1 ? body.length : next);
+  }
+
   test('an empty folder says no save files were found, not synced', () {
-    final body = picker();
-    final empty = body.indexOf('if (!wasBusy && provider.totalFiles == 0) {');
-    expect(empty, isNot(-1));
-    final complete = body.indexOf('AppLocale.customFolderUploadComplete');
-    expect(complete, greaterThan(empty));
-    final branch = body.substring(empty, complete);
+    final branch = outcomeBranch(picker(), 'empty');
     expect(branch, contains('AppLocale.neoSyncNoSave'));
-    expect(branch, contains('} else {'));
+    expect(branch, isNot(contains('AppLocale.customFolderUploadComplete')));
+  });
+
+  test('each upload outcome gets its own message', () {
+    final body = picker();
+    expect(
+      body,
+      contains(
+        'outcome = await provider.syncCustomSaveFolder(system, emulatorSlug);',
+      ),
+    );
+    final expected = {
+      'busy': 'AppLocale.neoSyncSynchronizing',
+      'notSignedIn': 'AppLocale.neoSyncNotConnected',
+      'quotaExceeded': 'AppLocale.neoSyncQuotaExceeded',
+      'failed': 'AppLocale.customFolderUploadFailed',
+      'uploaded': 'AppLocale.customFolderUploadComplete',
+    };
+    expected.forEach((outcome, message) {
+      expect(outcomeBranch(body, outcome), contains(message), reason: outcome);
+    });
+    // A missing folder falls through to the failure message.
+    expect(
+      body,
+      matches(
+        RegExp(
+          r'case CustomFolderUploadOutcome\.noFolder:\s*'
+          r'case CustomFolderUploadOutcome\.failed:',
+        ),
+      ),
+    );
+    expect(
+      'AppLocale.customFolderUploadComplete'.allMatches(body).length,
+      1,
+      reason: 'only an upload that ran reports its counts',
+    );
   });
 
   test('only an empty folder mentions All files access, and only when it '
       'is missing', () {
     final body = picker();
-    final empty = body.indexOf('if (!wasBusy && provider.totalFiles == 0) {');
-    final hint = body.indexOf('AppLocale.userDataFolderGrantAllFiles');
-    expect(hint, greaterThan(empty));
     expect('AppLocale.userDataFolderGrantAllFiles'.allMatches(body).length, 1);
-    final branch = body.substring(empty, hint);
+    final branch = outcomeBranch(body, 'empty');
+    expect(branch, contains('AppLocale.userDataFolderGrantAllFiles'));
     expect(branch, contains('!await PermissionService.hasAllFilesAccess()'));
     expect(branch, contains('allFilesHint = needsAllFilesAccess'));
     expect(
-      body.substring(empty),
+      branch,
       contains(
         "'\${AppLocale.neoSyncNoSave.getString(context)}\$allFilesHint'",
       ),
     );
-  });
-
-  test('a sync already running is not reported as an empty folder', () {
-    final body = picker();
-    final busy = body.indexOf('final wasBusy = provider.isSyncing;');
-    final upload = body.indexOf('await provider.syncCustomSaveFolder(');
-    expect(busy, isNot(-1));
-    expect(upload, greaterThan(busy));
   });
 }

@@ -731,21 +731,26 @@ extension NeoSyncPathResolver on NeoSyncProvider {
   /// Gets all save files recursively from a directory.
   ///
   /// NeoSync backup copies (`*.neosync.bak`) are excluded so the recovery
-  /// safety net is never itself uploaded or synced.
+  /// safety net is never itself uploaded or synced. A subfolder that can't be
+  /// read is skipped; the rest of the folder is still listed.
   Future<List<File>> _getSaveFiles(String directoryPath) async {
-    final dir = Directory(directoryPath);
-    if (!await dir.exists()) return [];
-
+    final skipped = <String>[];
     try {
-      return await dir
-          .list(recursive: true)
-          .where((entity) => entity is File)
-          .cast<File>()
-          .where((file) => !file.path.toLowerCase().endsWith('.neosync.bak'))
-          .toList();
+      final paths = await listSaveFilePaths([directoryPath], skipped: skipped);
+      return paths.map(File.new).toList();
     } catch (e) {
       NeoSyncProvider._log.e('Error listing save files in $directoryPath: $e');
       return [];
+    } finally {
+      _logUnreadable(skipped);
+    }
+  }
+
+  void _logUnreadable(List<String> folders) {
+    for (final folder in folders) {
+      NeoSyncProvider._log.w(
+        'Save listing skipped an unreadable folder: $folder',
+      );
     }
   }
 }
