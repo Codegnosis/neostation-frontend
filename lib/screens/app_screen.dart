@@ -215,6 +215,10 @@ class AppScreenState extends State<AppScreen> with WidgetsBindingObserver {
 
     unawaited(_fixRetroarchAndroidDefault());
 
+    // Updates downloaded by an earlier run are no longer needed. Awaited, so
+    // it can't remove a download the update below starts.
+    await UpdateService.cleanUpDownloads();
+
     // App update check (network) — runs alongside the scan, no longer blocking it.
     if (configProvider.config.autoUpdateApp) {
       final appUpdateResult = await _checkAndShowAppUpdate();
