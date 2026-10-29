@@ -238,15 +238,23 @@ class NeoSyncProvider extends ChangeNotifier {
     return fileName;
   }
 
+  /// Whether an upload's failure [message] is the NeoSync server saying the
+  /// account is out of storage.
+  ///
+  /// Only the server's own reply counts. `syncFile` reports a local file or
+  /// network failure as "Network error: …", and those often mention a
+  /// `/storage/…` path or a connection "closed before full header", which
+  /// must not be taken for a full account.
+  @visibleForTesting
+  static bool isQuotaExceededMessage(String message) =>
+      !message.startsWith('Network error:') &&
+      message.toLowerCase().contains('quota');
+
   /// Analyzes an error message to determine if it represents a storage quota violation.
   ///
   /// Increments failure counters if a quota issue is detected.
   bool _checkQuotaExceeded(String errorMessage) {
-    final lowerMessage = errorMessage.toLowerCase();
-    if (lowerMessage.contains('quota') ||
-        lowerMessage.contains('storage') ||
-        lowerMessage.contains('413') ||
-        lowerMessage.contains('full')) {
+    if (isQuotaExceededMessage(errorMessage)) {
       _quotaExceededAttempts++;
       return true;
     }
