@@ -214,6 +214,11 @@ class SecondaryDisplayStateData {
   /// main engine.
   final bool dockEnabled;
 
+  /// Whether the system logo (and the name shown in its place) is hidden while
+  /// browsing, leaving only the background art. User setting, pushed by the
+  /// main engine.
+  final bool hideSystemLogo;
+
   /// How many dock slots are visible (1–5). User setting, pushed by the main
   /// engine; slots beyond it stay in [dockApps] but are hidden.
   final int dockSlotCount;
@@ -319,6 +324,7 @@ class SecondaryDisplayStateData {
     this.dockApps = const ['', '', '', '', ''],
     this.dockEditTrigger = 0,
     this.dockEnabled = true,
+    this.hideSystemLogo = false,
     this.dockSlotCount = 3,
     this.appReady = false,
     this.setupWizardActive = false,
@@ -408,6 +414,7 @@ class SecondaryDisplayStateData {
     List<String>? dockApps,
     int? dockEditTrigger,
     bool? dockEnabled,
+    bool? hideSystemLogo,
     int? dockSlotCount,
     bool? appReady,
     bool? setupWizardActive,
@@ -498,6 +505,7 @@ class SecondaryDisplayStateData {
       dockApps: dockApps ?? this.dockApps,
       dockEditTrigger: dockEditTrigger ?? this.dockEditTrigger,
       dockEnabled: dockEnabled ?? this.dockEnabled,
+      hideSystemLogo: hideSystemLogo ?? this.hideSystemLogo,
       dockSlotCount: dockSlotCount ?? this.dockSlotCount,
       appReady: appReady ?? this.appReady,
       setupWizardActive: setupWizardActive ?? this.setupWizardActive,
@@ -589,6 +597,7 @@ class SecondaryDisplayStateData {
           : const ['', '', '', '', ''],
       dockEditTrigger: (json['dockEditTrigger'] as num?)?.toInt() ?? 0,
       dockEnabled: json['dockEnabled'] as bool? ?? true,
+      hideSystemLogo: json['hideSystemLogo'] as bool? ?? false,
       dockSlotCount: (json['dockSlotCount'] as num?)?.toInt() ?? 3,
       appReady: json['appReady'] as bool? ?? false,
       setupWizardActive: json['setupWizardActive'] as bool? ?? false,
@@ -661,6 +670,7 @@ class SecondaryDisplayStateData {
       'dockApps': dockApps,
       'dockEditTrigger': dockEditTrigger,
       'dockEnabled': dockEnabled,
+      'hideSystemLogo': hideSystemLogo,
       'dockSlotCount': dockSlotCount,
       'appReady': appReady,
       'setupWizardActive': setupWizardActive,
@@ -783,6 +793,7 @@ class SecondaryDisplayState extends SharedState<SecondaryDisplayStateData> {
     List<String>? dockApps,
     int? dockEditTrigger,
     bool? dockEnabled,
+    bool? hideSystemLogo,
     int? dockSlotCount,
     bool? appReady,
     bool? setupWizardActive,
@@ -877,6 +888,7 @@ class SecondaryDisplayState extends SharedState<SecondaryDisplayStateData> {
           dockApps: dockApps,
           dockEditTrigger: dockEditTrigger,
           dockEnabled: dockEnabled,
+          hideSystemLogo: hideSystemLogo,
           dockSlotCount: dockSlotCount,
           appReady: appReady,
           setupWizardActive: setupWizardActive,

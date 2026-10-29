@@ -469,7 +469,7 @@ class SqliteService {
   SqliteService._internal();
 
   // Database configuration
-  static const int _databaseVersion = 178;
+  static const int _databaseVersion = 179;
   static const String _databaseName = 'data.sqlite';
 
   DatabaseAdapter? _database;
@@ -1973,6 +1973,7 @@ class SqliteService {
         use_12_hour_clock INTEGER DEFAULT 0,
         dock_apps TEXT,
         dock_enabled INTEGER DEFAULT 1,
+        secondary_hide_system_logo INTEGER DEFAULT 0,
         dock_slot_count INTEGER DEFAULT 3,
         now_playing_dim_delay INTEGER DEFAULT 3,
         now_playing_dim_level INTEGER DEFAULT 100,
@@ -2840,6 +2841,7 @@ class SqliteService {
     String? gameCarouselCardStyle,
     String? dockApps,
     int? dockEnabled,
+    int? secondaryHideSystemLogo,
     int? dockSlotCount,
     int? nowPlayingDimDelay,
     int? nowPlayingDimLevel,
@@ -2988,6 +2990,9 @@ class SqliteService {
     }
     if (dockEnabled != null) {
       updates['dock_enabled'] = dockEnabled;
+    }
+    if (secondaryHideSystemLogo != null) {
+      updates['secondary_hide_system_logo'] = secondaryHideSystemLogo;
     }
     if (dockSlotCount != null) {
       updates['dock_slot_count'] = dockSlotCount;

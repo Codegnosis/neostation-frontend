@@ -365,6 +365,7 @@ class SqliteConfigProvider extends ChangeNotifier with WidgetsBindingObserver {
         _secondaryDisplayState!.updateState(
           dockApps: _config.dockApps,
           dockEnabled: _config.dockEnabled,
+          hideSystemLogo: _config.secondaryHideSystemLogo,
           dockSlotCount: _config.dockSlotCount,
           nowPlayingDimDelay: _config.nowPlayingDimDelay,
           nowPlayingDimLevel: _config.nowPlayingDimLevel,

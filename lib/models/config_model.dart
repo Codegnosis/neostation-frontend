@@ -191,6 +191,11 @@ class ConfigModel {
   /// Whether the secondary "Now Playing" app dock is shown at all.
   final bool dockEnabled;
 
+  /// Whether the secondary display hides the system logo while browsing,
+  /// showing only the background art (no logo or system name). Separate from
+  /// [hideSystemLogos], which only affects the main screen's system cards.
+  final bool secondaryHideSystemLogo;
+
   /// How many dock slots are visible, from [dockMinSlotCount] to
   /// [dockMaxSlotCount]. Slots beyond this stay persisted but hidden.
   final int dockSlotCount;
@@ -324,6 +329,7 @@ class ConfigModel {
     this.fanartDimLevel = 25,
     this.dockApps = const ['', '', '', '', ''],
     this.dockEnabled = true,
+    this.secondaryHideSystemLogo = false,
     this.dockSlotCount = 3,
     this.esdeFolderPath = '',
     this.showAchievementsBadge = false,
@@ -534,6 +540,15 @@ class ConfigModel {
       dockEnabled:
           (json['dockEnabled'] ?? true).toString().toLowerCase() == 'true' ||
           (json['dock_enabled'] ?? 1).toString() == '1',
+      // Absent => 0 => logo shown (the default).
+      secondaryHideSystemLogo:
+          (json['secondaryHideSystemLogo'] ??
+                      json['secondary_hide_system_logo'] ??
+                      0)
+                  .toString() ==
+              '1' ||
+          (json['secondaryHideSystemLogo'] ?? false).toString().toLowerCase() ==
+              'true',
       dockSlotCount:
           (int.tryParse(
                     (json['dockSlotCount'] ?? json['dock_slot_count'] ?? 3)
@@ -682,6 +697,7 @@ class ConfigModel {
       'fanartDimLevel': fanartDimLevel,
       'dockApps': dockApps,
       'dockEnabled': dockEnabled,
+      'secondaryHideSystemLogo': secondaryHideSystemLogo,
       'dockSlotCount': dockSlotCount,
       'esdeFolderPath': esdeFolderPath,
       'showAchievementsBadge': showAchievementsBadge,
@@ -743,6 +759,7 @@ class ConfigModel {
     int? fanartDimLevel,
     List<String>? dockApps,
     bool? dockEnabled,
+    bool? secondaryHideSystemLogo,
     int? dockSlotCount,
     String? esdeFolderPath,
     bool? showAchievementsBadge,
@@ -803,6 +820,8 @@ class ConfigModel {
       fanartDimLevel: fanartDimLevel ?? this.fanartDimLevel,
       dockApps: dockApps ?? this.dockApps,
       dockEnabled: dockEnabled ?? this.dockEnabled,
+      secondaryHideSystemLogo:
+          secondaryHideSystemLogo ?? this.secondaryHideSystemLogo,
       dockSlotCount: dockSlotCount ?? this.dockSlotCount,
       esdeFolderPath: esdeFolderPath ?? this.esdeFolderPath,
       showAchievementsBadge:
