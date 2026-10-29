@@ -422,6 +422,14 @@ extension NeoSyncCore on NeoSyncProvider {
       if (localSaveFiles.isEmpty) {
         // Buscar archivos en la nube para este juego
         final cloudFiles = await _getCloudSaveFilesForGame(game);
+        if (cloudFiles == null) {
+          _updateGameSyncState(
+            game.romname,
+            game.name,
+            neo_sync.GameSyncStatus.error,
+          );
+          return;
+        }
 
         if (cloudFiles.isNotEmpty) {
           // Descargar todos los archivos de la nube
@@ -463,6 +471,16 @@ extension NeoSyncCore on NeoSyncProvider {
       bool allCloudDownloadsSucceeded = true;
 
       final cloudFiles = await _getCloudSaveFilesForGame(game);
+      // Without the cloud list every local save would look missing from the
+      // cloud: sync nothing rather than guess.
+      if (cloudFiles == null) {
+        _updateGameSyncState(
+          game.romname,
+          game.name,
+          neo_sync.GameSyncStatus.error,
+        );
+        return;
+      }
 
       // 1. Verificar cada archivo local contra la nube
       for (final localFile in localSaveFiles) {
@@ -1014,7 +1032,9 @@ extension NeoSyncCore on NeoSyncProvider {
   );
 
   /// Obtiene TODOS los archivos de guardado de la nube para un juego específico
-  Future<List<NeoSyncFile>> _getCloudSaveFilesForGame(GameModel game) async {
+  ///
+  /// Returns null when the cloud list can't be fetched.
+  Future<List<NeoSyncFile>?> _getCloudSaveFilesForGame(GameModel game) async {
     try {
       // 1. Obtener el sistema para resolver sus características
       final system = await _getSystemForGame(game);
@@ -1023,13 +1043,23 @@ extension NeoSyncCore on NeoSyncProvider {
       // Verificar si el sistema tiene sync deshabilitado
       if (!system.neosync.sync) return [];
 
-      // 2. Cargar archivos de la nube si no están cargados
-      if (_files.isEmpty) {
+      // 2. Fetch the cloud list unless a recent one for this account is
+      // held.
+      final account = _authService?.currentUser?.id;
+      final fetchedAt = _filesFetchedAt;
+      final fresh =
+          fetchedAt != null &&
+          _filesAccountId == account &&
+          _now().difference(fetchedAt) < NeoSyncProvider._cloudListMaxAge;
+      if (!fresh) {
+        final generation = _filesGeneration;
         final result = await _neoSyncService.getAllFiles();
-        if (result['success']) {
-          _files = result['files'];
-        } else {
-          return [];
+        if (result['success'] != true) return null;
+        _files = result['files'];
+        // Only a list asked for since the last "stale" mark counts as fresh.
+        if (generation == _filesGeneration) {
+          _filesFetchedAt = _now();
+          _filesAccountId = account;
         }
       }
 
@@ -1106,7 +1136,7 @@ extension NeoSyncCore on NeoSyncProvider {
       NeoSyncProvider._log.e(
         'Error getting cloud save files for ${game.name}: $e',
       );
-      return [];
+      return null;
     }
   }
 
@@ -1115,7 +1145,7 @@ extension NeoSyncCore on NeoSyncProvider {
     GameModel game, {
     LocalSaveFile? localSave,
   }) async {
-    final allFiles = await _getCloudSaveFilesForGame(game);
+    final allFiles = await _getCloudSaveFilesForGame(game) ?? const [];
     return allFiles.isNotEmpty ? allFiles.first : null;
   }
 
@@ -1294,6 +1324,9 @@ extension NeoSyncCore on NeoSyncProvider {
     // Expose the deadline to the shared download path (_downloadCloudFile) so a
     // late download abandons its write once the launch has proceeded.
     _launchDeadline = deadline;
+    // A save made on another device since the list was fetched must be seen
+    // before the game starts, or the game is played on the old one.
+    _markCloudListStale(olderThan: NeoSyncProvider._cloudListLaunchMaxAge);
     try {
       // Detectar saves actuales
       await detectGameSaveFiles(game);
@@ -1347,6 +1380,10 @@ extension NeoSyncCore on NeoSyncProvider {
     try {
       // Pequeña pausa para asegurar que el juego haya terminado de escribir saves
       await Future.delayed(const Duration(seconds: 1));
+
+      // Compare with the cloud as it is now: pick up a save made on another
+      // device meanwhile, and drop files deleted there.
+      _markCloudListStale(olderThan: NeoSyncProvider._cloudListLaunchMaxAge);
 
       // Detectar saves actuales (pueden haber cambiado durante el juego)
       await detectGameSaveFiles(game);

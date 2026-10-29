@@ -10,10 +10,16 @@ extension NeoSyncStatus on NeoSyncProvider {
     notify();
 
     try {
+      final account = _authService?.currentUser?.id;
+      final generation = _filesGeneration;
       final result = await _neoSyncService.getAllFiles();
 
       if (result['success']) {
         _files = result['files'];
+        if (generation == _filesGeneration) {
+          _filesFetchedAt = _now();
+          _filesAccountId = account;
+        }
         notify();
         return true;
       } else {
@@ -154,8 +160,9 @@ extension NeoSyncStatus on NeoSyncProvider {
     try {
       final result = await _neoSyncService.deleteFile(fileId);
       if (result['success']) {
-        // Remove the file from the local list
+        // Remove the file from the local lists
         _onlineFiles.removeWhere((file) => file.id == fileId);
+        _files = _files.where((file) => file.id != fileId).toList();
         if (_onlineTotal > 0) _onlineTotal -= 1;
         // Step back a page when the last item of the last page was removed.
         if (_onlineFiles.isEmpty && _onlinePage > 1) {
