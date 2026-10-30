@@ -156,6 +156,7 @@ class DatabaseTestHelper {
         hide_tab_search INTEGER DEFAULT 0,
         hide_search_card INTEGER DEFAULT 1,
         android_apps_as_tab INTEGER DEFAULT 0,
+        hide_tab_discovery INTEGER DEFAULT 0,
         game_grid_columns TEXT DEFAULT 'M',
         game_list_size TEXT DEFAULT 'S',
         game_carousel_card_style TEXT DEFAULT 'fanart',
@@ -348,5 +349,19 @@ class DatabaseTestHelper {
     // The production DDL rather than a copy, so the singleton CHECK and the
     // nullable secret columns behave exactly as they do on a device.
     await db.execute(SqliteMigrations.createUserRommConfigTableSql);
+
+    await db.execute('''
+      CREATE TABLE user_discovery_picks (
+        week_key TEXT NOT NULL,
+        slot_id TEXT NOT NULL,
+        section TEXT NOT NULL,
+        genre_bucket TEXT,
+        slot_order INTEGER NOT NULL DEFAULT 0,
+        rom_path TEXT NOT NULL COLLATE NOCASE,
+        reroll_count INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (week_key, slot_id)
+      )
+    ''');
   }
 }

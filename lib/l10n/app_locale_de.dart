@@ -1733,4 +1733,38 @@ const Map<String, dynamic> appLocaleDe = {
       'Verknüpfung mit RomM konnte nicht entfernt werden',
   // Link action on search results
   AppLocale.searchLinkToRomm: 'Mit RomM verknüpfen',
+  // Discovery
+  AppLocale.discovery: 'Entdecken',
+  AppLocale.showDiscoveryTab: 'Tab „Entdecken“ anzeigen',
+  AppLocale.showDiscoveryTabSubtitle:
+      'Zeigt den Tab „Entdecken“ in der Navigationsleiste an',
+  AppLocale.discoveryGameOfTheWeek: 'Spiel der Woche',
+  AppLocale.discoveryHiddenGem: 'Verborgene Perle',
+  AppLocale.discoveryHiddenGemSubtitle:
+      'Etwas aus deiner Bibliothek, das du nie angerührt hast',
+  AppLocale.discoveryAchievementSpotlight: 'Erfolge im Fokus',
+  AppLocale.discoveryGenrePicks: 'Genre-Auswahl',
+  AppLocale.discoveryReroll: 'Neu würfeln',
+  AppLocale.discoveryRerollHint: 'Drücke Y für einen anderen Vorschlag',
+  AppLocale.discoveryNeverPlayed: 'Nie gespielt',
+  AppLocale.discoveryEmptyLibrary: 'Füge ROMs hinzu, um Spiele zu entdecken',
+  AppLocale.discoveryNeedsScraping:
+      'Scrape mehr deiner Bibliothek, um verborgene Perlen freizuschalten',
+  AppLocale.discoveryNoPickAvailable:
+      'Diese Woche gibt es hier nichts vorzuschlagen',
+  AppLocale.discoveryWeekOf: 'Woche vom {date}',
+  AppLocale.discoveryAchievementsCount: '{count} Erfolge',
+  AppLocale.genrePlatform: 'Plattform',
+  AppLocale.genreRpg: 'Rollenspiel',
+  AppLocale.genreShooter: 'Shooter',
+  AppLocale.genreFighting: 'Kampfspiel',
+  AppLocale.genreRacing: 'Rennspiel',
+  AppLocale.genrePuzzle: 'Rätsel',
+  AppLocale.genreSports: 'Sport',
+  AppLocale.genreAdventure: 'Abenteuer',
+  AppLocale.genreStrategy: 'Strategie',
+  AppLocale.genreSimulation: 'Simulation',
+  AppLocale.genreAction: 'Action',
+  AppLocale.genreArcade: 'Arcade',
+  AppLocale.genreOther: 'Sonstige',
 };

@@ -362,6 +362,12 @@ class SqliteConfigService {
                 ) ??
                 0) ==
             1,
+        hideTabDiscovery:
+            (int.tryParse(
+                  userConfig?['hide_tab_discovery']?.toString() ?? '0',
+                ) ??
+                0) ==
+            1,
         activeSyncProvider:
             userConfig?['active_sync_provider']?.toString() ?? 'neosync',
         autoUpdateApp:
@@ -535,6 +541,7 @@ class SqliteConfigService {
           hideTabRomm: config.hideTabRomm ? 1 : 0,
           hideSearchCard: config.hideSearchCard ? 1 : 0,
           androidAppsAsTab: config.androidAppsAsTab ? 1 : 0,
+          hideTabDiscovery: config.hideTabDiscovery ? 1 : 0,
           activeSyncProvider: config.activeSyncProvider,
           autoUpdateApp: config.autoUpdateApp ? 1 : 0,
           autoUpdateSystems: config.autoUpdateSystems ? 1 : 0,

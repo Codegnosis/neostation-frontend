@@ -1650,4 +1650,37 @@ const Map<String, dynamic> appLocaleEn = {
   AppLocale.rommUnlinkFailed: 'Could not unlink from RomM',
   // Link action on search results
   AppLocale.searchLinkToRomm: 'Link to RomM',
+  // Discovery
+  AppLocale.discovery: 'Discovery',
+  AppLocale.showDiscoveryTab: 'Show Discovery tab',
+  AppLocale.showDiscoveryTabSubtitle:
+      'Display the Discovery tab in the navigation bar',
+  AppLocale.discoveryGameOfTheWeek: 'Game of the Week',
+  AppLocale.discoveryHiddenGem: 'Hidden Gem',
+  AppLocale.discoveryHiddenGemSubtitle:
+      'Something in your library you have never touched',
+  AppLocale.discoveryAchievementSpotlight: 'Achievement Spotlight',
+  AppLocale.discoveryGenrePicks: 'Genre Picks',
+  AppLocale.discoveryReroll: 'Re-roll',
+  AppLocale.discoveryRerollHint: 'Press Y for a different pick',
+  AppLocale.discoveryNeverPlayed: 'Never played',
+  AppLocale.discoveryEmptyLibrary: 'Add some ROMs to start discovering games',
+  AppLocale.discoveryNeedsScraping:
+      'Scrape more of your library to unlock hidden gems',
+  AppLocale.discoveryNoPickAvailable: 'Nothing to suggest here this week',
+  AppLocale.discoveryWeekOf: 'Week of {date}',
+  AppLocale.discoveryAchievementsCount: '{count} achievements',
+  AppLocale.genrePlatform: 'Platform',
+  AppLocale.genreRpg: 'RPG',
+  AppLocale.genreShooter: 'Shooter',
+  AppLocale.genreFighting: 'Fighting',
+  AppLocale.genreRacing: 'Racing',
+  AppLocale.genrePuzzle: 'Puzzle',
+  AppLocale.genreSports: 'Sports',
+  AppLocale.genreAdventure: 'Adventure',
+  AppLocale.genreStrategy: 'Strategy',
+  AppLocale.genreSimulation: 'Simulation',
+  AppLocale.genreAction: 'Action',
+  AppLocale.genreArcade: 'Arcade',
+  AppLocale.genreOther: 'Other',
 };

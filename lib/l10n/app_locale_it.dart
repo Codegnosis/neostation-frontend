@@ -1720,4 +1720,38 @@ const Map<String, dynamic> appLocaleIt = {
   AppLocale.rommUnlinkFailed: 'Impossibile scollegare da RomM',
   // Link action on search results
   AppLocale.searchLinkToRomm: 'Collega a RomM',
+  // Discovery
+  AppLocale.discovery: 'Scoperta',
+  AppLocale.showDiscoveryTab: 'Mostra scheda Scoperta',
+  AppLocale.showDiscoveryTabSubtitle:
+      'Mostra la scheda Scoperta nella barra di navigazione',
+  AppLocale.discoveryGameOfTheWeek: 'Gioco della settimana',
+  AppLocale.discoveryHiddenGem: 'Gemma nascosta',
+  AppLocale.discoveryHiddenGemSubtitle:
+      'Qualcosa nella tua libreria che non hai mai toccato',
+  AppLocale.discoveryAchievementSpotlight: 'Obiettivi in evidenza',
+  AppLocale.discoveryGenrePicks: 'Scelte per genere',
+  AppLocale.discoveryReroll: 'Rilancia',
+  AppLocale.discoveryRerollHint: 'Premi Y per un altro suggerimento',
+  AppLocale.discoveryNeverPlayed: 'Mai giocato',
+  AppLocale.discoveryEmptyLibrary:
+      'Aggiungi delle ROM per iniziare a scoprire giochi',
+  AppLocale.discoveryNeedsScraping:
+      'Fai lo scraping di più giochi per sbloccare le gemme nascoste',
+  AppLocale.discoveryNoPickAvailable: 'Niente da suggerire questa settimana',
+  AppLocale.discoveryWeekOf: 'Settimana del {date}',
+  AppLocale.discoveryAchievementsCount: '{count} obiettivi',
+  AppLocale.genrePlatform: 'Piattaforma',
+  AppLocale.genreRpg: 'Gioco di ruolo',
+  AppLocale.genreShooter: 'Sparatutto',
+  AppLocale.genreFighting: 'Picchiaduro',
+  AppLocale.genreRacing: 'Corse',
+  AppLocale.genrePuzzle: 'Rompicapo',
+  AppLocale.genreSports: 'Sport',
+  AppLocale.genreAdventure: 'Avventura',
+  AppLocale.genreStrategy: 'Strategia',
+  AppLocale.genreSimulation: 'Simulazione',
+  AppLocale.genreAction: 'Azione',
+  AppLocale.genreArcade: 'Arcade',
+  AppLocale.genreOther: 'Altro',
 };

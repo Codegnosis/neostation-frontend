@@ -469,7 +469,7 @@ class SqliteService {
   SqliteService._internal();
 
   // Database configuration
-  static const int _databaseVersion = 179;
+  static const int _databaseVersion = 183;
   static const String _databaseName = 'data.sqlite';
 
   DatabaseAdapter? _database;
@@ -1957,6 +1957,7 @@ class SqliteService {
         hide_tab_search INTEGER DEFAULT 0,
         hide_search_card INTEGER DEFAULT 1,
         android_apps_as_tab INTEGER DEFAULT 0,
+        hide_tab_discovery INTEGER DEFAULT 0,
         active_sync_provider TEXT DEFAULT 'neosync',
         systems_version TEXT DEFAULT '',
         -- Generation stamp of the bundled RA seed asset that is currently
@@ -2164,6 +2165,24 @@ class SqliteService {
       SqliteMigrations.createAppRommPlaytimeStateTableSql,
       SqliteMigrations.createUserCollectionsTableSql,
       SqliteMigrations.createUserCollectionItemsTableSql,
+      // One row per Discovery slot per ISO week. No foreign key to user_roms on
+      // purpose: a rescan that removes a ROM should leave a dangling pick that
+      // the service re-resolves into a new choice, not cascade the row away.
+      // Must stay identical to migration v182 — fresh installs run this instead
+      // of the migrations.
+      '''
+      CREATE TABLE IF NOT EXISTS user_discovery_picks (
+        week_key TEXT NOT NULL,
+        slot_id TEXT NOT NULL,
+        section TEXT NOT NULL,
+        genre_bucket TEXT,
+        slot_order INTEGER NOT NULL DEFAULT 0,
+        rom_path TEXT NOT NULL COLLATE NOCASE,
+        reroll_count INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (week_key, slot_id)
+      );
+      ''',
     ];
 
     for (final sql in tables) {
@@ -2242,6 +2261,9 @@ class SqliteService {
       SqliteMigrations.createAppRommPlaySessionsIndexSql,
       // 9. Index for user_collection_items ("which collections is this ROM in?")
       SqliteMigrations.createUserCollectionItemsIndexSql,
+
+      // 9. Index for user_discovery_picks (reads are always week-scoped)
+      'CREATE INDEX IF NOT EXISTS idx_user_discovery_picks_week ON user_discovery_picks(week_key);',
     ];
 
     for (final sql in indexes) {
@@ -2829,6 +2851,7 @@ class SqliteService {
     int? hideTabRomm,
     int? hideSearchCard,
     int? androidAppsAsTab,
+    int? hideTabDiscovery,
     String? activeSyncProvider,
     String? systemsVersion,
     String? raSeedStamp,
@@ -2954,6 +2977,9 @@ class SqliteService {
     }
     if (androidAppsAsTab != null) {
       updates['android_apps_as_tab'] = androidAppsAsTab;
+    }
+    if (hideTabDiscovery != null) {
+      updates['hide_tab_discovery'] = hideTabDiscovery;
     }
     if (activeSyncProvider != null) {
       updates['active_sync_provider'] = activeSyncProvider;
@@ -5062,6 +5088,124 @@ class SqliteService {
       [collectionId],
     );
     return results.map((row) => DatabaseGameModel.fromJson(row)).toList();
+  }
+
+  /// Retrieves every game the weekly Discovery board can pick from.
+  ///
+  /// Returns raw rows rather than models because each one feeds two things: the
+  /// pick engine's `DiscoveryCandidate` (rating, playtime, genre, achievement
+  /// counts) and `DatabaseGameModel.fromJson` for launching the pick, which is
+  /// the same row shape [getFavoriteGames] returns. The aliases are chosen to
+  /// satisfy both.
+  ///
+  /// The `app_ra_game_list` join goes through a GROUP BY subquery on purpose:
+  /// that table holds **one row per ROM hash**, so several rows share a
+  /// `game_id`, and joining it directly would emit the same game once per hash.
+  /// That does not just duplicate cards — it silently multiplies a game's
+  /// weight in every pool the engine draws from.
+  ///
+  /// `android` and `music` are excluded exactly as [getFavoriteGames] and the
+  /// "all systems" game list do: neither holds games worth recommending.
+  static Future<List<Map<String, Object?>>> getDiscoveryCandidates() async {
+    final db = await instance.database;
+    return db.rawQuery('''
+      SELECT
+        ur.filename, ur.rom_path, ur.is_favorite, ur.play_time, ur.last_played,
+        ur.cloud_sync_enabled, ur.title_id, ur.title_name, ur.id_ra,
+        ur.app_emulator_unique_id AS emulator_name, ur.box2d_aspect_ratio,
+        s.id AS system_id, s.folder_name AS system_folder_name,
+        s.real_name AS system_real_name, s.short_name AS system_short_name,
+        COALESCE(usm.real_name, ur.title_name, ur.filename) AS game_display_name,
+        usm.real_name AS ss_real_name, usm.rating,
+        COALESCE(usm.genre, ur.genre)         AS genre,
+        COALESCE(usm.release_date, ur.year)   AS year,
+        COALESCE(usm.developer, ur.developer) AS developer,
+        COALESCE(usm.is_fully_scraped, 0)     AS is_fully_scraped,
+        COALESCE(ra.num_achievements, 0)      AS ra_num_achievements,
+        COALESCE(ra.points, 0)                AS ra_points
+      FROM user_roms ur
+      JOIN app_systems s ON ur.app_system_id = s.id
+      LEFT JOIN user_screenscraper_metadata usm
+             ON ur.app_system_id = usm.app_system_id AND ur.filename = usm.filename
+      LEFT JOIN (SELECT game_id, MAX(num_achievements) AS num_achievements, MAX(points) AS points
+                 FROM app_ra_game_list GROUP BY game_id) ra
+             ON ra.game_id = ur.id_ra
+      WHERE s.folder_name NOT IN ('android', 'music')
+    ''');
+  }
+
+  /// Returns the persisted Discovery picks for [weekKey], in board order.
+  static Future<List<Map<String, Object?>>> getDiscoveryPicks(
+    String weekKey,
+  ) async {
+    final db = await instance.database;
+    return db.rawQuery(
+      'SELECT week_key, slot_id, section, genre_bucket, slot_order, rom_path, '
+      'reroll_count FROM user_discovery_picks WHERE week_key = ? '
+      'ORDER BY slot_order ASC, slot_id ASC',
+      [weekKey],
+    );
+  }
+
+  /// Returns the distinct ROM paths picked in any week from [sinceWeekKey] on.
+  ///
+  /// Week keys are fixed-width and zero-padded, so a plain string comparison is
+  /// also a chronological one — the same trick `systems_version` uses.
+  static Future<List<String>> getDiscoveryPickPathsSince(
+    String sinceWeekKey,
+  ) async {
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      'SELECT DISTINCT rom_path FROM user_discovery_picks WHERE week_key >= ?',
+      [sinceWeekKey],
+    );
+    return rows
+        .map((row) => row['rom_path'] as String?)
+        .whereType<String>()
+        .toList();
+  }
+
+  /// Writes one Discovery pick, replacing whatever occupied that slot.
+  ///
+  /// A single-row write by (week, slot): re-rolling one section must not touch
+  /// the rest of the board, and the secondary Flutter engine shares no memory
+  /// with this one, only the database file.
+  static Future<void> upsertDiscoveryPick({
+    required String weekKey,
+    required String slotId,
+    required String section,
+    required String romPath,
+    String? genreBucket,
+    int slotOrder = 0,
+    int rerollCount = 0,
+  }) async {
+    final db = await instance.database;
+    await db.execute(
+      'INSERT OR REPLACE INTO user_discovery_picks '
+      '(week_key, slot_id, section, genre_bucket, slot_order, rom_path, reroll_count) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [weekKey, slotId, section, genreBucket, slotOrder, romPath, rerollCount],
+    );
+  }
+
+  /// Deletes every pick from before [weekKey], keeping the table bounded.
+  static Future<int> pruneDiscoveryPicksBefore(String weekKey) async {
+    final db = await instance.database;
+    return db.rawDelete('DELETE FROM user_discovery_picks WHERE week_key < ?', [
+      weekKey,
+    ]);
+  }
+
+  /// Deletes a single Discovery pick, used when its ROM no longer exists.
+  static Future<void> deleteDiscoveryPick({
+    required String weekKey,
+    required String slotId,
+  }) async {
+    final db = await instance.database;
+    await db.rawDelete(
+      'DELETE FROM user_discovery_picks WHERE week_key = ? AND slot_id = ?',
+      [weekKey, slotId],
+    );
   }
 
   /// Retrieves a single game record based on its system and filename.

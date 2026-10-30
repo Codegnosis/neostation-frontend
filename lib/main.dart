@@ -4,6 +4,7 @@ import 'package:neostation/providers/sqlite_database_provider.dart';
 import 'package:neostation/providers/file_provider.dart';
 import 'package:neostation/providers/theme_provider.dart';
 import 'package:neostation/providers/scraping_provider.dart';
+import 'package:neostation/providers/discovery_provider.dart';
 import 'package:neostation/providers/retro_achievements_provider.dart';
 import 'package:neostation/providers/romm_provider.dart';
 import 'package:neostation/providers/neo_sync_provider.dart';
@@ -1022,6 +1023,9 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider.value(value: widget.rommProvider),
         ChangeNotifierProvider(create: (context) => SystemBackgroundProvider()),
+        // Lazy: the board is a full library scan, and it must not run at
+        // startup for the many users who never open the tab.
+        ChangeNotifierProvider(create: (context) => DiscoveryProvider()),
         ChangeNotifierProvider(
           // Eager: the systems carousel/grid paints the Collections card's game
           // count on the first frame it builds, and that card is on the very

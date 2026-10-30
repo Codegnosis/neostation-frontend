@@ -1702,4 +1702,38 @@ const Map<String, dynamic> appLocalePt = {
   AppLocale.rommUnlinkFailed: 'Não foi possível desvincular do RomM',
   // Link action on search results
   AppLocale.searchLinkToRomm: 'Vincular ao RomM',
+  // Discovery
+  AppLocale.discovery: 'Descoberta',
+  AppLocale.showDiscoveryTab: 'Mostrar separador Descoberta',
+  AppLocale.showDiscoveryTabSubtitle:
+      'Mostra o separador Descoberta na barra de navegação',
+  AppLocale.discoveryGameOfTheWeek: 'Jogo da semana',
+  AppLocale.discoveryHiddenGem: 'Joia escondida',
+  AppLocale.discoveryHiddenGemSubtitle:
+      'Algo na tua biblioteca em que nunca tocaste',
+  AppLocale.discoveryAchievementSpotlight: 'Conquistas em destaque',
+  AppLocale.discoveryGenrePicks: 'Escolhas por género',
+  AppLocale.discoveryReroll: 'Sortear',
+  AppLocale.discoveryRerollHint: 'Prime Y para outra sugestão',
+  AppLocale.discoveryNeverPlayed: 'Nunca jogado',
+  AppLocale.discoveryEmptyLibrary:
+      'Adiciona ROMs para começares a descobrir jogos',
+  AppLocale.discoveryNeedsScraping:
+      'Faz scraping de mais jogos para desbloquear joias escondidas',
+  AppLocale.discoveryNoPickAvailable: 'Nada a sugerir esta semana',
+  AppLocale.discoveryWeekOf: 'Semana de {date}',
+  AppLocale.discoveryAchievementsCount: '{count} conquistas',
+  AppLocale.genrePlatform: 'Plataformas',
+  AppLocale.genreRpg: 'RPG',
+  AppLocale.genreShooter: 'Tiro',
+  AppLocale.genreFighting: 'Luta',
+  AppLocale.genreRacing: 'Corrida',
+  AppLocale.genrePuzzle: 'Quebra-cabeças',
+  AppLocale.genreSports: 'Desporto',
+  AppLocale.genreAdventure: 'Aventura',
+  AppLocale.genreStrategy: 'Estratégia',
+  AppLocale.genreSimulation: 'Simulação',
+  AppLocale.genreAction: 'Ação',
+  AppLocale.genreArcade: 'Arcade',
+  AppLocale.genreOther: 'Outros',
 };
