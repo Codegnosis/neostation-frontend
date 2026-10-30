@@ -8,6 +8,8 @@ import 'package:neostation/providers/neo_sync_provider.dart';
 import 'package:neostation/repositories/neosync_save_folder_repository.dart';
 import 'package:neostation/services/neosync/auth_service.dart';
 import 'package:neostation/services/neosync/neo_sync_service.dart';
+import 'package:neostation/sync/i_sync_provider.dart';
+import 'package:neostation/sync/providers/neo_sync_adapter.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,11 +21,14 @@ import 'database_test_helper.dart';
 // save could be uploaded over newer progress, and the list outlived signing
 // out into another account.
 
-/// Lists [cloud] (or fails when [listFails]), records uploads and downloads,
-/// and never touches the network or the real save folders.
+/// Lists [cloud] (or fails when [listFails], or throws when [listThrows]),
+/// records uploads (or refuses them as over quota when [accountFull]) and
+/// downloads, and never touches the network or the real save folders.
 class _FakeNeoSync extends NeoSyncService {
   List<NeoSyncFile> cloud = [];
   bool listFails = false;
+  bool listThrows = false;
+  bool accountFull = false;
   int listCalls = 0;
   final uploads = <String>[];
   final downloads = <String>[];
@@ -31,6 +36,7 @@ class _FakeNeoSync extends NeoSyncService {
   @override
   Future<Map<String, dynamic>> getAllFiles({NeoSyncFileFilter? filter}) async {
     listCalls++;
+    if (listThrows) throw const SocketException('Network is unreachable');
     if (listFails) return {'success': false, 'message': 'Network error'};
     return {'success': true, 'files': List<NeoSyncFile>.of(cloud)};
   }
@@ -47,6 +53,9 @@ class _FakeNeoSync extends NeoSyncService {
     String? scope,
     String? type,
   }) async {
+    if (accountFull) {
+      return {'success': false, 'message': 'Storage quota exceeded'};
+    }
     uploads.add(p.basename(file.path));
     return {'success': true};
   }
@@ -241,7 +250,7 @@ void main() {
     expect(service.downloads, isEmpty);
   });
 
-  test('a list the save list just loaded is reused', () async {
+  test('a list just loaded for the account is reused', () async {
     service.cloud = [cloudSave('Mario.sav', gameName: 'Mario')];
     await provider.loadFiles();
     later(const Duration(seconds: 5));
@@ -281,5 +290,48 @@ void main() {
     await provider.deleteOnlineFile('Zelda.sav');
 
     expect(provider.files, isEmpty);
+  });
+
+  // Listing the cloud files is not a sync: when it fails, the games' marks
+  // keep showing their own sync state rather than all turning red.
+  test('a failed cloud file listing is not reported as a sync error', () async {
+    final adapter = NeoSyncAdapter(provider);
+    addTearDown(adapter.dispose);
+    service.listFails = true;
+
+    expect(await provider.loadFiles(), isFalse);
+
+    expect(provider.error, isNull);
+    expect(adapter.lastError, isNull);
+    expect(adapter.status, SyncProviderStatus.connected);
+  });
+
+  test('a cloud file listing that throws is not reported as a sync '
+      'error', () async {
+    final adapter = NeoSyncAdapter(provider);
+    addTearDown(adapter.dispose);
+    service.listThrows = true;
+
+    expect(await provider.loadFiles(), isFalse);
+
+    expect(adapter.lastError, isNull);
+    expect(adapter.status, SyncProviderStatus.connected);
+  });
+
+  test('a cloud file listing leaves a sync error in place', () async {
+    final adapter = NeoSyncAdapter(provider);
+    addTearDown(adapter.dispose);
+    File(p.join(folder.path, 'Zelda.sav')).writeAsBytesSync(const [1, 2, 3]);
+    service.accountFull = true;
+    expect(
+      await provider.syncCustomSaveFolder('gc', 'dolphin'),
+      CustomFolderUploadOutcome.quotaExceeded,
+    );
+    final syncError = provider.error;
+    expect(syncError, isNotNull);
+
+    expect(await provider.loadFiles(), isTrue);
+
+    expect(adapter.lastError, syncError);
   });
 }

@@ -1680,4 +1680,37 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.rommUnlinkFailed: 'Tidak dapat memutus tautan dari RomM',
   // Link action on search results
   AppLocale.searchLinkToRomm: 'Tautkan ke RomM',
+  // Discovery
+  AppLocale.discovery: 'Temukan',
+  AppLocale.showDiscoveryTab: 'Tampilkan tab Temukan',
+  AppLocale.showDiscoveryTabSubtitle: 'Tampilkan tab Temukan di bilah navigasi',
+  AppLocale.discoveryGameOfTheWeek: 'Game Minggu Ini',
+  AppLocale.discoveryHiddenGem: 'Permata Tersembunyi',
+  AppLocale.discoveryHiddenGemSubtitle:
+      'Sesuatu di pustakamu yang belum pernah kamu sentuh',
+  AppLocale.discoveryAchievementSpotlight: 'Sorotan Pencapaian',
+  AppLocale.discoveryGenrePicks: 'Pilihan Genre',
+  AppLocale.discoveryReroll: 'Acak ulang',
+  AppLocale.discoveryRerollHint: 'Tekan Y untuk pilihan lain',
+  AppLocale.discoveryNeverPlayed: 'Belum dimainkan',
+  AppLocale.discoveryEmptyLibrary: 'Tambahkan ROM untuk mulai menemukan game',
+  AppLocale.discoveryNeedsScraping:
+      'Scrape lebih banyak pustakamu untuk membuka permata tersembunyi',
+  AppLocale.discoveryNoPickAvailable:
+      'Tidak ada yang bisa disarankan minggu ini',
+  AppLocale.discoveryWeekOf: 'Minggu {date}',
+  AppLocale.discoveryAchievementsCount: '{count} pencapaian',
+  AppLocale.genrePlatform: 'Platform',
+  AppLocale.genreRpg: 'RPG',
+  AppLocale.genreShooter: 'Tembak-menembak',
+  AppLocale.genreFighting: 'Pertarungan',
+  AppLocale.genreRacing: 'Balap',
+  AppLocale.genrePuzzle: 'Teka-teki',
+  AppLocale.genreSports: 'Olahraga',
+  AppLocale.genreAdventure: 'Petualangan',
+  AppLocale.genreStrategy: 'Strategi',
+  AppLocale.genreSimulation: 'Simulasi',
+  AppLocale.genreAction: 'Aksi',
+  AppLocale.genreArcade: 'Arkade',
+  AppLocale.genreOther: 'Lainnya',
 };

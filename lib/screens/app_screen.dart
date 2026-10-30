@@ -19,6 +19,7 @@ import '../widgets/fixed_header.dart';
 import 'systems_screen/system_content.dart';
 import 'search_screen/search_screen.dart';
 import 'systems_screen/my_systems_section/initial_setup_widget.dart';
+import 'discovery_screen/discovery_content.dart';
 import 'retro_achievements_screen/ra_content.dart';
 import 'settings_screen/new_settings_screen.dart';
 import 'saves_screen/saves_tab.dart';
@@ -49,14 +50,19 @@ class AppScreen extends StatefulWidget {
 /// delegation logic below is written against these names rather than literals.
 abstract final class AppTabs {
   static const int systems = 0;
-  static const int sync = 1;
-  static const int achievements = 2;
-  static const int romm = 3;
-  static const int settings = 4;
-  static const int androidApps = 5;
+
+  /// Second in the strip, beside Systems: it is a way into the library rather
+  /// than a tool, so it belongs with the browsing tabs and not after Settings.
+  static const int discovery = 1;
+
+  static const int sync = 2;
+  static const int achievements = 3;
+  static const int romm = 4;
+  static const int settings = 5;
+  static const int androidApps = 6;
 
   /// Total number of tabs, used for wrap-around when cycling with the bumpers.
-  static const int count = 6;
+  static const int count = 7;
 }
 
 /// Bridge class providing static access to the main application navigation state.
@@ -763,6 +769,11 @@ class AppScreenState extends State<AppScreen> with WidgetsBindingObserver {
           onPreviousTab: AppNavigation.previousTab,
           onNextTab: AppNavigation.nextTab,
         );
+      case AppTabs.discovery:
+        // Like RAContent, Discovery pushes its own gamepad layer from initState
+        // and needs no deactivate callback here. Adding one would double-
+        // dispatch every press (#255).
+        return DiscoveryContent();
       default:
         return SystemContent(
           selectedIndex: _selectedSystemIndex,

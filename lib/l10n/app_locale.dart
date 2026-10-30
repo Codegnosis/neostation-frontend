@@ -1640,6 +1640,43 @@ mixin AppLocale {
       'custom_folder_upload_complete';
   static const String customFolderUploadFailed = 'custom_folder_upload_failed';
   static const String customSaveFoldersMigrate = 'custom_save_folders_migrate';
+  // ---------------------------------------------------------------------------
+  // Discovery
+  // ---------------------------------------------------------------------------
+  static const String discovery = 'discovery';
+  static const String showDiscoveryTab = 'show_discovery_tab';
+  static const String showDiscoveryTabSubtitle = 'show_discovery_tab_subtitle';
+  static const String discoveryGameOfTheWeek = 'discovery_game_of_the_week';
+  static const String discoveryHiddenGem = 'discovery_hidden_gem';
+  static const String discoveryHiddenGemSubtitle =
+      'discovery_hidden_gem_subtitle';
+  static const String discoveryAchievementSpotlight =
+      'discovery_achievement_spotlight';
+  static const String discoveryGenrePicks = 'discovery_genre_picks';
+  static const String discoveryReroll = 'discovery_reroll';
+  static const String discoveryRerollHint = 'discovery_reroll_hint';
+  static const String discoveryNeverPlayed = 'discovery_never_played';
+  static const String discoveryEmptyLibrary = 'discovery_empty_library';
+  static const String discoveryNeedsScraping = 'discovery_needs_scraping';
+  static const String discoveryNoPickAvailable = 'discovery_no_pick_available';
+  static const String discoveryWeekOf = 'discovery_week_of';
+  static const String discoveryAchievementsCount =
+      'discovery_achievements_count';
+
+  // Genre shelf labels, one per GenreBucket (lib/utils/genre_buckets.dart).
+  static const String genrePlatform = 'genre_platform';
+  static const String genreRpg = 'genre_rpg';
+  static const String genreShooter = 'genre_shooter';
+  static const String genreFighting = 'genre_fighting';
+  static const String genreRacing = 'genre_racing';
+  static const String genrePuzzle = 'genre_puzzle';
+  static const String genreSports = 'genre_sports';
+  static const String genreAdventure = 'genre_adventure';
+  static const String genreStrategy = 'genre_strategy';
+  static const String genreSimulation = 'genre_simulation';
+  static const String genreAction = 'genre_action';
+  static const String genreArcade = 'genre_arcade';
+  static const String genreOther = 'genre_other';
 
   // RomM manual link picker / Manage tab link rows.
   static const String rommLinkRow = 'romm_link_row';

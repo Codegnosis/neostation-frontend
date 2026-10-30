@@ -1672,4 +1672,38 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.rommUnlinkFailed: 'Не удалось отвязать от RomM',
   // Link action on search results
   AppLocale.searchLinkToRomm: 'Связать с RomM',
+  // Discovery
+  AppLocale.discovery: 'Открытия',
+  AppLocale.showDiscoveryTab: 'Показывать вкладку «Открытия»',
+  AppLocale.showDiscoveryTabSubtitle:
+      'Отображать вкладку «Открытия» на панели навигации',
+  AppLocale.discoveryGameOfTheWeek: 'Игра недели',
+  AppLocale.discoveryHiddenGem: 'Скрытая жемчужина',
+  AppLocale.discoveryHiddenGemSubtitle:
+      'Что-то из вашей библиотеки, к чему вы ни разу не притрагивались',
+  AppLocale.discoveryAchievementSpotlight: 'В центре внимания: достижения',
+  AppLocale.discoveryGenrePicks: 'Подборки по жанрам',
+  AppLocale.discoveryReroll: 'Другая игра',
+  AppLocale.discoveryRerollHint: 'Нажмите Y, чтобы выбрать другую игру',
+  AppLocale.discoveryNeverPlayed: 'Не запускалась',
+  AppLocale.discoveryEmptyLibrary:
+      'Добавьте ROM-файлы, чтобы начать открывать игры',
+  AppLocale.discoveryNeedsScraping:
+      'Просканируйте больше игр, чтобы открыть скрытые жемчужины',
+  AppLocale.discoveryNoPickAvailable: 'На этой неделе здесь нечего предложить',
+  AppLocale.discoveryWeekOf: 'Неделя с {date}',
+  AppLocale.discoveryAchievementsCount: 'Достижений: {count}',
+  AppLocale.genrePlatform: 'Платформер',
+  AppLocale.genreRpg: 'РПГ',
+  AppLocale.genreShooter: 'Шутер',
+  AppLocale.genreFighting: 'Файтинг',
+  AppLocale.genreRacing: 'Гонки',
+  AppLocale.genrePuzzle: 'Головоломки',
+  AppLocale.genreSports: 'Спорт',
+  AppLocale.genreAdventure: 'Приключения',
+  AppLocale.genreStrategy: 'Стратегия',
+  AppLocale.genreSimulation: 'Симулятор',
+  AppLocale.genreAction: 'Экшен',
+  AppLocale.genreArcade: 'Аркада',
+  AppLocale.genreOther: 'Другое',
 };

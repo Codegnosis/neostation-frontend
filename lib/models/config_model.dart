@@ -171,6 +171,9 @@ class ConfigModel {
 
   final bool androidAppsAsTab;
 
+  /// Whether the Discovery navigation tab is hidden. See [hideTabSync].
+  final bool hideTabDiscovery;
+
   /// Seconds of inactivity before the secondary "Now Playing" panel dims, or `0`
   /// to never dim. Only meaningful when a secondary display is active.
   final int nowPlayingDimDelay;
@@ -317,6 +320,7 @@ class ConfigModel {
     this.hideTabRomm = false,
     this.hideSearchCard = true,
     this.androidAppsAsTab = false,
+    this.hideTabDiscovery = false,
     this.activeSyncProvider = 'neosync',
     this.autoUpdateApp = true,
     this.autoUpdateSystems = true,
@@ -488,6 +492,12 @@ class ConfigModel {
                   .toString() ==
               '1' ||
           (json['androidAppsAsTab'] ?? false).toString().toLowerCase() ==
+              'true',
+      hideTabDiscovery:
+          (json['hideTabDiscovery'] ?? json['hide_tab_discovery'] ?? 0)
+                  .toString() ==
+              '1' ||
+          (json['hideTabDiscovery'] ?? false).toString().toLowerCase() ==
               'true',
       activeSyncProvider:
           (json['activeSyncProvider'] ??
@@ -685,6 +695,7 @@ class ConfigModel {
       'hideTabRomm': hideTabRomm,
       'hideSearchCard': hideSearchCard,
       'androidAppsAsTab': androidAppsAsTab,
+      'hideTabDiscovery': hideTabDiscovery,
       'activeSyncProvider': activeSyncProvider,
       'autoUpdateApp': autoUpdateApp,
       'autoUpdateSystems': autoUpdateSystems,
@@ -747,6 +758,7 @@ class ConfigModel {
     bool? hideTabRomm,
     bool? hideSearchCard,
     bool? androidAppsAsTab,
+    bool? hideTabDiscovery,
     String? activeSyncProvider,
     bool? autoUpdateApp,
     bool? autoUpdateSystems,
@@ -807,6 +819,7 @@ class ConfigModel {
       hideTabRomm: hideTabRomm ?? this.hideTabRomm,
       hideSearchCard: hideSearchCard ?? this.hideSearchCard,
       androidAppsAsTab: androidAppsAsTab ?? this.androidAppsAsTab,
+      hideTabDiscovery: hideTabDiscovery ?? this.hideTabDiscovery,
       activeSyncProvider: activeSyncProvider ?? this.activeSyncProvider,
       autoUpdateApp: autoUpdateApp ?? this.autoUpdateApp,
       autoUpdateSystems: autoUpdateSystems ?? this.autoUpdateSystems,

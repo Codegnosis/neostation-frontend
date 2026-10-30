@@ -47,6 +47,10 @@ class NeoSyncProvider extends ChangeNotifier {
   /// Whether a network request to fetch the cloud file list is active.
   bool _isLoadingOnlineFiles = false;
 
+  /// Whether the last load of [onlineFiles] failed, so the empty list means
+  /// "couldn't list", not "no saves".
+  bool _onlineFilesLoadFailed = false;
+
   /// Total number of online files matching the active filter.
   int _onlineTotal = 0;
 
@@ -76,6 +80,7 @@ class NeoSyncProvider extends ChangeNotifier {
 
   List<NeoSyncFile> get onlineFiles => _onlineFiles;
   bool get isLoadingOnlineFiles => _isLoadingOnlineFiles;
+  bool get onlineFilesLoadFailed => _onlineFilesLoadFailed;
   int get onlineTotal => _onlineTotal;
   Map<String, dynamic>? get onlineCounts => _onlineCounts;
   List<String> get onlineSystems => _onlineSystems;
@@ -167,6 +172,11 @@ class NeoSyncProvider extends ChangeNotifier {
 
   /// Set of platform-specific files (e.g., PS2 memory cards, Switch user saves) already handled.
   final Set<String> _processedMultiEmulatorFilesInSession = {};
+
+  /// Shared memory cards a sync is transferring right now. Unlike the set
+  /// above, a launch or a closed game doesn't clear it, so two syncs never move
+  /// the same card at once.
+  final Set<String> _sharedCardsInFlight = {};
 
   /// Identifier of the game ROM currently targeted for per-game sync UI.
   String? _selectedGameRomname;

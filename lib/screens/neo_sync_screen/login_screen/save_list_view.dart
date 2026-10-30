@@ -715,9 +715,13 @@ class _SaveListViewState extends State<SaveListView> {
 
       await authService.getProfile();
       await neoSyncProvider.loadQuota();
-      await neoSyncProvider.loadOnlineFiles();
+      final loaded = await neoSyncProvider.loadOnlineFiles();
 
       if (!mounted) return;
+      if (!loaded) {
+        _refreshFailed();
+        return;
+      }
       _resetSelection();
       setState(() {
         _isRefreshingOnlineFiles = false;
@@ -736,16 +740,21 @@ class _SaveListViewState extends State<SaveListView> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _isRefreshingOnlineFiles = false;
-        _refreshCompleted = false;
-      });
-      custom.AppNotification.showNotification(
-        context,
-        AppLocale.failedToRefreshCloud.getString(context),
-        type: custom.NotificationType.error,
-      );
+      _refreshFailed();
     }
+  }
+
+  void _refreshFailed() {
+    _resetSelection();
+    setState(() {
+      _isRefreshingOnlineFiles = false;
+      _refreshCompleted = false;
+    });
+    custom.AppNotification.showNotification(
+      context,
+      AppLocale.failedToRefreshCloud.getString(context),
+      type: custom.NotificationType.error,
+    );
   }
 
   void _onOnlineSearchChanged(String value) {
@@ -1293,7 +1302,10 @@ class _SaveListViewState extends State<SaveListView> {
             ),
             SizedBox(height: 8.r),
             Text(
-              provider.onlineTotal > 0
+              // An empty list after a failed load isn't an empty account.
+              provider.onlineFilesLoadFailed
+                  ? AppLocale.failedToRefreshCloud.getString(context)
+                  : provider.onlineTotal > 0
                   ? AppLocale.noSavesMatchFilters.getString(context)
                   : AppLocale.noOnlineSavesFound.getString(context),
               style: TextStyle(

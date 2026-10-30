@@ -1,12 +1,15 @@
 part of '../neo_sync_provider.dart';
 
 extension NeoSyncStatus on NeoSyncProvider {
-  /// Loads the list of cloud files
+  /// Loads the list of cloud files.
+  ///
+  /// A failure is only logged, like [loadQuota]'s: listing is not a sync, so it
+  /// neither sets nor clears [error], which the games' NeoSync marks read as a
+  /// failed sync.
   Future<bool> loadFiles() async {
     if (!isNeoSyncAuthenticated) return false;
 
     _isLoadingOnlineFiles = true;
-    _error = null;
     notify();
 
     try {
@@ -23,13 +26,11 @@ extension NeoSyncStatus on NeoSyncProvider {
         notify();
         return true;
       } else {
-        _error = result['message'];
-        notify();
+        NeoSyncProvider._log.e('Failed to load files: ${result['message']}');
         return false;
       }
     } catch (e) {
-      _error = 'Error loading files: $e';
-      notify();
+      NeoSyncProvider._log.e('Error loading files: $e');
       return false;
     } finally {
       _isLoadingOnlineFiles = false;
@@ -79,8 +80,13 @@ extension NeoSyncStatus on NeoSyncProvider {
   }
 
   /// Loads the online file page described by the current filter and page.
-  Future<void> loadOnlineFiles() async {
+  ///
+  /// Returns false only when this load failed (recorded in
+  /// [onlineFilesLoadFailed]); a load overtaken by a newer one reports no
+  /// failure.
+  Future<bool> loadOnlineFiles() async {
     _isLoadingOnlineFiles = true;
+    _onlineFilesLoadFailed = false;
     notify();
 
     final generation = ++_onlineLoadGeneration;
@@ -92,7 +98,7 @@ extension NeoSyncStatus on NeoSyncProvider {
           offset: (_onlinePage - 1) * NeoSyncProvider._onlinePageSize,
         ),
       );
-      if (generation != _onlineLoadGeneration) return;
+      if (generation != _onlineLoadGeneration) return true;
       if (result['success']) {
         _onlineFiles = result['files'] as List<NeoSyncFile>;
         _onlineTotal = result['total'] as int;
@@ -107,18 +113,23 @@ extension NeoSyncStatus on NeoSyncProvider {
                 ?.map((e) => e.toString())
                 .toList() ??
             const <String>[];
+        return true;
       } else {
         NeoSyncProvider._log.e(
           'Failed to load online files: ${result['message']}',
         );
         _onlineFiles = [];
         _onlineTotal = 0;
+        _onlineFilesLoadFailed = true;
+        return false;
       }
     } catch (e) {
-      if (generation != _onlineLoadGeneration) return;
+      if (generation != _onlineLoadGeneration) return true;
       NeoSyncProvider._log.e('Error loading online files: $e');
       _onlineFiles = [];
       _onlineTotal = 0;
+      _onlineFilesLoadFailed = true;
+      return false;
     } finally {
       if (generation == _onlineLoadGeneration) {
         _isLoadingOnlineFiles = false;

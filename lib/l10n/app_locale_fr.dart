@@ -1741,4 +1741,38 @@ const Map<String, dynamic> appLocaleFr = {
   AppLocale.rommUnlinkFailed: 'Impossible de dissocier de RomM',
   // Link action on search results
   AppLocale.searchLinkToRomm: 'Lier à RomM',
+  // Discovery
+  AppLocale.discovery: 'Découverte',
+  AppLocale.showDiscoveryTab: 'Afficher l\'onglet Découverte',
+  AppLocale.showDiscoveryTabSubtitle:
+      'Affiche l\'onglet Découverte dans la barre de navigation',
+  AppLocale.discoveryGameOfTheWeek: 'Jeu de la semaine',
+  AppLocale.discoveryHiddenGem: 'Pépite cachée',
+  AppLocale.discoveryHiddenGemSubtitle:
+      'Un jeu de votre bibliothèque auquel vous n\'avez jamais touché',
+  AppLocale.discoveryAchievementSpotlight: 'Succès à découvrir',
+  AppLocale.discoveryGenrePicks: 'Sélection par genre',
+  AppLocale.discoveryReroll: 'Relancer',
+  AppLocale.discoveryRerollHint: 'Appuyez sur Y pour une autre suggestion',
+  AppLocale.discoveryNeverPlayed: 'Jamais joué',
+  AppLocale.discoveryEmptyLibrary:
+      'Ajoutez des ROMs pour commencer à découvrir des jeux',
+  AppLocale.discoveryNeedsScraping:
+      'Scrapez davantage votre bibliothèque pour débloquer les pépites cachées',
+  AppLocale.discoveryNoPickAvailable: 'Rien à suggérer cette semaine',
+  AppLocale.discoveryWeekOf: 'Semaine du {date}',
+  AppLocale.discoveryAchievementsCount: '{count} succès',
+  AppLocale.genrePlatform: 'Plate-forme',
+  AppLocale.genreRpg: 'Jeu de rôle',
+  AppLocale.genreShooter: 'Tir',
+  AppLocale.genreFighting: 'Combat',
+  AppLocale.genreRacing: 'Course',
+  AppLocale.genrePuzzle: 'Réflexion',
+  AppLocale.genreSports: 'Sport',
+  AppLocale.genreAdventure: 'Aventure',
+  AppLocale.genreStrategy: 'Stratégie',
+  AppLocale.genreSimulation: 'Simulation',
+  AppLocale.genreAction: 'Action',
+  AppLocale.genreArcade: 'Arcade',
+  AppLocale.genreOther: 'Autre',
 };

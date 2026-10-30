@@ -594,15 +594,22 @@ class NeoSyncContentState extends State<NeoSyncContent>
                   background: theme.colorScheme.secondary,
                   foreground: theme.colorScheme.onSecondary,
                 ),
-                _buildDashboardPill(
-                  theme,
-                  icon: Symbols.cloud_rounded,
-                  label:
-                      '${neoSyncProvider.onlineTotal} ${AppLocale.onlineSaves.getString(context).toUpperCase()}',
-                  background: theme.colorScheme.primary.withValues(alpha: 0.12),
-                  foreground: theme.colorScheme.onSurface,
-                  border: theme.colorScheme.primary.withValues(alpha: 0.25),
-                ),
+                // No count until a listing has worked: a failed or first
+                // load has counted nothing.
+                if (!neoSyncProvider.onlineFilesLoadFailed &&
+                    !(neoSyncProvider.isLoadingOnlineFiles &&
+                        neoSyncProvider.onlineFiles.isEmpty))
+                  _buildDashboardPill(
+                    theme,
+                    icon: Symbols.cloud_rounded,
+                    label:
+                        '${neoSyncProvider.onlineTotal} ${AppLocale.onlineSaves.getString(context).toUpperCase()}',
+                    background: theme.colorScheme.primary.withValues(
+                      alpha: 0.12,
+                    ),
+                    foreground: theme.colorScheme.onSurface,
+                    border: theme.colorScheme.primary.withValues(alpha: 0.25),
+                  ),
               ],
             ),
             // Storage bar — right under name + plan
@@ -669,6 +676,8 @@ class NeoSyncContentState extends State<NeoSyncContent>
               child: _buildLatestSavesList(
                 context,
                 neoSyncProvider.onlineFiles.take(10).toList(),
+                loading: neoSyncProvider.isLoadingOnlineFiles,
+                loadFailed: neoSyncProvider.onlineFilesLoadFailed,
               ),
             ),
           ],
@@ -712,13 +721,20 @@ class NeoSyncContentState extends State<NeoSyncContent>
 
   Widget _buildLatestSavesList(
     BuildContext context,
-    List<NeoSyncFile> latestSaves,
-  ) {
+    List<NeoSyncFile> latestSaves, {
+    bool loading = false,
+    bool loadFailed = false,
+  }) {
     final theme = Theme.of(context);
     if (latestSaves.isEmpty) {
       return Center(
         child: Text(
-          AppLocale.noOnlineSavesFound.getString(context),
+          (loading
+                  ? AppLocale.loading
+                  : loadFailed
+                  ? AppLocale.failedToRefreshCloud
+                  : AppLocale.noOnlineSavesFound)
+              .getString(context),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 8.r,
