@@ -202,9 +202,12 @@ extension NeoSyncPathResolver on NeoSyncProvider {
       }
     }
 
-    if (isDreamcast && file.path.toLowerCase().contains('vmu_save')) {
-      // Force structure: saves/dc/filename.bin
-      return 'saves/dc/${path.basename(file.path)}';
+    if (isDreamcast) {
+      final card = CloudPathBuilder.sharedCardPath(
+        'dc',
+        path.basename(file.path),
+      );
+      if (card != null) return card;
     }
 
     // Special handling for NetherSX2 on Android
@@ -214,6 +217,7 @@ extension NeoSyncPathResolver on NeoSyncProvider {
 
     // Special handling for PS2 (RetroArch/PCSX2)
     // Force structure: saves/PS2/filename.ps2 to match standard convention
+    // (a game's sync matches the card by the same path).
     bool isPS2 = game.systemFolderName == 'ps2';
     if (!isPS2) {
       try {
@@ -226,8 +230,12 @@ extension NeoSyncPathResolver on NeoSyncProvider {
       }
     }
 
-    if (isPS2 && file.path.toLowerCase().endsWith('.ps2')) {
-      return 'saves/PS2/${path.basename(file.path)}';
+    if (isPS2) {
+      final card = CloudPathBuilder.sharedCardPath(
+        'ps2',
+        path.basename(file.path),
+      );
+      if (card != null) return card;
     }
 
     return _calculateRelativePath(file, basePath, isState: isState);

@@ -131,6 +131,22 @@ class CloudPathBuilder {
     return isSharedCard ? 'shared' : 'save';
   }
 
+  /// The cloud path of a RetroArch memory card that every game of its system
+  /// shares: `saves/PS2/<card>` for a PS2 card, `saves/dc/<card>` for a
+  /// Dreamcast VMU, whatever folder of the saves folder the card is in. Null for
+  /// any other file, which keeps its own relative path.
+  static String? sharedCardPath(String? systemFolder, String fileName) {
+    final lower = fileName.toLowerCase();
+    if (systemFolder == 'ps2' && lower.endsWith('.ps2')) {
+      return '$rootSave/PS2/$fileName';
+    }
+    if ((systemFolder == 'dc' || systemFolder == 'dreamcast') &&
+        lower.contains('vmu_save')) {
+      return '$rootSave/dc/$fileName';
+    }
+    return null;
+  }
+
   /// Whether [cloudPath] refers to the same save as the local [localPath].
   ///
   /// The `type` is cross-checked against the local `saves/`/`states/` root so a

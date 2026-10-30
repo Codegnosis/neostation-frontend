@@ -364,6 +364,11 @@ class LocalSaveFile {
   /// Path relative to the tracked synchronization root.
   final String relativePath;
 
+  /// The path NeoSync keeps this file under in the cloud, when it isn't
+  /// [relativePath]: a RetroArch memory card shared by every game of its
+  /// system goes up under its system's fixed path. Null otherwise.
+  final String? cloudPath;
+
   LocalSaveFile({
     required this.filePath,
     required this.fileName,
@@ -372,6 +377,7 @@ class LocalSaveFile {
     required this.gameName,
     required this.isSynced,
     required this.relativePath,
+    this.cloudPath,
   });
 
   /// Returns formatted file size string.
