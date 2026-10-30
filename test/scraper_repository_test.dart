@@ -163,12 +163,31 @@ void main() {
         "INSERT INTO user_screenscraper_metadata (filename, app_system_id, is_fully_scraped) VALUES ('game.smc', 'snes', 0)",
       );
 
-      await ScraperRepository.markGameFullyScraped('game.smc');
+      await ScraperRepository.markGameFullyScraped('snes', 'game.smc');
 
       final rows = await db.rawQuery(
         "SELECT is_fully_scraped FROM user_screenscraper_metadata WHERE filename = 'game.smc'",
       );
       expect(rows.first['is_fully_scraped'], 1);
+    });
+
+    test('markGameFullyScraped leaves a same-named game on another system', () async {
+      await db.execute(
+        "INSERT INTO user_screenscraper_metadata (filename, app_system_id, is_fully_scraped) VALUES ('Tetris.zip', 'snes', 0)",
+      );
+      await db.execute(
+        "INSERT INTO user_screenscraper_metadata (filename, app_system_id, is_fully_scraped) VALUES ('Tetris.zip', 'nes', 0)",
+      );
+
+      await ScraperRepository.markGameFullyScraped('snes', 'Tetris.zip');
+
+      final rows = await db.rawQuery(
+        "SELECT app_system_id, is_fully_scraped FROM user_screenscraper_metadata WHERE filename = 'Tetris.zip' ORDER BY app_system_id",
+      );
+      expect(rows, [
+        {'app_system_id': 'nes', 'is_fully_scraped': 0},
+        {'app_system_id': 'snes', 'is_fully_scraped': 1},
+      ]);
     });
 
     test('transfers scraped metadata from a disc ROM to its playlist', () async {
@@ -278,6 +297,69 @@ void main() {
         'new_only',
       );
       expect(count, 1);
+    });
+
+    group('a same-named game on another system', () {
+      setUp(() async {
+        await db.execute(
+          "INSERT INTO user_roms (filename, rom_path, app_system_id) VALUES ('Tetris.zip', '/roms/nes/Tetris.zip', 'nes')",
+        );
+        await db.execute(
+          "INSERT INTO user_roms (filename, rom_path, app_system_id) VALUES ('Tetris.zip', '/roms/snes/Tetris.zip', 'snes')",
+        );
+        await db.execute(
+          "INSERT INTO user_screenscraper_metadata (filename, app_system_id, is_fully_scraped) VALUES ('Tetris.zip', 'snes', 1)",
+        );
+      });
+
+      test('does not hide a new game from new content only', () async {
+        final count = await ScraperRepository.getRomCountForScraping(
+          'nes',
+          'new_only',
+        );
+        final roms = await ScraperRepository.getRomsForScraping(
+          'nes',
+          'new_only',
+        );
+
+        expect(count, 1);
+        expect(roms.map((r) => r['rom_path']), ['/roms/nes/Tetris.zip']);
+        expect(roms.single['is_fully_scraped'], isNull);
+      });
+
+      test('does not bring back a scraped game', () async {
+        await db.execute(
+          "INSERT INTO user_screenscraper_metadata (filename, app_system_id, is_fully_scraped) VALUES ('Tetris.zip', 'nes', 0)",
+        );
+
+        final count = await ScraperRepository.getRomCountForScraping(
+          'snes',
+          'new_only',
+        );
+        final roms = await ScraperRepository.getRomsForScraping(
+          'snes',
+          'new_only',
+        );
+
+        expect(count, 0);
+        expect(roms, isEmpty);
+      });
+
+      test('does not list a game twice', () async {
+        await db.execute(
+          "INSERT INTO user_screenscraper_metadata (filename, app_system_id, is_fully_scraped) VALUES ('Tetris.zip', 'nes', 0)",
+        );
+
+        final count = await ScraperRepository.getRomCountForScraping(
+          'nes',
+          'all',
+        );
+        final roms = await ScraperRepository.getRomsForScraping('nes', 'all');
+
+        expect(count, 1);
+        expect(roms, hasLength(1));
+        expect(roms.single['is_fully_scraped'], 0);
+      });
     });
 
     test('getRomsForScraping returns eligible ROMs', () async {

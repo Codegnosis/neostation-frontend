@@ -861,14 +861,17 @@ class ScraperRepository {
     }
   }
 
-  /// Marks a game's metadata as fully scraped.
-  static Future<void> markGameFullyScraped(String filename) async {
+  /// Marks a game's metadata on [appSystemId] as fully scraped.
+  static Future<void> markGameFullyScraped(
+    String appSystemId,
+    String filename,
+  ) async {
     final db = await SqliteService.getDatabase();
     await db.update(
       'user_screenscraper_metadata',
       {'is_fully_scraped': 1, 'updated_at': DateTime.now().toIso8601String()},
-      where: 'filename = ?',
-      whereArgs: [filename],
+      where: 'app_system_id = ? AND filename = ?',
+      whereArgs: [appSystemId, filename],
     );
   }
 
@@ -994,7 +997,7 @@ class ScraperRepository {
   ) async {
     final db = await SqliteService.getDatabase();
     final result = await db.rawQuery(
-      '''SELECT COUNT(*) as count FROM user_roms ur LEFT JOIN user_screenscraper_metadata usm ON ur.filename = usm.filename 
+      '''SELECT COUNT(*) as count FROM user_roms ur LEFT JOIN user_screenscraper_metadata usm ON ur.app_system_id = usm.app_system_id AND ur.filename = usm.filename
        WHERE ur.app_system_id = ? ${scrapeMode == 'new_only' ? 'AND (usm.filename IS NULL OR usm.is_fully_scraped = 0)' : ''}''',
       [appSystemId],
     );
@@ -1009,7 +1012,7 @@ class ScraperRepository {
     final db = await SqliteService.getDatabase();
     return await db.rawQuery(
       '''SELECT ur.filename, ur.rom_path, ur.title_name, usm.is_fully_scraped 
-       FROM user_roms ur LEFT JOIN user_screenscraper_metadata usm ON ur.filename = usm.filename 
+       FROM user_roms ur LEFT JOIN user_screenscraper_metadata usm ON ur.app_system_id = usm.app_system_id AND ur.filename = usm.filename
        WHERE ur.app_system_id = ? ${scrapeMode == 'new_only' ? 'AND (usm.filename IS NULL OR usm.is_fully_scraped = 0)' : ''}''',
       [appSystemId],
     );

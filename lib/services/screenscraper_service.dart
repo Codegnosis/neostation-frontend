@@ -1452,7 +1452,7 @@ class ScreenScraperService {
             };
           }
           if (res['success'] == true) {
-            await ScraperRepository.markGameFullyScraped(filename);
+            await ScraperRepository.markGameFullyScraped(appSystemId, filename);
           }
         }
 
