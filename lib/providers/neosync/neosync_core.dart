@@ -442,7 +442,7 @@ extension NeoSyncCore on NeoSyncProvider {
           if (currentState?.status != neo_sync.GameSyncStatus.quotaExceeded) {
             final status = allDownloadsSucceeded
                 ? neo_sync.GameSyncStatus.upToDate
-                : neo_sync.GameSyncStatus.upToDate;
+                : neo_sync.GameSyncStatus.error;
             _updateGameSyncState(game.romname, game.name, status);
           }
           return;
@@ -588,10 +588,8 @@ extension NeoSyncCore on NeoSyncProvider {
       if (_quotaExceededActive || quotaExceededDuringProcessing) {
         finalStatus = neo_sync.GameSyncStatus.quotaExceeded;
       } else if (!allUploadsSucceeded || !allCloudDownloadsSucceeded) {
-        NeoSyncProvider._log.w(
-          'Sync had errors for ${game.name}, marking as upToDate',
-        );
-        finalStatus = neo_sync.GameSyncStatus.upToDate;
+        NeoSyncProvider._log.w('Sync had errors for ${game.name}');
+        finalStatus = neo_sync.GameSyncStatus.error;
       } else {
         finalStatus = neo_sync.GameSyncStatus.upToDate;
       }
@@ -602,7 +600,7 @@ extension NeoSyncCore on NeoSyncProvider {
       _updateGameSyncState(
         game.romname,
         game.name,
-        neo_sync.GameSyncStatus.noSaveFound,
+        neo_sync.GameSyncStatus.error,
       );
     }
   }
@@ -637,8 +635,8 @@ extension NeoSyncCore on NeoSyncProvider {
       if (result['success']) {
         return true;
       }
-      final errorMessage = result['message']?.toString().toLowerCase() ?? '';
-      if (errorMessage.contains('quota') && errorMessage.contains('exceeded')) {
+      final errorMessage = result['message']?.toString() ?? '';
+      if (NeoSyncProvider.isQuotaExceededMessage(errorMessage)) {
         _quotaExceededActive = true;
         throw QuotaExceededException('Storage quota exceeded', 1);
       }
@@ -750,11 +748,13 @@ extension NeoSyncCore on NeoSyncProvider {
       // 1. Resolver la ruta local de manera universal
       final localPaths = await resolveCloudFileToLocalPath(game, cloudSave);
       if (localPaths.isEmpty) {
+        // A cloud save NeoStation can't place can never sync, so skipping it
+        // isn't a failure.
         NeoSyncProvider._log.w(
           'Auto-download: no path for ${cloudSave.fileName} '
           '(${game.name}); skipping',
         );
-        return false;
+        return true;
       }
 
       // Verificar si el sistema tiene sync deshabilitado
