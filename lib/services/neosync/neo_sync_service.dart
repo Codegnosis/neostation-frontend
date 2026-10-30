@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:neostation/models/neo_sync_models.dart';
 import 'package:neostation/utils/app_config.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +17,27 @@ import '../../repositories/sync_repository.dart';
 /// Handles file uploads, downloads, quota management, and synchronization
 /// conflict resolution for game save states and configurations.
 class NeoSyncService extends ChangeNotifier {
+  NeoSyncService({
+    http.Client? client,
+    this.requestTimeout = defaultRequestTimeout,
+  }) : _client =
+           client ?? IOClient(HttpClient()..connectionTimeout = requestTimeout),
+       _ownsClient = client == null;
+
   static const String _tokenKey = 'auth_token';
   final _log = LoggerService.instance;
+
+  /// How long a request to the NeoSync API (listing, quota, delete, checks)
+  /// may take. Without a limit, a server that takes the connection and then
+  /// says nothing would keep the save list refreshing and a game's sync
+  /// running for as long as the socket lived.
+  static const Duration defaultRequestTimeout = Duration(seconds: 15);
+
+  /// The limit for each API request (and for connecting, on the default
+  /// client); see [defaultRequestTimeout].
+  final Duration requestTimeout;
+  final http.Client _client;
+  final bool _ownsClient;
 
   bool _isLoading = false;
   String? _lastError;
@@ -24,10 +45,44 @@ class NeoSyncService extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get lastError => _lastError;
 
+  @override
+  void dispose() {
+    if (_ownsClient) _client.close();
+    super.dispose();
+  }
+
   void _safeNotifyListeners() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
+  }
+
+  /// Sends an API request and reads its answer within [requestTimeout]; a
+  /// request that runs out of time throws [TimeoutException], which callers
+  /// report like any network error, and its connection is closed.
+  Future<http.Response> _request(
+    String method,
+    Uri uri, {
+    required Map<String, String> headers,
+    String? body,
+  }) async {
+    final abort = Completer<void>();
+    final request = http.AbortableRequest(
+      method,
+      uri,
+      abortTrigger: abort.future,
+    )..headers.addAll(headers);
+    if (body != null) request.body = body;
+    try {
+      return await _client
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(requestTimeout);
+    } finally {
+      // Closes the connection of a request that ran out of time; one that
+      // answered in full is unaffected.
+      abort.complete();
+    }
   }
 
   /// Computes the MD5 hash of the given byte list.
@@ -88,7 +143,8 @@ class NeoSyncService extends ChangeNotifier {
         requestBody['local_modified_at_timestamp'] = timestampMillis;
       }
 
-      final response = await http.post(
+      final response = await _request(
+        'POST',
         uri,
         headers: headers,
         body: jsonEncode(requestBody),
@@ -107,6 +163,16 @@ class NeoSyncService extends ChangeNotifier {
         _log.e('Check request failed with status: ${response.statusCode}');
         return {'exists': false, 'needs_sync': true, 'remote_newer': false};
       }
+    } on TimeoutException catch (e) {
+      // No answer says nothing about the cloud copy, which may be newer: the
+      // caller must not upload over it on a guess.
+      _log.e('Check request timed out: $e');
+      return {
+        'exists': false,
+        'needs_sync': true,
+        'remote_newer': false,
+        'timed_out': true,
+      };
     } catch (e) {
       _log.e('Check request error: $e');
       return {'exists': false, 'needs_sync': true, 'remote_newer': false};
@@ -158,6 +224,12 @@ class NeoSyncService extends ChangeNotifier {
         localModifiedAt: localModifiedAt,
         type: fileType,
       );
+
+      if (checkResult['timed_out'] == true) {
+        const error = 'Network error: NeoSync did not answer the file check';
+        _lastError = error;
+        return {'success': false, 'message': error};
+      }
 
       if (!checkResult['needs_sync']) {
         int cloudTime = localModifiedAt.millisecondsSinceEpoch;
@@ -404,7 +476,7 @@ class NeoSyncService extends ChangeNotifier {
           ? Uri.parse('$baseUrl/api/v2/files')
           : Uri.parse('$baseUrl/api/v2/files').replace(queryParameters: query);
 
-      final response = await http.get(uri, headers: headers);
+      final response = await _request('GET', uri, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -502,7 +574,7 @@ class NeoSyncService extends ChangeNotifier {
       final baseUrl = AppConfig.neoSyncBaseUrl;
       final uri = Uri.parse('$baseUrl/api/v2/files/$fileId');
 
-      final response = await http.delete(uri, headers: headers);
+      final response = await _request('DELETE', uri, headers: headers);
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return {'success': true};
@@ -534,7 +606,7 @@ class NeoSyncService extends ChangeNotifier {
       final baseUrl = AppConfig.neoSyncBaseUrl;
       final uri = Uri.parse('$baseUrl/api/v2/quota');
 
-      final response = await http.get(uri, headers: headers);
+      final response = await _request('GET', uri, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -574,7 +646,8 @@ class NeoSyncService extends ChangeNotifier {
 
       final requestBody = {'file_id': fileId};
 
-      final response = await http.post(
+      final response = await _request(
+        'POST',
         uri,
         headers: headers,
         body: jsonEncode(requestBody),
