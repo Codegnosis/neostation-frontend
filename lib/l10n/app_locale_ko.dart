@@ -452,6 +452,7 @@ const Map<String, dynamic> appLocaleKo = {
   AppLocale.neoSyncLogin: 'NeoSync 로그인',
   AppLocale.neoSyncSynchronizing: 'NeoSync: 동기화 중...',
   AppLocale.neoSyncNotConnected: 'NeoSync: 연결 안 됨',
+  AppLocale.neoSyncUnreachable: 'NeoSync에 연결할 수 없습니다. 네트워크 연결을 확인하고 다시 시도하세요.',
   AppLocale.neoSyncSynchronized: 'NeoSync: 세이브 동기화 완료',
   AppLocale.neoSyncSavesSync: '저장 파일은 NeoSync와 동기화됩니다',
   AppLocale.neoSyncNoSave: 'NeoSync: 세이브 파일 없음',

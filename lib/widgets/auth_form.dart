@@ -8,6 +8,7 @@ import 'package:neostation/services/game_service.dart'
 import 'package:neostation/services/neosync/auth_service.dart';
 import 'package:neostation/utils/gamepad_nav.dart';
 import 'package:neostation/utils/login_form_selection.dart';
+import 'package:neostation/utils/neosync_failure_message.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neostation/screens/app_screen.dart' show AppNavigation;
@@ -43,6 +44,10 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
 
   bool _isLogin = true;
   bool _isLoading = false;
+
+  /// Bumped when the user leaves a view with its request still out, so that
+  /// request's answer, arriving later, leaves the form they are now on alone.
+  int _requestGeneration = 0;
   String? _message;
   bool _showVerification = false;
   bool _showEmailVerification = false;
@@ -134,6 +139,11 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
     _handleAction();
   }
 
+  /// A failed request's message in the app language when the server couldn't
+  /// be reached; see [neoSyncFailureMessage].
+  String? _failureText(Map<String, dynamic> result) =>
+      neoSyncFailureMessage(result, (key) => key.getString(context));
+
   void _handleAction() {
     if (_showEmailVerification) {
       if (isSelected(0)) {
@@ -209,6 +219,10 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
       _showForgotPassword = false;
       _showResetPassword = false;
       _isPolling = false;
+      // A request still out belongs to the view being left; the login form's
+      // own button must not wait for it, nor its answer change this form.
+      _isLoading = false;
+      _requestGeneration++;
       _message = null;
       resetSelectionInPlace();
     });
@@ -236,7 +250,11 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
   }
 
   Future<void> _submitForm() async {
+    // The button is disabled while a request is out, but A and the keyboard's
+    // Enter reach this directly: without the check each press sent another.
+    if (_isLoading) return;
     if (!_formKey.currentState!.validate()) return;
+    final generation = _requestGeneration;
 
     setState(() {
       _isLoading = true;
@@ -260,6 +278,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
           _passwordController.text.trim(),
         );
       }
+      if (generation != _requestGeneration) return;
 
       setState(() {
         // A login the device could not store still works until the app closes.
@@ -267,7 +286,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
         // next launch would contradict.
         _message = result['tokenPersisted'] == false
             ? AppLocale.credentialStorageUnavailable.getString(context)
-            : result['message'];
+            : _failureText(result);
       });
 
       // Handle email not verified case (can come as error from backend)
@@ -290,17 +309,21 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
         }
       }
     } catch (e) {
+      if (generation != _requestGeneration) return;
       setState(() {
         _message = '${AppLocale.anErrorOccurred.getString(context)}: $e';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (generation == _requestGeneration) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _verifyEmail() async {
+    if (_isLoading) return; // As in _submitForm.
     if (_verificationTokenController.text.isEmpty) {
       setState(() {
         _message = AppLocale.enterTokenFromEmailShort.getString(context);
@@ -312,6 +335,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
       _isLoading = true;
       _message = null;
     });
+    final generation = _requestGeneration;
 
     final authService = Provider.of<AuthService>(context, listen: false);
 
@@ -319,9 +343,10 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
       final result = await authService.verifyEmail(
         _verificationTokenController.text.trim(),
       );
+      if (generation != _requestGeneration) return;
 
       setState(() {
-        _message = result['message'];
+        _message = _failureText(result);
       });
 
       if (result['success']) {
@@ -330,27 +355,32 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
+        if (generation != _requestGeneration) return;
 
         if (loginResult['success']) {
           widget.onLoginSuccess();
         } else {
           setState(() {
-            _message = loginResult['message'];
+            _message = _failureText(loginResult);
           });
         }
       }
     } catch (e) {
+      if (generation != _requestGeneration) return;
       setState(() {
         _message = '${AppLocale.anErrorOccurred.getString(context)}: $e';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (generation == _requestGeneration) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _resendVerification() async {
+    if (_isLoading) return; // As in _submitForm.
     if (_emailController.text.isEmpty) {
       setState(() {
         _message = AppLocale.pleaseEnterEmail.getString(context);
@@ -363,14 +393,16 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
       _message = null;
     });
 
+    final generation = _requestGeneration;
     final authService = Provider.of<AuthService>(context, listen: false);
 
     try {
       final result = await authService.resendVerificationEmail(
         _emailController.text.trim(),
       );
+      if (generation != _requestGeneration) return;
       setState(() {
-        _message = result['message'];
+        _message = _failureText(result);
       });
 
       // If email was sent successfully, start polling for verification
@@ -379,13 +411,16 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
         _startEmailVerificationPolling();
       }
     } catch (e) {
+      if (generation != _requestGeneration) return;
       setState(() {
         _message = '${AppLocale.anErrorOccurred.getString(context)}: $e';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (generation == _requestGeneration) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -463,7 +498,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
         } else {
           setState(() {
             _message =
-                '${AppLocale.emailVerifiedLoginFailed.getString(context)}: ${loginResult['message']}';
+                '${AppLocale.emailVerifiedLoginFailed.getString(context)}: ${_failureText(loginResult)}';
             _showEmailVerification = false;
           });
         }
@@ -497,6 +532,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
   }
 
   Future<void> _sendForgotPasswordEmail() async {
+    if (_isLoading) return; // As in _submitForm.
     if (_emailController.text.isEmpty) {
       setState(() {
         _message = AppLocale.pleaseEnterEmail.getString(context);
@@ -509,15 +545,17 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
       _message = null;
     });
 
+    final generation = _requestGeneration;
     final authService = Provider.of<AuthService>(context, listen: false);
 
     try {
       final result = await authService.forgotPassword(
         _emailController.text.trim(),
       );
+      if (generation != _requestGeneration) return;
 
       setState(() {
-        _message = result['message'];
+        _message = _failureText(result);
         _isLoading = false;
       });
 
@@ -529,6 +567,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
         });
       }
     } catch (e) {
+      if (generation != _requestGeneration) return;
       setState(() {
         _message = '${AppLocale.anErrorOccurred.getString(context)}: $e';
         _isLoading = false;
@@ -537,6 +576,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
   }
 
   Future<void> _resetPassword() async {
+    if (_isLoading) return; // As in _submitForm.
     if (_resetTokenController.text.isEmpty ||
         _newPasswordController.text.isEmpty) {
       setState(() {
@@ -557,6 +597,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
       _message = null;
     });
 
+    final generation = _requestGeneration;
     final authService = Provider.of<AuthService>(context, listen: false);
 
     try {
@@ -564,9 +605,10 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
         _resetTokenController.text.trim(),
         _newPasswordController.text.trim(),
       );
+      if (generation != _requestGeneration) return;
 
       setState(() {
-        _message = result['message'];
+        _message = _failureText(result);
         _isLoading = false;
       });
 
@@ -584,6 +626,7 @@ class AuthFormState extends State<AuthForm> with LoginFormSelection<AuthForm> {
         });
       }
     } catch (e) {
+      if (generation != _requestGeneration) return;
       setState(() {
         _message = '${AppLocale.anErrorOccurred.getString(context)}: $e';
         _isLoading = false;
