@@ -288,8 +288,11 @@ class RomMSyncProvider extends ChangeNotifier implements ISyncProvider {
   @override
   bool get isAuthenticated => _browse.isConnected;
 
+  /// The connection's error only. The browse provider also records failed
+  /// searches and collection loads, which say nothing about syncing saves.
   @override
-  String? get lastError => _browse.lastError;
+  String? get lastError =>
+      _browse.status == RommConnectionStatus.error ? _browse.lastError : null;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
