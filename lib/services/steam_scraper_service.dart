@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import '../repositories/system_repository.dart';
@@ -18,6 +19,18 @@ class SteamScraperService {
       'https://store.steampowered.com/api/appdetails';
 
   static final _log = LoggerService.instance;
+
+  static http.Client? _httpClientOverride;
+
+  /// Routes the Steam Store and image requests through [client] (a
+  /// `MockClient`, typically); pass null to restore the default.
+  @visibleForTesting
+  static void debugUseHttpClient(http.Client? client) {
+    _httpClientOverride = client;
+  }
+
+  static Future<http.Response> _get(Uri url) =>
+      _httpClientOverride?.get(url) ?? http.get(url);
 
   /// Performs a batch scraping operation for all registered Steam games.
   ///
@@ -46,14 +59,19 @@ class SteamScraperService {
         final filename = game['filename'].toString();
         final romPath = game['rom_path'].toString();
         final appId = game['title_id'].toString();
-        final isFullyScraped =
-            (int.tryParse(game['is_fully_scraped']?.toString() ?? '0') ?? 0) ==
-            1;
 
-        // Perform a physical integrity check for media assets.
-        final bool missingImages = await _needsImages('steam', filename);
+        // The user picked this game's match through ScreenScraper; its metadata
+        // and media are theirs, not ours to replace.
+        if (game['ss_manual_game_id'] != null) continue;
 
-        if (!isFullyScraped || missingImages) {
+        // Metadata is only written for a game that has none yet: an existing
+        // row came from this scraper, ScreenScraper, an ES-DE import or the
+        // user's own edits, and none of those is ours to replace. Otherwise
+        // only missing art is fetched.
+        final writeMetadata = game['metadata_filename'] == null;
+        final missingMedia = await _missingMediaFolders('steam', filename);
+
+        if (writeMetadata || missingMedia.isNotEmpty) {
           scrapeCount++;
           await _scrapeSingleGame(
             steamSystem.id!,
@@ -61,6 +79,8 @@ class SteamScraperService {
             romPath,
             appId,
             lang,
+            writeMetadata: writeMetadata,
+            missingMedia: missingMedia,
           );
 
           // Trigger a reactive UI update if a state provider is attached.
@@ -71,9 +91,7 @@ class SteamScraperService {
       }
 
       if (scrapeCount > 0) {
-        _log.i(
-          'SteamScraper: Successfully synchronized $scrapeCount game entries.',
-        );
+        _log.i('SteamScraper: Processed $scrapeCount game entries.');
       } else {
         _log.i('SteamScraper: Local metadata and media library is up to date.');
       }
@@ -83,16 +101,21 @@ class SteamScraperService {
   }
 
   /// Synchronizes metadata for a specific Steam application ID.
+  ///
+  /// Writes the metadata only when [writeMetadata] is set, and downloads only
+  /// the media folders in [missingMedia].
   static Future<void> _scrapeSingleGame(
     String systemId,
     String filename,
     String romPath,
     String appId,
-    String lang,
-  ) async {
+    String lang, {
+    required bool writeMetadata,
+    required Set<String> missingMedia,
+  }) async {
     try {
       final url = Uri.parse('$_steamApiUrl?appids=$appId&l=$lang');
-      final response = await http.get(url);
+      final response = await _get(url);
 
       if (response.statusCode != 200) {
         _log.e(
@@ -109,46 +132,52 @@ class SteamScraperService {
 
       final gameData = data[appId]['data'];
 
-      // Map Steam API response to application metadata schema.
-      final metadata = <String, dynamic>{
-        'app_system_id': systemId,
-        'filename': filename,
-        'real_name': gameData['name'] ?? filename,
-        'developer': (gameData['developers'] as List?)?.first?.toString(),
-        'publisher': (gameData['publishers'] as List?)?.first?.toString(),
-        'rating':
-            (gameData['metacritic']?['score'] as num? ?? 0) /
-            5.0, // Normalize metacritic 0-100 to 0-20 (UI maps to 0-10 star scale).
-        'release_date': gameData['release_date']?['date']?.toString(),
-        'genre': (gameData['genres'] as List?)?.first?['description']
-            ?.toString(),
-        'is_fully_scraped': 1,
-        'updated_at': DateTime.now().toIso8601String(),
-      };
+      if (writeMetadata) {
+        // Map Steam API response to application metadata schema.
+        final metadata = <String, dynamic>{
+          'app_system_id': systemId,
+          'filename': filename,
+          'real_name': gameData['name'] ?? filename,
+          'developer': (gameData['developers'] as List?)?.first?.toString(),
+          'publisher': (gameData['publishers'] as List?)?.first?.toString(),
+          'rating':
+              (gameData['metacritic']?['score'] as num? ?? 0) /
+              5.0, // Normalize metacritic 0-100 to 0-20 (UI maps to 0-10 star scale).
+          'release_date': gameData['release_date']?['date']?.toString(),
+          'genre': (gameData['genres'] as List?)?.first?['description']
+              ?.toString(),
+          'is_fully_scraped': 1,
+          'updated_at': DateTime.now().toIso8601String(),
+        };
 
-      // Localized description logic: persist in requested language with English fallback.
-      final description = gameData['short_description']?.toString() ?? '';
-      metadata['description_$lang'] = description;
-      if (lang != 'en') {
-        metadata['description_en'] = description;
+        // Localized description logic: persist in requested language with English fallback.
+        final description = gameData['short_description']?.toString() ?? '';
+        metadata['description_$lang'] = description;
+        if (lang != 'en') {
+          metadata['description_en'] = description;
+        }
+
+        // Upsert into the persistent storage.
+        await ScraperRepository.upsertSteamMetadata(metadata);
       }
 
-      // Upsert into the persistent storage.
-      await ScraperRepository.upsertSteamMetadata(metadata);
-
       // Trigger asynchronous media download.
-      await _downloadMedia(gameData, 'steam', filename, appId);
+      await _downloadMedia(gameData, 'steam', filename, appId, missingMedia);
     } catch (e) {
       _log.e('SteamScraper: Error processing AppID $appId', error: e);
     }
   }
 
   /// Orchestrates the download of media assets based on Steam API URLs.
+  ///
+  /// Only the folders in [missingMedia] are downloaded, so art another scraper
+  /// saved in a different format is left as it is.
   static Future<void> _downloadMedia(
     Map<String, dynamic> gameData,
     String systemFolder,
     String filename,
     String appId,
+    Set<String> missingMedia,
   ) async {
     final mediaDir = await ConfigService.getMediaPath();
 
@@ -172,35 +201,28 @@ class SteamScraperService {
     final ssUrl = (gameData['screenshots'] as List?)?.first?['path_thumbnail']
         ?.toString();
 
-    await _downloadFile(
-      fanartUrl,
-      path.join(mediaDir, systemFolder, 'fanarts', '$romBaseName.jpg'),
-    );
-
-    await _downloadFile(
-      box2dUrl,
-      path.join(mediaDir, systemFolder, 'box2d', '$romBaseName.jpg'),
-    );
-
-    // Standardize logos to PNG format; perform cleanup of legacy JPG assets.
-    final oldJpgWheel = File(
-      path.join(mediaDir, systemFolder, 'wheels', '$romBaseName.jpg'),
-    );
-    if (await oldJpgWheel.exists()) {
-      try {
-        await oldJpgWheel.delete();
-      } catch (e) {
-        _log.w(
-          'SteamScraper: Failed to purge legacy JPG wheel asset, error: $e',
-        );
-      }
+    if (missingMedia.contains('fanarts')) {
+      await _downloadFile(
+        fanartUrl,
+        path.join(mediaDir, systemFolder, 'fanarts', '$romBaseName.jpg'),
+      );
     }
 
-    await _downloadFile(
-      wheelUrl,
-      path.join(mediaDir, systemFolder, 'wheels', '$romBaseName.png'),
-    );
+    if (missingMedia.contains('box2d')) {
+      await _downloadFile(
+        box2dUrl,
+        path.join(mediaDir, systemFolder, 'box2d', '$romBaseName.jpg'),
+      );
+    }
 
+    if (missingMedia.contains('wheels')) {
+      await _downloadFile(
+        wheelUrl,
+        path.join(mediaDir, systemFolder, 'wheels', '$romBaseName.png'),
+      );
+    }
+
+    if (!missingMedia.contains('screenshots')) return;
     if (ssUrl != null) {
       await _downloadFile(
         ssUrl,
@@ -220,7 +242,7 @@ class SteamScraperService {
       if (await file.exists()) return;
 
       await file.parent.create(recursive: true);
-      final response = await http.get(Uri.parse(url));
+      final response = await _get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         await file.writeAsBytes(response.bodyBytes);
@@ -230,40 +252,45 @@ class SteamScraperService {
     }
   }
 
-  /// Determines if the local media library for a game is incomplete.
-  static Future<bool> _needsImages(String systemFolder, String filename) async {
+  /// The media folders the Steam scraper fills.
+  static const _mediaFolders = ['fanarts', 'box2d', 'wheels', 'screenshots'];
+
+  /// The image formats the library shows (`GameModel`), in any of which art
+  /// counts as present, whichever scraper saved it.
+  static const _mediaExtensions = ['png', 'jpg', 'webp'];
+
+  /// The media folders that have no art for [filename] in any format.
+  static Future<Set<String>> _missingMediaFolders(
+    String systemFolder,
+    String filename,
+  ) async {
     final mediaDir = await ConfigService.getMediaPath();
 
     final String romBaseName = filename.contains('.')
         ? filename.substring(0, filename.lastIndexOf('.'))
         : filename;
 
-    // Define the core media requirements for a 'complete' entry.
-    final imageConfigs = [
-      {'folder': 'fanarts', 'ext': 'jpg'},
-      {'folder': 'box2d', 'ext': 'jpg'},
-      {'folder': 'wheels', 'ext': 'png'},
-      {'folder': 'screenshots', 'ext': 'jpg'},
-    ];
-
-    for (final config in imageConfigs) {
-      final folder = config['folder']!;
-      final ext = config['ext']!;
-      final imagePath = path.join(
-        mediaDir,
-        systemFolder,
-        folder,
-        '$romBaseName.$ext',
-      );
-
-      if (!await File(imagePath).exists()) {
-        _log.d(
-          'SteamScraper: Missing required $folder asset ($ext) for $romBaseName',
+    final missing = <String>{};
+    for (final folder in _mediaFolders) {
+      var found = false;
+      for (final ext in _mediaExtensions) {
+        final imagePath = path.join(
+          mediaDir,
+          systemFolder,
+          folder,
+          '$romBaseName.$ext',
         );
-        return true;
+        if (await File(imagePath).exists()) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        _log.d('SteamScraper: Missing required $folder asset for $romBaseName');
+        missing.add(folder);
       }
     }
-    return false;
+    return missing;
   }
 
   /// Retrieves the preferred language for scraper operations from local configuration.
