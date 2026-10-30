@@ -254,7 +254,11 @@ class _SaveListViewState extends State<SaveListView> {
       case _SaveRegion.menu:
         _moveMenuSelection(-1);
       case _SaveRegion.results:
-        if (_selectedSaveIndex == 0) {
+        final neoSyncProvider = Provider.of<NeoSyncProvider>(
+          context,
+          listen: false,
+        );
+        if (_selectedSaveIndex == 0 || !_rowsShown(neoSyncProvider)) {
           setState(() {
             _region = _filtersExpanded
                 ? _SaveRegion.filters
@@ -277,12 +281,14 @@ class _SaveListViewState extends State<SaveListView> {
         _moveMenuSelection(1);
       case _SaveRegion.search:
         _onlineSearchFocus.unfocus();
-        setState(() {
-          _region = _filtersExpanded
-              ? _SaveRegion.filters
-              : _SaveRegion.results;
-          if (_filtersExpanded) _barIndex = 0;
-        });
+        if (_filtersExpanded) {
+          setState(() {
+            _region = _SaveRegion.filters;
+            _barIndex = 0;
+          });
+        } else {
+          _enterResults();
+        }
       case _SaveRegion.filters:
         _enterResults();
       case _SaveRegion.results:
@@ -291,12 +297,19 @@ class _SaveListViewState extends State<SaveListView> {
     SfxService().playNavSound();
   }
 
+  /// Whether the save rows are on screen. While a page loads, a spinner takes
+  /// their place but [NeoSyncProvider.onlineFiles] still holds the previous
+  /// page, so nothing may act on or move through a row until they are back.
+  bool _rowsShown(NeoSyncProvider neoSyncProvider) =>
+      !neoSyncProvider.isLoadingOnlineFiles &&
+      neoSyncProvider.onlineFiles.isNotEmpty;
+
   void _enterResults() {
     final neoSyncProvider = Provider.of<NeoSyncProvider>(
       context,
       listen: false,
     );
-    if (neoSyncProvider.onlineFiles.isEmpty) return;
+    if (!_rowsShown(neoSyncProvider)) return;
     setState(() {
       _onlineSearchFocus.unfocus();
       _region = _SaveRegion.results;
@@ -583,7 +596,7 @@ class _SaveListViewState extends State<SaveListView> {
       context,
       listen: false,
     );
-    if (neoSyncProvider.onlineFiles.isNotEmpty) {
+    if (_rowsShown(neoSyncProvider)) {
       final newIndex =
           (_selectedSaveIndex + 1) % neoSyncProvider.onlineFiles.length;
       _updateSelectionIndex(newIndex);
@@ -596,6 +609,12 @@ class _SaveListViewState extends State<SaveListView> {
   }
 
   Future<void> _selectSaveItem() async {
+    final neoSyncProvider = Provider.of<NeoSyncProvider>(
+      context,
+      listen: false,
+    );
+    if (!_rowsShown(neoSyncProvider)) return;
+
     final now = DateTime.now();
     if (_lastSelectTime != null &&
         now.difference(_lastSelectTime!).inMilliseconds < _selectThrottleMs) {
@@ -603,12 +622,7 @@ class _SaveListViewState extends State<SaveListView> {
     }
     _lastSelectTime = now;
 
-    final neoSyncProvider = Provider.of<NeoSyncProvider>(
-      context,
-      listen: false,
-    );
-    if (neoSyncProvider.onlineFiles.isNotEmpty &&
-        _selectedSaveIndex < neoSyncProvider.onlineFiles.length) {
+    if (_selectedSaveIndex < neoSyncProvider.onlineFiles.length) {
       final selectedFile = neoSyncProvider.onlineFiles[_selectedSaveIndex];
 
       bool disableNeoSync = false;
