@@ -1,5 +1,12 @@
 part of '../neo_sync_provider.dart';
 
+/// Whether games of the system share their memory cards (PS2 `.ps2` cards,
+/// Dreamcast VMUs), so a game's sync checks the system's cards once per
+/// session rather than for every game. [systemFolderName] is the system's own
+/// folder name (`dc`, never an alias like `dreamcast`).
+bool _sharesMemoryCards(String? systemFolderName) =>
+    systemFolderName == 'ps2' || systemFolderName == 'dc';
+
 extension NeoSyncCore on NeoSyncProvider {
   Future<void> updateSelectedGame(
     String romname,
@@ -388,8 +395,7 @@ extension NeoSyncCore on NeoSyncProvider {
     try {
       // Identificar si es un sistema de "memory cards compartidas"
       final system = await _getSystemForGame(game);
-      final isSharedSystem =
-          system?.folderName == 'ps2' || system?.folderName == 'dreamcast';
+      final isSharedSystem = _sharesMemoryCards(system?.folderName);
 
       // Verificar si hay configuración de emulador válida en Windows.
       //
@@ -484,75 +490,84 @@ extension NeoSyncCore on NeoSyncProvider {
 
       // 1. Verificar cada archivo local contra la nube
       for (final localFile in localSaveFiles) {
-        // OPTIMIZACIÓN: Si es compartido y ya lo procesamos en esta sesión, saltar el sync activo
-        if (isSharedSystem &&
-            _processedMultiEmulatorFilesInSession.contains(
-              localFile.filePath,
-            )) {
-          continue;
-        }
-
-        // Encontrar archivo correspondiente en la nube (comparación canónica
-        // independiente del OS: sin prefijo saves/states y case-insensitive)
-        final cloudFile = cloudFiles.firstWhere(
-          (cf) => _cloudMatchesLocal(cf, localFile),
-          orElse: () => NeoSyncFile(
-            id: '',
-            fileName: '',
-            filePath: '',
-            fileSize: 0,
-            gameName: '',
-            uploadedAt: DateTime.now(),
-            userId: '',
-            checksum: '',
-          ),
-        );
-
-        if (cloudFile.fileName.isEmpty) {
-          // No existe en la nube, subir
-          try {
-            final uploadSuccess = await _autoUploadLocalSave(game, localFile);
-            if (!uploadSuccess) allUploadsSucceeded = false;
-            if (uploadSuccess && isSharedSystem) {
-              _processedMultiEmulatorFilesInSession.add(localFile.filePath);
-            }
-          } on QuotaExceededException {
-            quotaExceededDuringProcessing = true;
-            allUploadsSucceeded = false;
+        // A shared card is claimed before it is synced, so the next game of the
+        // system, or a sync running alongside this one, leaves it alone. It is
+        // released if its transfer fails, except when the account is full:
+        // then it waits for the next launch rather than resending every card
+        // at every selection.
+        if (isSharedSystem) {
+          if (_sharedCardsInFlight.contains(localFile.filePath) ||
+              !_processedMultiEmulatorFilesInSession.add(localFile.filePath)) {
+            continue;
           }
-        } else {
-          // Ambos existen, comparar
-          final syncStatus = await _calculateGameSyncStatus(
-            localFile,
-            cloudFile,
+          _sharedCardsInFlight.add(localFile.filePath);
+        }
+        var transferFailed = false;
+        try {
+          // Encontrar archivo correspondiente en la nube (comparación canónica
+          // independiente del OS: sin prefijo saves/states y case-insensitive)
+          final cloudFile = cloudFiles.firstWhere(
+            (cf) => _cloudMatchesLocal(cf, localFile),
+            orElse: () => NeoSyncFile(
+              id: '',
+              fileName: '',
+              filePath: '',
+              fileSize: 0,
+              gameName: '',
+              uploadedAt: DateTime.now(),
+              userId: '',
+              checksum: '',
+            ),
           );
 
-          if (syncStatus == neo_sync.GameSyncStatus.localOnly) {
+          if (cloudFile.fileName.isEmpty) {
+            // No existe en la nube, subir
             try {
-              final success = await _autoUploadLocalSave(game, localFile);
-              if (!success) allUploadsSucceeded = false;
-              if (success && isSharedSystem) {
-                _processedMultiEmulatorFilesInSession.add(localFile.filePath);
+              final uploadSuccess = await _autoUploadLocalSave(game, localFile);
+              if (!uploadSuccess) {
+                allUploadsSucceeded = false;
+                transferFailed = true;
               }
             } on QuotaExceededException {
               quotaExceededDuringProcessing = true;
               allUploadsSucceeded = false;
             }
-          } else if (syncStatus == neo_sync.GameSyncStatus.cloudOnly) {
-            try {
-              final success = await _autoDownloadCloudSave(game, cloudFile);
-              if (!success) allCloudDownloadsSucceeded = false;
-              if (success && isSharedSystem) {
-                _processedMultiEmulatorFilesInSession.add(localFile.filePath);
+          } else {
+            // Ambos existen, comparar
+            final syncStatus = await _calculateGameSyncStatus(
+              localFile,
+              cloudFile,
+            );
+
+            if (syncStatus == neo_sync.GameSyncStatus.localOnly) {
+              try {
+                final success = await _autoUploadLocalSave(game, localFile);
+                if (!success) {
+                  allUploadsSucceeded = false;
+                  transferFailed = true;
+                }
+              } on QuotaExceededException {
+                quotaExceededDuringProcessing = true;
+                allUploadsSucceeded = false;
               }
-            } on QuotaExceededException {
-              quotaExceededDuringProcessing = true;
-              allCloudDownloadsSucceeded = false;
+            } else if (syncStatus == neo_sync.GameSyncStatus.cloudOnly) {
+              try {
+                final success = await _autoDownloadCloudSave(game, cloudFile);
+                if (!success) {
+                  allCloudDownloadsSucceeded = false;
+                  transferFailed = true;
+                }
+              } on QuotaExceededException {
+                quotaExceededDuringProcessing = true;
+                allCloudDownloadsSucceeded = false;
+              }
             }
-          } else if (syncStatus == neo_sync.GameSyncStatus.upToDate) {
-            // Si está al día, marcar como procesado para no volver a chequearlo
-            if (isSharedSystem) {
-              _processedMultiEmulatorFilesInSession.add(localFile.filePath);
+          }
+        } finally {
+          if (isSharedSystem) {
+            _sharedCardsInFlight.remove(localFile.filePath);
+            if (transferFailed) {
+              _processedMultiEmulatorFilesInSession.remove(localFile.filePath);
             }
           }
         }
@@ -576,7 +591,8 @@ extension NeoSyncCore on NeoSyncProvider {
           allProcessed = false; // Forzamos chequeo si no es sistema compartido
         }
 
-        if (allProcessed) {
+        if (allProcessed ||
+            (isSharedSystem && localPaths.any(_sharedCardsInFlight.contains))) {
           continue;
         }
 
@@ -585,18 +601,24 @@ extension NeoSyncCore on NeoSyncProvider {
         );
 
         if (!existsLocally) {
+          // Claimed like a local card, so a sync alongside doesn't fetch it too.
+          if (isSharedSystem) {
+            _processedMultiEmulatorFilesInSession.addAll(localPaths);
+            _sharedCardsInFlight.addAll(localPaths);
+          }
           try {
             final success = await _autoDownloadCloudSave(game, cloudFile);
-            if (!success) allCloudDownloadsSucceeded = false;
-
-            if (success && isSharedSystem) {
-              for (final path in localPaths) {
-                _processedMultiEmulatorFilesInSession.add(path);
+            if (!success) {
+              allCloudDownloadsSucceeded = false;
+              if (isSharedSystem) {
+                _processedMultiEmulatorFilesInSession.removeAll(localPaths);
               }
             }
           } on QuotaExceededException {
             quotaExceededDuringProcessing = true;
             allCloudDownloadsSucceeded = false;
+          } finally {
+            if (isSharedSystem) _sharedCardsInFlight.removeAll(localPaths);
           }
         }
       }
@@ -895,8 +917,7 @@ extension NeoSyncCore on NeoSyncProvider {
       ).toLowerCase();
 
       // Identificar si es un sistema de "memory cards compartidas"
-      final isSharedSystem =
-          system.folderName == 'ps2' || system.folderName == 'dc';
+      final isSharedSystem = _sharesMemoryCards(system.folderName);
 
       final statesPath = await _getRetroArchStatesPath();
       final savesPath = await _getRetroArchSavesPath();
@@ -977,11 +998,6 @@ extension NeoSyncCore on NeoSyncProvider {
                 relativePath: relativePath,
               ),
             );
-
-            // Marcar como procesado si es compartido para evitar re-comprobación en esta sesión
-            if (isSharedSystem) {
-              _processedMultiEmulatorFilesInSession.add(file.path);
-            }
           }
         } catch (e) {
           NeoSyncProvider._log.e('Error matching file: $e');
@@ -1058,8 +1074,7 @@ extension NeoSyncCore on NeoSyncProvider {
       final List<NeoSyncFile> matchingFiles = [];
 
       // Identificar si es un sistema de "memory cards compartidas"
-      final isSharedSystem =
-          system.folderName == 'ps2' || system.folderName == 'dc';
+      final isSharedSystem = _sharesMemoryCards(system.folderName);
 
       for (final cloudFile in _files) {
         final fileName = path.basename(cloudFile.fileName).toLowerCase();
@@ -1316,6 +1331,8 @@ extension NeoSyncCore on NeoSyncProvider {
     // A save made on another device since the list was fetched must be seen
     // before the game starts, or the game is played on the old one.
     _markCloudListStale(olderThan: NeoSyncProvider._cloudListLaunchMaxAge);
+    // Shared memory cards too, even if another game checked them already.
+    _processedMultiEmulatorFilesInSession.clear();
     try {
       // Detectar saves actuales
       await detectGameSaveFiles(game);
@@ -1373,6 +1390,9 @@ extension NeoSyncCore on NeoSyncProvider {
       // Compare with the cloud as it is now: pick up a save made on another
       // device meanwhile, and drop files deleted there.
       _markCloudListStale(olderThan: NeoSyncProvider._cloudListLaunchMaxAge);
+      // The game may have changed a shared memory card that another game
+      // checked earlier this session.
+      _processedMultiEmulatorFilesInSession.clear();
 
       // Detectar saves actuales (pueden haber cambiado durante el juego)
       await detectGameSaveFiles(game);

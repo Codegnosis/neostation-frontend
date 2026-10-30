@@ -173,6 +173,11 @@ class NeoSyncProvider extends ChangeNotifier {
   /// Set of platform-specific files (e.g., PS2 memory cards, Switch user saves) already handled.
   final Set<String> _processedMultiEmulatorFilesInSession = {};
 
+  /// Shared memory cards a sync is transferring right now. Unlike the set
+  /// above, a launch or a closed game doesn't clear it, so two syncs never move
+  /// the same card at once.
+  final Set<String> _sharedCardsInFlight = {};
+
   /// Identifier of the game ROM currently targeted for per-game sync UI.
   String? _selectedGameRomname;
 
