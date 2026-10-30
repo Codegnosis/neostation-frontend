@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:archive/archive_io.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:neostation/services/logger_service.dart';
 
 import 'package:neostation/services/permission_service.dart';
@@ -27,6 +28,21 @@ class UpdateService {
 
   static final _log = LoggerService.instance;
 
+  static http.Client? _httpClientOverride;
+
+  /// Routes the release check through [client] (a `MockClient`, typically);
+  /// pass null to restore the default.
+  @visibleForTesting
+  static void debugUseHttpClient(http.Client? client) {
+    _httpClientOverride = client;
+  }
+
+  /// The process environment, replaceable so a test can run without
+  /// `APPIMAGE`.
+  @visibleForTesting
+  static Map<String, String> Function() environment = () =>
+      Platform.environment;
+
   /// Queries the remote repository to check for available software updates.
   ///
   /// Returns an [UpdateInfo] object if a newer version is detected and compatible
@@ -36,6 +52,14 @@ class UpdateService {
     // OTA updates are disabled for web-targeted builds.
     if (kIsWeb) return null;
 
+    // Linux installs an update by replacing the AppImage it runs from. Without
+    // one (Flatpak, an extracted AppImage, a build run in place) the download
+    // could only fail to install, so no update is offered.
+    if (Platform.isLinux && (environment()['APPIMAGE'] ?? '').isEmpty) {
+      _log.i('UpdateService: Not running from an AppImage; no app update');
+      return null;
+    }
+
     try {
       // 1. Resolve local versioning from the application manifest.
       final currentVersion = await _getAppVersion();
@@ -43,9 +67,10 @@ class UpdateService {
       // 2. Poll GitHub API for the latest release metadata. A bounded timeout
       // keeps an offline/unreachable network from stalling the startup
       // sequence, which defers the ROM scan until the update checks finish.
-      final response = await http
-          .get(Uri.parse(_githubApiUrl))
-          .timeout(const Duration(seconds: 10));
+      final response =
+          await (_httpClientOverride?.get(Uri.parse(_githubApiUrl)) ??
+                  http.get(Uri.parse(_githubApiUrl)))
+              .timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) {
         _log.e('UpdateService: API failure (Status: ${response.statusCode})');
@@ -80,6 +105,7 @@ class UpdateService {
             fileName: platformAsset['name'].toString(),
             fileSize:
                 int.tryParse(platformAsset['size']?.toString() ?? '0') ?? 0,
+            sha256: sha256FromDigest(platformAsset['digest']),
             releaseNotes: releaseData['body']?.toString(),
           );
         }
@@ -94,6 +120,16 @@ class UpdateService {
       );
       return null;
     }
+  }
+
+  /// The SHA-256 in a GitHub asset's `digest` (`sha256:<hex>`), in lower case,
+  /// or null when there is none.
+  @visibleForTesting
+  static String? sha256FromDigest(Object? digest) {
+    const prefix = 'sha256:';
+    if (digest is! String || !digest.startsWith(prefix)) return null;
+    final hex = digest.substring(prefix.length).toLowerCase();
+    return RegExp(r'^[0-9a-f]{64}$').hasMatch(hex) ? hex : null;
   }
 
   /// Extracts the application version string from the platform package info.
@@ -180,13 +216,16 @@ class UpdateService {
     bool Function()? shouldCancel,
   }) async {
     bool cancelled() => shouldCancel?.call() ?? false;
+    File? downloadedFile;
     try {
       // 1. Localize the update binary to a temporary directory.
-      final downloadedFile = await downloadUpdateFile(
+      downloadedFile = await downloadUpdateFile(
         updateInfo.downloadUrl,
         updateInfo.fileName,
         onProgress,
         shouldCancel: shouldCancel,
+        expectedSize: updateInfo.fileSize,
+        expectedSha256: updateInfo.sha256,
       );
 
       if (downloadedFile == null) {
@@ -195,30 +234,50 @@ class UpdateService {
         return UpdateOutcome.downloadFailed;
       }
       if (cancelled()) {
-        await downloadedFile.delete();
+        await _deleteQuietly(downloadedFile);
         return UpdateOutcome.cancelled;
       }
 
       // 2. Delegate to platform-specific installation logic.
-      if (Platform.isAndroid) return await installAndroid(downloadedFile);
-      final bool started;
-      if (Platform.isWindows) {
-        started = await _installWindows(downloadedFile);
-      } else if (Platform.isLinux) {
-        started = await _installLinux(downloadedFile);
-      } else if (Platform.isMacOS) {
-        started = await _installMacOS(downloadedFile);
-      } else {
-        started = false;
+      final outcome = await _install(downloadedFile);
+      // An update that couldn't be installed is downloaded again next time;
+      // a started one is left for its installer and cleaned up on a later
+      // start.
+      if (outcome != UpdateOutcome.installing) {
+        await _deleteQuietly(downloadedFile);
       }
-      return started ? UpdateOutcome.installing : UpdateOutcome.installFailed;
+      return outcome;
     } catch (e, stackTrace) {
       _log.e(
         'UpdateService: Installation sequence failed',
         error: e,
         stackTrace: stackTrace,
       );
+      if (downloadedFile != null) await _deleteQuietly(downloadedFile);
       return UpdateOutcome.installFailed;
+    }
+  }
+
+  static Future<UpdateOutcome> _install(File downloadedFile) async {
+    if (Platform.isAndroid) return installAndroid(downloadedFile);
+    final bool started;
+    if (Platform.isWindows) {
+      started = await _installWindows(downloadedFile);
+    } else if (Platform.isLinux) {
+      started = await _installLinux(downloadedFile);
+    } else if (Platform.isMacOS) {
+      started = await _installMacOS(downloadedFile);
+    } else {
+      started = false;
+    }
+    return started ? UpdateOutcome.installing : UpdateOutcome.installFailed;
+  }
+
+  static Future<void> _deleteQuietly(File file) async {
+    try {
+      if (await file.exists()) await file.delete();
+    } catch (e) {
+      _log.w('UpdateService: Could not remove ${file.path}: $e');
     }
   }
 
@@ -240,8 +299,11 @@ class UpdateService {
   ///
   /// The headers must arrive within [requestTimeout] and each chunk of the
   /// body within [stallTimeout] of the last. [shouldCancel] returning true
-  /// stops the download. Returns null on any failure or cancel, with any
-  /// partial file removed and the connection closed.
+  /// stops the download. The file must be [expectedSize] bytes when that is
+  /// known (non-zero) and hash to [expectedSha256] when given; progress uses
+  /// [expectedSize] when the server sends no length. Returns null on any
+  /// failure, mismatch or cancel, with the file removed and the connection
+  /// closed.
   @visibleForTesting
   static Future<File?> downloadUpdateFile(
     String url,
@@ -250,6 +312,8 @@ class UpdateService {
     bool Function()? shouldCancel,
     Duration requestTimeout = downloadRequestTimeout,
     Duration stallTimeout = downloadStallTimeout,
+    int expectedSize = 0,
+    String? expectedSha256,
   }) async {
     // Completing [abort] drops the request and its connection on a cancel;
     // closing [client] drops it on every other way out of this method, and on
@@ -288,21 +352,59 @@ class UpdateService {
       final file = File(path.join(tempDir.path, fileName));
 
       final contentLength = response.contentLength ?? 0;
+      if (contentLength > 0 &&
+          expectedSize > 0 &&
+          contentLength != expectedSize) {
+        _log.e(
+          'UpdateService: Download is $contentLength bytes, the release '
+          'lists $expectedSize',
+        );
+        return null;
+      }
+      final totalBytes = contentLength > 0 ? contentLength : expectedSize;
       var downloadedBytes = 0;
+      final digest = _DigestSink();
+      final hasher = crypto.sha256.startChunkedConversion(digest);
 
       // Each chunk is written before the next is read, so a full disk stops
-      // the download; the partial file is removed.
+      // the download; the partial file is removed. The hash is taken as it
+      // goes, so checking it costs no second read.
       Stream<List<int>> written() async* {
         await for (final chunk in response.stream.timeout(stallTimeout)) {
+          // Without a length from the server, more than the release lists is
+          // the wrong file: stop rather than run the progress past 100%.
+          if (expectedSize > 0 &&
+              downloadedBytes + chunk.length > expectedSize) {
+            throw StateError('more than the $expectedSize bytes listed');
+          }
           yield chunk;
+          hasher.add(chunk);
           downloadedBytes += chunk.length;
-          if (contentLength > 0 && onProgress != null) {
-            onProgress(downloadedBytes / contentLength);
+          if (totalBytes > 0 && onProgress != null) {
+            onProgress(downloadedBytes / totalBytes);
           }
         }
       }
 
       await writeChunksToFile(file, written());
+      hasher.close();
+
+      // A captive portal's page, a proxy's error or a damaged download isn't
+      // the release's file, and mustn't reach the installer.
+      final String? mismatch;
+      if (expectedSize > 0 && downloadedBytes != expectedSize) {
+        mismatch = '$downloadedBytes bytes, expected $expectedSize';
+      } else if (expectedSha256 != null &&
+          digest.value.toString() != expectedSha256) {
+        mismatch = 'SHA-256 ${digest.value}, expected $expectedSha256';
+      } else {
+        mismatch = null;
+      }
+      if (mismatch != null) {
+        _log.e('UpdateService: Download doesn\'t match the release: $mismatch');
+        await _deleteQuietly(file);
+        return null;
+      }
       return file;
     } catch (e) {
       _log.e('UpdateService: File download failed', error: e);
@@ -445,9 +547,9 @@ start /min cmd /c "${stage2Path.replaceAll('/', '\\')}"
       _log.i('UpdateService: Deploying Linux AppImage update...');
 
       // Verify the application was launched from an AppImage container.
-      final appImagePath = Platform.environment['APPIMAGE'];
+      final appImagePath = environment()['APPIMAGE'];
 
-      if (appImagePath == null) {
+      if (appImagePath == null || appImagePath.isEmpty) {
         _log.w(
           'UpdateService: Not running from AppImage. Update logic suspended in development mode.',
         );
@@ -497,6 +599,42 @@ rm -f "$scriptPath"
       return false;
     }
   }
+
+  /// Removes app updates downloaded by an earlier run, and Windows' extracted
+  /// copy of one, from the temporary folder.
+  static Future<void> cleanUpDownloads() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      await for (final entity in tempDir.list(followLinks: false)) {
+        final name = path.basename(entity.path);
+        try {
+          if (entity is File &&
+              name.toLowerCase().startsWith('neostation-') &&
+              _assetPlatformMarkers.any(name.contains)) {
+            await entity.delete();
+          } else if (entity is Directory && name == 'neostation_update') {
+            await entity.delete(recursive: true);
+          }
+        } catch (e) {
+          _log.w('UpdateService: Could not remove old update $name: $e');
+        }
+      }
+    } catch (e) {
+      _log.w('UpdateService: Could not clean up old updates: $e');
+    }
+  }
+
+  /// The parts of a release asset's name that say which platform it is for,
+  /// as [_findPlatformAsset] matches them. Linux's temporary folder is shared,
+  /// so only names like these are ever removed from it.
+  static const _assetPlatformMarkers = [
+    '-android-armeabi-v7a-',
+    '-android-arm64-v8a-',
+    '-windows-x64-',
+    '-linux-arm64-',
+    '-linux-x86_64-',
+    '-macos-',
+  ];
 
   /// Handles updates on macOS by invoking the system handler for the downloaded payload.
   static Future<bool> _installMacOS(File file) async {
@@ -581,6 +719,9 @@ class UpdateInfo {
   final String downloadUrl;
   final String fileName;
   final int fileSize;
+
+  /// The release asset's SHA-256, in lower-case hex, when GitHub gives one.
+  final String? sha256;
   final String? releaseNotes;
 
   UpdateInfo({
@@ -589,9 +730,21 @@ class UpdateInfo {
     required this.downloadUrl,
     required this.fileName,
     required this.fileSize,
+    this.sha256,
     this.releaseNotes,
   });
 
   /// Formats the file size to a human-readable Megabyte string.
   String get fileSizeMB => (fileSize / (1024 * 1024)).toStringAsFixed(2);
+}
+
+/// Captures the single [crypto.Digest] a chunked conversion emits on close.
+class _DigestSink implements Sink<crypto.Digest> {
+  late final crypto.Digest value;
+
+  @override
+  void add(crypto.Digest digest) => value = digest;
+
+  @override
+  void close() {}
 }
