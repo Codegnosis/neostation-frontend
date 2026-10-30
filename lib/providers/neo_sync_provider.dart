@@ -47,6 +47,10 @@ class NeoSyncProvider extends ChangeNotifier {
   /// Whether a network request to fetch the cloud file list is active.
   bool _isLoadingOnlineFiles = false;
 
+  /// Whether the last load of [onlineFiles] failed, so the empty list means
+  /// "couldn't list", not "no saves".
+  bool _onlineFilesLoadFailed = false;
+
   /// Total number of online files matching the active filter.
   int _onlineTotal = 0;
 
@@ -76,6 +80,7 @@ class NeoSyncProvider extends ChangeNotifier {
 
   List<NeoSyncFile> get onlineFiles => _onlineFiles;
   bool get isLoadingOnlineFiles => _isLoadingOnlineFiles;
+  bool get onlineFilesLoadFailed => _onlineFilesLoadFailed;
   int get onlineTotal => _onlineTotal;
   Map<String, dynamic>? get onlineCounts => _onlineCounts;
   List<String> get onlineSystems => _onlineSystems;
