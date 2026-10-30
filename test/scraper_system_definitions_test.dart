@@ -29,4 +29,31 @@ void main() {
       );
     }
   });
+
+  test('PC store systems scrape as PC Windows games', () {
+    int? screenScraperId(String fileName) {
+      final file = File('assets/systems/$fileName');
+      final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+      final system = json['system'] as Map<String, dynamic>;
+      return (system['ids'] as Map<String, dynamic>)['screenscraper'] as int?;
+    }
+
+    // Steam, Amazon, GOG and Epic hold Windows games launched through their
+    // store, so ScreenScraper lists them under its PC Windows platform. A
+    // system without an id can't be scraped or identified at all.
+    final windows = screenScraperId('windows.json');
+    expect(windows, 138);
+    for (final store in [
+      'steam.json',
+      'amazon.json',
+      'gog.json',
+      'epic.json',
+    ]) {
+      expect(
+        screenScraperId(store),
+        windows,
+        reason: '$store must use the PC Windows ScreenScraper platform.',
+      );
+    }
+  });
 }
