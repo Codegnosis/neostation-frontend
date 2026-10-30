@@ -1957,8 +1957,11 @@ class RomMSyncProvider extends ChangeNotifier implements ISyncProvider {
   /// run — which warms the per-platform system cache
   /// [RommProvider.systemForPlatform] reads and lets it try each platform's
   /// `fs_slug`. The provider swallows a failed load into
-  /// [RommProvider.lastError], which is surfaced here as an error so the pass
-  /// reports it rather than reading "no platforms".
+  /// [RommProvider.platformsFailure], which is surfaced here as an error so the
+  /// pass reports it rather than reading "no platforms". Only that load's own
+  /// failure counts: [RommProvider.lastError] is shared with the other loads
+  /// and the connection, and one of those failing while the platforms were on
+  /// their way would fail the pass for a server that simply has none.
   ///
   /// A load already in flight (the browse screen opened just before the pass
   /// fired) is awaited, not raced: `loadPlatforms` returns at once while one
@@ -1974,8 +1977,9 @@ class RomMSyncProvider extends ChangeNotifier implements ISyncProvider {
     }
     await _browse.loadPlatforms();
     final platforms = _browse.platforms;
-    if (platforms.isEmpty && _browse.lastError != null) {
-      throw StateError(_browse.lastError!);
+    final failure = _browse.platformsFailure;
+    if (platforms.isEmpty && failure != null) {
+      throw StateError(failure.message);
     }
     if (platforms.isEmpty && _browse.isLoadingPlatforms) {
       throw StateError('the platform list is still loading');

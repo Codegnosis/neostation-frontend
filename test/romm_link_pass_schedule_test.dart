@@ -30,9 +30,11 @@ import 'database_test_helper.dart';
 
 class _FakeRommService extends RommService {
   /// What [getPlatforms] answers — after [platformsGate] completes, when one
-  /// is set, so a test can hold a platform load open.
+  /// is set, so a test can hold a platform load open — or [platformsError],
+  /// thrown instead when set.
   List<RommPlatform> platforms = const [];
   Completer<void>? platformsGate;
+  Object? platformsError;
 
   @override
   bool get playtimeSyncAvailable => false;
@@ -41,6 +43,8 @@ class _FakeRommService extends RommService {
   Future<List<RommPlatform>> getPlatforms() async {
     final gate = platformsGate;
     if (gate != null) await gate.future;
+    final error = platformsError;
+    if (error != null) throw error;
     return platforms;
   }
 }
@@ -348,6 +352,51 @@ void main() {
         );
       },
     );
+
+    test('a platform list that failed to load fails the pass', () async {
+      (browse.fakeService as _FakeRommService).platformsError = RommException(
+        'Request failed (500)',
+        statusCode: 500,
+      );
+      await build(autoSweep: false, withLinker: realLinker());
+      browse.connected = true;
+
+      await expectLater(
+        provider.linkLibrary(),
+        throwsA(
+          isA<RommLinkPassException>().having(
+            (e) => e.toString(),
+            'toString',
+            'RomM link pass failed: platform enumeration failed: '
+                'Bad state: Request failed (500)',
+          ),
+        ),
+      );
+    });
+
+    // Only the platform load's own failure counts. Another RomM load (the RomM
+    // tab opening loads the collections too) that failed while the platforms
+    // were on their way left its error where the pass read it, so a server
+    // with no platforms failed the pass with the collections' error instead
+    // of reporting nothing to link.
+    test('another load failing meanwhile doesn\'t fail an empty platform '
+        'list', () async {
+      final svc = browse.fakeService as _FakeRommService;
+      svc.platformsGate = Completer<void>();
+      await build(autoSweep: false, withLinker: realLinker());
+      browse.connected = true;
+
+      final listing = provider.listPlatformsForLinkPass();
+      await pumpEventQueue();
+      // The fake browse provider's own service is unconfigured, so this fails
+      // ("Server URL is empty") without a request, as a server error would.
+      await browse.loadCollections();
+      expect(browse.collectionsFailure, isNotNull);
+      expect(browse.lastError, isNotNull, reason: 'the error the pass read');
+
+      svc.platformsGate!.complete();
+      expect(await listing, isEmpty);
+    });
 
     test('the lock is released after a failed pass', () async {
       // The `finally` is what guarantees this now that the exception is not
