@@ -34,7 +34,10 @@ abstract class ISyncProvider {
 
   bool get isAuthenticated;
 
-  /// Last error message; null when no error.
+  /// The provider's own connection or sync error; null when there is none.
+  ///
+  /// Unrelated calls such as listing or browsing must not set it: a game's sync
+  /// status mark shows it whatever that game's own state.
   String? get lastError;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────

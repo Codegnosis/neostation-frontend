@@ -1,12 +1,15 @@
 part of '../neo_sync_provider.dart';
 
 extension NeoSyncStatus on NeoSyncProvider {
-  /// Loads the list of cloud files
+  /// Loads the list of cloud files.
+  ///
+  /// A failure is only logged, like [loadQuota]'s: listing is not a sync, so it
+  /// neither sets nor clears [error], which the games' NeoSync marks read as a
+  /// failed sync.
   Future<bool> loadFiles() async {
     if (!isNeoSyncAuthenticated) return false;
 
     _isLoadingOnlineFiles = true;
-    _error = null;
     notify();
 
     try {
@@ -23,13 +26,11 @@ extension NeoSyncStatus on NeoSyncProvider {
         notify();
         return true;
       } else {
-        _error = result['message'];
-        notify();
+        NeoSyncProvider._log.e('Failed to load files: ${result['message']}');
         return false;
       }
     } catch (e) {
-      _error = 'Error loading files: $e';
-      notify();
+      NeoSyncProvider._log.e('Error loading files: $e');
       return false;
     } finally {
       _isLoadingOnlineFiles = false;
