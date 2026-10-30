@@ -318,19 +318,31 @@ extension NeoSyncUpload on NeoSyncProvider {
   ///
   /// Used right after the user selects a folder so its existing saves are
   /// backed up immediately, without waiting for the next global auto-sync.
-  Future<void> syncCustomSaveFolder(
+  Future<CustomFolderUploadOutcome> syncCustomSaveFolder(
     String systemFolderName,
     String emulatorSlug,
   ) async {
-    if (!isNeoSyncAuthenticated) return;
-    if (_isSyncing) return;
+    if (!isNeoSyncAuthenticated) return CustomFolderUploadOutcome.notSignedIn;
+    if (_isSyncing) return CustomFolderUploadOutcome.busy;
 
-    final folder = await NeoSyncSaveFolderRepository.getFolder(
-      systemFolderName,
-      emulatorSlug,
-    );
-    if (folder == null || folder.isEmpty) return;
-    if (!Directory(folder).existsSync()) return;
+    // Claimed before the first await, so two uploads started together can't
+    // both get past the check above. Listeners hear about it once there is a
+    // folder to upload.
+    _isSyncing = true;
+    final String? folder;
+    try {
+      folder = await NeoSyncSaveFolderRepository.getFolder(
+        systemFolderName,
+        emulatorSlug,
+      );
+    } catch (_) {
+      _isSyncing = false;
+      rethrow;
+    }
+    if (folder == null || folder.isEmpty || !Directory(folder).existsSync()) {
+      _isSyncing = false;
+      return CustomFolderUploadOutcome.noFolder;
+    }
 
     _setSyncing(true);
     _error = null;
@@ -350,7 +362,7 @@ extension NeoSyncUpload on NeoSyncProvider {
       if (files.isEmpty) {
         _syncStatus = 'No save files found in the selected folder';
         _processedItems.add(_syncStatus);
-        return;
+        return CustomFolderUploadOutcome.empty;
       }
 
       _processedItems.add('Uploading $_totalFiles save files...');
@@ -369,15 +381,28 @@ extension NeoSyncUpload on NeoSyncProvider {
         notify();
       }
 
+      // A save that neither uploaded nor was already in sync failed.
+      final failed = _processedFiles - _uploadedFiles - _skippedFiles;
       _syncProgress = 1.0;
       _syncStatus =
-          'Upload complete: $_uploadedFiles uploaded, $_skippedFiles already synced';
+          'Upload complete: $_uploadedFiles uploaded, $_skippedFiles already '
+          'synced, $failed failed';
       _processedItems.add(_syncStatus);
+      return failed > 0
+          ? CustomFolderUploadOutcome.failed
+          : CustomFolderUploadOutcome.uploaded;
+    } on QuotaExceededException catch (e) {
+      _error = 'Error uploading standalone save folder: $e';
+      _syncStatus = 'Error: $_error';
+      _processedItems.add(_syncStatus);
+      NeoSyncProvider._log.e(_error!);
+      return CustomFolderUploadOutcome.quotaExceeded;
     } catch (e) {
       _error = 'Error uploading standalone save folder: $e';
       _syncStatus = 'Error: $_error';
       _processedItems.add(_syncStatus);
       NeoSyncProvider._log.e(_error!);
+      return CustomFolderUploadOutcome.failed;
     } finally {
       _setSyncing(false);
     }

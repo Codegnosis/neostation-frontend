@@ -853,33 +853,22 @@ extension NeoSyncCore on NeoSyncProvider {
       final List<File> allFiles = [];
       const int maxFileSize = 10 * 1024 * 1024; // 10MB
 
-      // Execute heavy listing and filtering in background
-      final List<String> filePaths = await Isolate.run(() {
-        final List<String> paths = [];
-        for (final folderPath in resolvedFolders) {
-          final dir = Directory(folderPath);
-          if (dir.existsSync()) {
-            final files = dir.listSync(recursive: true).whereType<File>().where(
-              (file) {
-                try {
-                  // NeoSync recovery backups are never synced.
-                  if (file.path.toLowerCase().endsWith('.neosync.bak')) {
-                    return false;
-                  }
-                  final size = file.lengthSync();
-                  return size <= maxFileSize;
-                } catch (e) {
-                  return false;
-                }
-              },
-            );
-            paths.addAll(files.map((f) => f.path));
-          }
-        }
-        return paths;
+      // Execute heavy listing and filtering in background. An unreadable
+      // subfolder is skipped rather than failing the listing: an empty list
+      // here means "no local saves", and the sync would then download the
+      // cloud saves over the readable local ones.
+      final listing = await Isolate.run(() async {
+        final skipped = <String>[];
+        final paths = await listSaveFilePaths(
+          resolvedFolders,
+          maxFileSize: maxFileSize,
+          skipped: skipped,
+        );
+        return (paths: paths, skipped: skipped);
       });
+      _logUnreadable(listing.skipped);
 
-      allFiles.addAll(filePaths.map((path) => File(path)));
+      allFiles.addAll(listing.paths.map((path) => File(path)));
 
       // 4. Filtrar archivos según el sistema
       final List<LocalSaveFile> matchingFiles = [];

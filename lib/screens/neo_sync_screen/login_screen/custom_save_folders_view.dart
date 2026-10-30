@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:neostation/l10n/app_locale.dart';
 import 'package:neostation/providers/neo_sync_provider.dart';
 import 'package:neostation/utils/gamepad_nav.dart';
+import 'package:neostation/models/neo_sync_models.dart';
 import 'package:neostation/models/system_model.dart';
 import 'package:neostation/repositories/neosync_save_folder_repository.dart';
 import 'package:neostation/repositories/system_repository.dart';
@@ -258,44 +259,70 @@ class _CustomSaveFoldersViewState extends State<CustomSaveFoldersView> {
           );
         }
 
-        // A sync already running makes the upload return without listing the
-        // folder, so its file count says nothing about this folder.
-        final wasBusy = provider.isSyncing;
         provider.addListener(listener);
+        final CustomFolderUploadOutcome outcome;
         try {
-          await provider.syncCustomSaveFolder(system, emulatorSlug);
+          outcome = await provider.syncCustomSaveFolder(system, emulatorSlug);
         } finally {
           provider.removeListener(listener);
         }
 
         if (!mounted) return;
-        if (!wasBusy && provider.totalFiles == 0) {
-          // Nothing to upload: an empty folder, or one NeoStation can't list.
-          // Without All files access, say how to grant it.
-          final needsAllFilesAccess =
-              !await PermissionService.hasAllFilesAccess();
-          if (!mounted) return;
-          final allFilesHint = needsAllFilesAccess
-              ? '\n${AppLocale.userDataFolderGrantAllFiles.getString(context)}'
-              : '';
+        void show(String message, custom.NotificationType type) {
           custom.AppNotification.showNotification(
             context,
-            '${AppLocale.neoSyncNoSave.getString(context)}$allFilesHint',
-            type: custom.NotificationType.info,
+            message,
+            type: type,
             notificationId: notificationId,
             progress: 1,
           );
-        } else {
-          custom.AppNotification.showNotification(
-            context,
-            AppLocale.customFolderUploadComplete
-                .getString(context)
-                .replaceFirst('{uploaded}', '${provider.uploadedFiles}')
-                .replaceFirst('{skipped}', '${provider.skippedFiles}'),
-            type: custom.NotificationType.success,
-            notificationId: notificationId,
-            progress: 1,
-          );
+        }
+
+        // Only an upload that ran reports this folder's numbers: a busy or
+        // failed one says so instead of showing another sync's counts.
+        switch (outcome) {
+          case CustomFolderUploadOutcome.busy:
+            show(
+              AppLocale.neoSyncSynchronizing.getString(context),
+              custom.NotificationType.info,
+            );
+          case CustomFolderUploadOutcome.notSignedIn:
+            show(
+              AppLocale.neoSyncNotConnected.getString(context),
+              custom.NotificationType.error,
+            );
+          case CustomFolderUploadOutcome.quotaExceeded:
+            show(
+              AppLocale.neoSyncQuotaExceeded.getString(context),
+              custom.NotificationType.error,
+            );
+          case CustomFolderUploadOutcome.noFolder:
+          case CustomFolderUploadOutcome.failed:
+            show(
+              AppLocale.customFolderUploadFailed.getString(context),
+              custom.NotificationType.error,
+            );
+          case CustomFolderUploadOutcome.uploaded:
+            show(
+              AppLocale.customFolderUploadComplete
+                  .getString(context)
+                  .replaceFirst('{uploaded}', '${provider.uploadedFiles}')
+                  .replaceFirst('{skipped}', '${provider.skippedFiles}'),
+              custom.NotificationType.success,
+            );
+          case CustomFolderUploadOutcome.empty:
+            // Nothing to upload: an empty folder, or one NeoStation can't list.
+            // Without All files access, say how to grant it.
+            final needsAllFilesAccess =
+                !await PermissionService.hasAllFilesAccess();
+            if (!mounted) return;
+            final allFilesHint = needsAllFilesAccess
+                ? '\n${AppLocale.userDataFolderGrantAllFiles.getString(context)}'
+                : '';
+            show(
+              '${AppLocale.neoSyncNoSave.getString(context)}$allFilesHint',
+              custom.NotificationType.info,
+            );
         }
       } finally {
         if (mounted) setState(() => _syncing = false);
