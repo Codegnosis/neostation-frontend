@@ -44,7 +44,7 @@ class NeoSyncProvider extends ChangeNotifier {
   /// Local cache of user files currently stored in the cloud.
   List<NeoSyncFile> _onlineFiles = [];
 
-  /// Whether a network request to fetch the cloud file list is active.
+  /// Whether a page of the online save list ([onlineFiles]) is loading.
   bool _isLoadingOnlineFiles = false;
 
   /// Whether the last load of [onlineFiles] failed, so the empty list means
