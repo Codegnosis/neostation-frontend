@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart';
 import 'package:neostation/models/neo_sync_models.dart';
 import 'package:neostation/utils/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:crypto/crypto.dart';
 import 'package:neostation/services/credential_store.dart';
+import 'package:neostation/services/neosync/neosync_http.dart';
 import 'package:neostation/services/logger_service.dart';
 import 'package:neostation/utils/log_redaction.dart';
 import '../../repositories/sync_repository.dart';
@@ -20,8 +20,7 @@ class NeoSyncService extends ChangeNotifier {
   NeoSyncService({
     http.Client? client,
     this.requestTimeout = defaultRequestTimeout,
-  }) : _client =
-           client ?? IOClient(HttpClient()..connectionTimeout = requestTimeout),
+  }) : _client = client ?? neoSyncHttpClient(requestTimeout),
        _ownsClient = client == null;
 
   static const String _tokenKey = 'auth_token';
@@ -57,33 +56,20 @@ class NeoSyncService extends ChangeNotifier {
     });
   }
 
-  /// Sends an API request and reads its answer within [requestTimeout]; a
-  /// request that runs out of time throws [TimeoutException], which callers
-  /// report like any network error, and its connection is closed.
+  /// Sends an API request within [requestTimeout]; see [sendWithTimeout].
   Future<http.Response> _request(
     String method,
     Uri uri, {
     required Map<String, String> headers,
     String? body,
-  }) async {
-    final abort = Completer<void>();
-    final request = http.AbortableRequest(
-      method,
-      uri,
-      abortTrigger: abort.future,
-    )..headers.addAll(headers);
-    if (body != null) request.body = body;
-    try {
-      return await _client
-          .send(request)
-          .then(http.Response.fromStream)
-          .timeout(requestTimeout);
-    } finally {
-      // Closes the connection of a request that ran out of time; one that
-      // answered in full is unaffected.
-      abort.complete();
-    }
-  }
+  }) => sendWithTimeout(
+    _client,
+    method,
+    uri,
+    headers: headers,
+    body: body,
+    timeout: requestTimeout,
+  );
 
   /// Computes the MD5 hash of the given byte list.
   String _calculateFileHash(List<int> bytes) {
