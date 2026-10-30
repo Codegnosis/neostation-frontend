@@ -552,7 +552,15 @@ extension NeoSyncCore on NeoSyncProvider {
               }
             } else if (syncStatus == neo_sync.GameSyncStatus.cloudOnly) {
               try {
-                final success = await _autoDownloadCloudSave(game, cloudFile);
+                // A card matched by its cloud path is updated where it is,
+                // not in the folder that path names.
+                final success = await _autoDownloadCloudSave(
+                  game,
+                  cloudFile,
+                  target: localFile.cloudPath != null
+                      ? localFile.filePath
+                      : null,
+                );
                 if (!success) {
                   allCloudDownloadsSucceeded = false;
                   transferFailed = true;
@@ -782,11 +790,15 @@ extension NeoSyncCore on NeoSyncProvider {
   /// Descarga automáticamente un save de la nube
   Future<bool> _autoDownloadCloudSave(
     GameModel game,
-    NeoSyncFile cloudSave,
-  ) async {
+    NeoSyncFile cloudSave, {
+    String? target,
+  }) async {
     try {
-      // 1. Resolver la ruta local de manera universal
-      final localPaths = await resolveCloudFileToLocalPath(game, cloudSave);
+      // 1. Resolve the local path universally, unless the local file the
+      // cloud save was matched with is given.
+      final localPaths = target != null
+          ? [target]
+          : await resolveCloudFileToLocalPath(game, cloudSave);
       if (localPaths.isEmpty) {
         // A cloud save NeoStation can't place can never sync, so skipping it
         // isn't a failure.
@@ -871,12 +883,21 @@ extension NeoSyncCore on NeoSyncProvider {
         : cloudFile.fileName;
     return CloudPathBuilder.cloudMatchesLocalPath(
       cloudPath,
-      localFile.relativePath,
+      localFile.cloudPath ?? localFile.relativePath,
       cloudType: cloudFile.type,
     );
   }
 
-  Future<List<LocalSaveFile>> _findGameSaveFiles(GameModel game) async {
+  /// The local saves and states of [game] that NeoSync syncs.
+  ///
+  /// A copy NeoStation downloaded into a card's cloud-path folder before cards
+  /// were matched by that path is left out while the card the core uses is
+  /// there, unless [includeCardCopies] (RomM pairs files by name and keeps
+  /// them all).
+  Future<List<LocalSaveFile>> _findGameSaveFiles(
+    GameModel game, {
+    bool includeCardCopies = false,
+  }) async {
     try {
       // 1. Obtener el sistema para resolver sus rutas JSON
       final system = await _getSystemForGame(game);
@@ -984,6 +1005,15 @@ extension NeoSyncCore on NeoSyncProvider {
                       .relative(file.path, from: customRoot)
                       .replaceAll('\\', '/')
                 : _calculateRelativePath(file, basePath, isState: isState);
+            // A card in the RetroArch saves folder goes to the cloud under its
+            // system's fixed path, so it is matched by that path.
+            final cloudPath =
+                isSharedSystem && customRoot == null && basePath == savesPath
+                ? CloudPathBuilder.sharedCardPath(
+                    system.folderName,
+                    path.basename(file.path),
+                  )
+                : null;
 
             matchingFiles.add(
               LocalSaveFile(
@@ -996,12 +1026,53 @@ extension NeoSyncCore on NeoSyncProvider {
                     : game.name,
                 isSynced: false,
                 relativePath: relativePath,
+                cloudPath: cloudPath,
               ),
             );
           }
         } catch (e) {
           NeoSyncProvider._log.e('Error matching file: $e');
         }
+      }
+
+      // A copy NeoStation downloaded into the folder a card's cloud path names
+      // (`<saves>/PS2/<card>`) before cards were matched by that path stays on
+      // disk, but isn't synced while the card the core uses is there: written
+      // when it was downloaded, it can look newer than the cloud copy and be
+      // uploaded over it.
+      if (!includeCardCopies && savesPath != null) {
+        // Exactly the folder NeoStation created, case included, so a real card
+        // in a `ps2` folder (sorted by content directory) is never taken for
+        // a copy.
+        bool atOwnCloudPath(LocalSaveFile file) =>
+            file.cloudPath != null &&
+            path.normalize(file.filePath) ==
+                path.normalize(
+                  path.join(
+                    savesPath,
+                    file.cloudPath!.substring(
+                      CloudPathBuilder.legacySavePrefix.length,
+                    ),
+                  ),
+                );
+        final extras = matchingFiles
+            .where(
+              (file) =>
+                  atOwnCloudPath(file) &&
+                  matchingFiles.any(
+                    (other) =>
+                        !atOwnCloudPath(other) &&
+                        other.cloudPath?.toLowerCase() ==
+                            file.cloudPath!.toLowerCase(),
+                  ),
+            )
+            .toList();
+        for (final extra in extras) {
+          NeoSyncProvider._log.d(
+            'Not syncing ${extra.filePath}: the card the core uses is synced',
+          );
+        }
+        matchingFiles.removeWhere(extras.contains);
       }
 
       return matchingFiles;
@@ -1023,7 +1094,7 @@ extension NeoSyncCore on NeoSyncProvider {
   /// resolution and filename matching. Each [LocalSaveFile.relativePath] is
   /// prefixed with `saves/` or `states/` so callers can tell them apart.
   Future<List<LocalSaveFile>> locateGameSaveFiles(GameModel game) =>
-      _findGameSaveFiles(game);
+      _findGameSaveFiles(game, includeCardCopies: true);
 
   /// Resolves candidate local destination paths for a cloud file named
   /// [relativeName] (e.g. `saves/Game.srm` or `states/Game.state`) belonging to
