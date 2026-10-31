@@ -522,6 +522,8 @@ const Map<String, dynamic> appLocaleRu = {
   AppLocale.neoSyncLogin: 'Вход в NeoSync',
   AppLocale.neoSyncSynchronizing: 'NeoSync: Синхронизация...',
   AppLocale.neoSyncNotConnected: 'NeoSync: Не подключено',
+  AppLocale.neoSyncUnreachable:
+      'Не удалось подключиться к NeoSync. Проверьте подключение и повторите попытку.',
   AppLocale.neoSyncSynchronized: 'NeoSync: Сохранения синхронизированы',
   AppLocale.neoSyncSavesSync:
       'Файлы сохранений будут синхронизированы с NeoSync',

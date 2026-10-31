@@ -516,6 +516,8 @@ const Map<String, dynamic> appLocaleId = {
   AppLocale.neoSyncLogin: 'Masuk NeoSync',
   AppLocale.neoSyncSynchronizing: 'NeoSync: Menyinkronkan...',
   AppLocale.neoSyncNotConnected: 'NeoSync: Tidak terhubung',
+  AppLocale.neoSyncUnreachable:
+      'Tidak dapat menjangkau NeoSync. Periksa koneksi Anda dan coba lagi.',
   AppLocale.neoSyncSynchronized: 'NeoSync: Simpanan disinkronkan',
   AppLocale.neoSyncSavesSync: 'File simpanan akan disinkronkan dengan NeoSync',
   AppLocale.neoSyncNoSave: 'NeoSync: Tidak ada simpanan ditemukan',

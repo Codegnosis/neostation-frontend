@@ -438,6 +438,7 @@ const Map<String, dynamic> appLocaleZh = {
   AppLocale.neoSyncLogin: 'NeoSync 登录',
   AppLocale.neoSyncSynchronizing: 'NeoSync: 正在同步...',
   AppLocale.neoSyncNotConnected: 'NeoSync: 未连接',
+  AppLocale.neoSyncUnreachable: '无法连接 NeoSync。请检查您的网络连接并重试。',
   AppLocale.neoSyncSynchronized: 'NeoSync: 存档已同步',
   AppLocale.neoSyncSavesSync: '存档文件将与 NeoSync 同步',
   AppLocale.neoSyncNoSave: 'NeoSync: 未发现存档文件',

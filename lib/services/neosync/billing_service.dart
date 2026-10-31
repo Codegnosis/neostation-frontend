@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:neostation/models/billing_models.dart';
 import 'package:neostation/services/credential_store.dart';
 import 'package:neostation/services/logger_service.dart';
+import 'package:neostation/services/neosync/neosync_http.dart';
 import 'package:neostation/utils/app_config.dart';
 import 'package:neostation/utils/log_redaction.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +13,25 @@ import 'package:flutter/material.dart';
 /// Interacts with the NeoStation billing backend to initiate checkout flows,
 /// manage subscription cancellations, and retrieve pricing information.
 class BillingService extends ChangeNotifier {
+  BillingService({
+    http.Client? client,
+    this.requestTimeout = defaultRequestTimeout,
+  }) : _client = client ?? neoSyncHttpClient(requestTimeout),
+       _ownsClient = client == null;
+
   /// Storage key for the authentication JWT token required for billing requests.
   static const String _tokenKey = 'auth_token';
+
+  /// How long a billing request (plans, checkout, cancellation) may take.
+  /// Without a limit, a server that takes the connection and then says
+  /// nothing would keep the plan list loading for as long as the socket lived.
+  static const Duration defaultRequestTimeout = Duration(seconds: 15);
+
+  /// The limit for each billing request (and for connecting, on the default
+  /// client); see [defaultRequestTimeout].
+  final Duration requestTimeout;
+  final http.Client _client;
+  final bool _ownsClient;
 
   /// Primary storage for sensitive credentials.
 
@@ -27,6 +45,12 @@ class BillingService extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get lastError => _lastError;
+
+  @override
+  void dispose() {
+    if (_ownsClient) _client.close();
+    super.dispose();
+  }
 
   /// Internal helper to trigger UI updates safely, avoiding issues during build phases.
   void _safeNotifyListeners() {
@@ -82,10 +106,13 @@ class BillingService extends ChangeNotifier {
         'email': email,
       };
 
-      final response = await http.post(
+      final response = await sendWithTimeout(
+        _client,
+        'POST',
         uri,
         headers: headers,
         body: jsonEncode(body),
+        timeout: requestTimeout,
       );
 
       final data = jsonDecode(response.body);
@@ -107,7 +134,7 @@ class BillingService extends ChangeNotifier {
       final error = redactSecrets('Network error: $e');
       _log.e('Checkout creation error: $error');
       _lastError = error;
-      return {'success': false, 'message': error};
+      return {'success': false, 'message': error, 'isNetworkError': true};
     } finally {
       _isLoading = false;
       _safeNotifyListeners();
@@ -127,10 +154,13 @@ class BillingService extends ChangeNotifier {
 
       final body = {'user_id': userId};
 
-      final response = await http.post(
+      final response = await sendWithTimeout(
+        _client,
+        'POST',
         uri,
         headers: headers,
         body: jsonEncode(body),
+        timeout: requestTimeout,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -147,7 +177,7 @@ class BillingService extends ChangeNotifier {
       final error = redactSecrets('Network error: $e');
       _log.e('Cancellation error: $error');
       _lastError = error;
-      return {'success': false, 'message': error};
+      return {'success': false, 'message': error, 'isNetworkError': true};
     } finally {
       _isLoading = false;
       _safeNotifyListeners();
@@ -165,7 +195,13 @@ class BillingService extends ChangeNotifier {
       final baseUrl = AppConfig.billingBaseUrl;
       final uri = Uri.parse('$baseUrl/plans');
 
-      final response = await http.get(uri, headers: headers);
+      final response = await sendWithTimeout(
+        _client,
+        'GET',
+        uri,
+        headers: headers,
+        timeout: requestTimeout,
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -186,7 +222,7 @@ class BillingService extends ChangeNotifier {
       final error = redactSecrets('Network error: $e');
       _log.e('Plans fetch error: $error');
       _lastError = error;
-      return {'success': false, 'message': error};
+      return {'success': false, 'message': error, 'isNetworkError': true};
     } finally {
       _isLoading = false;
       _safeNotifyListeners();

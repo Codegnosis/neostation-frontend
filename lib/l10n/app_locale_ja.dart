@@ -455,6 +455,7 @@ const Map<String, dynamic> appLocaleJa = {
   AppLocale.neoSyncLogin: 'NeoSync ログイン',
   AppLocale.neoSyncSynchronizing: 'NeoSync: 同期中...',
   AppLocale.neoSyncNotConnected: 'NeoSync: 未接続',
+  AppLocale.neoSyncUnreachable: 'NeoSyncに接続できませんでした。ネットワーク接続を確認して再試行してください。',
   AppLocale.neoSyncSynchronized: 'NeoSync: セーブデータ同期済み',
   AppLocale.neoSyncSavesSync: 'セーブデータはNeoSyncと同期されます',
   AppLocale.neoSyncNoSave: 'NeoSync: セーブデータが見つかりません',
