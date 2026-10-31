@@ -24,6 +24,7 @@ import 'package:neostation/sync/sync_manager.dart';
 import 'package:neostation/themes/corner_radii.dart';
 import 'package:neostation/widgets/auth_form.dart';
 import 'package:neostation/widgets/core_footer.dart';
+import 'package:neostation/widgets/confirm_action_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -62,6 +63,12 @@ class _Subscriber extends AuthService {
   final String plan;
   final List<String> log;
 
+  /// The subscription status the account reports once reloaded, unless the
+  /// reload fails ([reloadFails]); [status] is the one held before.
+  String? statusOnReload;
+  bool reloadFails = false;
+  String? status;
+
   @override
   bool get isLoggedIn => true;
 
@@ -76,11 +83,14 @@ class _Subscriber extends AuthService {
     emailVerified: true,
     createdAt: DateTime(2026),
     updatedAt: DateTime(2026),
+    stripeSubscriptionStatus: status,
   );
 
   @override
   Future<Map<String, dynamic>> getProfile() async {
     log.add('profile');
+    if (reloadFails) return {'success': false, 'message': 'Network error'};
+    status = statusOnReload ?? status;
     return {'success': true};
   }
 }
@@ -608,6 +618,76 @@ void main() {
       await press(tester, LogicalKeyboardKey.enter);
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(ErrorDialog), findsNothing);
+    });
+
+    // NeoSync marks a cancelled subscription "canceling" until its period
+    // ends, so the reload tells whether an unanswered cancellation went
+    // through.
+    testWidgets('a cancellation NeoSync did not confirm, which the reloaded '
+        'account shows went through, is reported as done', (tester) async {
+      final log = <String>[];
+      await openPlans(
+        tester,
+        auth: _Subscriber('mini', log)..statusOnReload = 'canceling',
+        billing: _Billing(log, const {
+          'success': false,
+          'message': 'Network error: TimeoutException',
+          'isNetworkError': true,
+          'outcomeUnknown': true,
+        }),
+        log: log,
+      );
+
+      await press(tester, LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(find.byType(ConfirmActionDialog), findsOneWidget);
+      await press(tester, LogicalKeyboardKey.enter);
+      await tester.pump();
+      await tester.pump();
+
+      expect(log, ['cancel', 'profile', 'quota', 'files']);
+      expect(find.byType(SuccessDialog), findsOneWidget);
+      expect(
+        tester.widget<SuccessDialog>(find.byType(SuccessDialog)).title,
+        en(AppLocale.cancelSubscription),
+      );
+      expect(find.byType(ErrorDialog), findsNothing);
+      expect(find.text(unconfirmed), findsNothing);
+
+      await press(tester, LogicalKeyboardKey.enter);
+      await tester.pump(const Duration(seconds: 1));
+    });
+
+    testWidgets('a cancellation NeoSync did not confirm is not taken as done '
+        'from an account that could not be reloaded', (tester) async {
+      final log = <String>[];
+      await openPlans(
+        tester,
+        // Held from an earlier cancellation, since undone elsewhere.
+        auth: _Subscriber('mini', log)
+          ..status = 'canceling'
+          ..reloadFails = true,
+        billing: _Billing(log, const {
+          'success': false,
+          'message': 'Network error: TimeoutException',
+          'isNetworkError': true,
+          'outcomeUnknown': true,
+        }),
+        log: log,
+      );
+
+      await press(tester, LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(find.byType(ConfirmActionDialog), findsOneWidget);
+      await press(tester, LogicalKeyboardKey.enter);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(SuccessDialog), findsNothing);
+      expect(find.text(unconfirmed), findsOneWidget);
+
+      await press(tester, LogicalKeyboardKey.enter);
+      await tester.pump(const Duration(seconds: 1));
     });
   });
 }

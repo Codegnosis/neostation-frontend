@@ -217,8 +217,17 @@ class NeoSyncContentState extends State<NeoSyncContent>
 
     // A cancellation NeoSync didn't confirm may have gone through, so the
     // account is reloaded as for one that did before the user is told.
-    if (result['success'] || result['outcomeUnknown'] == true) {
-      await authService.getProfile();
+    var cancelled = result['success'] == true;
+    if (cancelled || result['outcomeUnknown'] == true) {
+      final reload = await authService.getProfile();
+      // NeoSync marks a cancelled subscription "canceling" until its period
+      // ends, so the reloaded account shows whether it went through. Only a
+      // reload that worked counts: the account held from before may be out
+      // of date.
+      if (reload['success'] == true &&
+          authService.currentUser?.stripeSubscriptionStatus == 'canceling') {
+        cancelled = true;
+      }
       if (mounted) {
         final neoSyncProvider = Provider.of<NeoSyncProvider>(
           context,
@@ -229,7 +238,7 @@ class NeoSyncContentState extends State<NeoSyncContent>
       }
     }
 
-    if (result['success']) {
+    if (cancelled) {
       if (mounted) {
         await showDialog(
           context: context,
